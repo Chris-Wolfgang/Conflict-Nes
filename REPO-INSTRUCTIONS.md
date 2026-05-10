@@ -44,7 +44,7 @@ Below is a list of what needs to be done. Once you have completed the checklist 
 	1. `Repository name`
  	2. `Description`
   	3. Select `Public` or `Private`
-1. `Start with a template` select `{{TEMPLATE_REPO_OWNER}}/{{TEMPLATE_REPO_NAME}}`
+1. `Start with a template` select `Chris-Wolfgang/repo-template`
 1. `Include all branches` set `On` - this will include the `develop` branch. If you don't want the `develop` branch or if there are other branches you don't want you can leave this `off` and create the `develop` branch in your new repository
 
 
@@ -186,13 +186,13 @@ After creating your repository from the template, update the following files wit
 ### Update CONTRIBUTING.md
 
 1. Open `CONTRIBUTING.md`
-2. Ensure any project name placeholders (for example, `{{PROJECT_NAME}}`) have been replaced with your actual project name (the automated setup scripts should normally do this for you)
+2. Ensure any project name placeholders (for example, `Wolfgang.Conflict.Nes`) have been replaced with your actual project name (the automated setup scripts should normally do this for you)
 3. Review and adjust contribution guidelines as needed for your project
 
 ### Update CODEOWNERS
 
 1. Open `.github/CODEOWNERS`
-2. Replace `{{GITHUB_USERNAME}}` with your GitHub username or team names
+2. Replace `@Chris-Wolfgang` with your GitHub username or team names
 3. Uncomment and customize the example rules if you want different owners for specific directories
 
 **Note:** The CODEOWNERS file determines who is automatically requested for review when someone opens a pull request.
@@ -210,7 +210,7 @@ If you want to publish your DocFX documentation to GitHub Pages automatically wh
    - **Prompt if you want to set up GitHub Pages** for documentation
    - **Auto-detect repository information** (name, description, URLs)
    - **Prompt for project details** needed for DocFX configuration
-   - **Replace placeholders** in DocFX files ({{PROJECT_NAME}}, {{DOCS_URL}}, etc.)
+   - **Replace placeholders** in DocFX files (Wolfgang.Conflict.Nes, https://Chris-Wolfgang.github.io/Conflict-Nes/, etc.)
    - Create a `gh-pages` branch if it doesn't exist
    - Configure GitHub Pages to serve from the `gh-pages` branch
    - Verify that the DocFX workflow is reachable via `workflow_call` from `release.yaml`
@@ -263,3 +263,4 @@ When you publish a new release (e.g. `v1.0.0`):
 The DocFX modern template is configured to default to dark mode. This is controlled by:
 - `"colorMode": "dark"` in `docfx_project/docfx.json` → `build.globalMetadata`
 - `"_enableDarkMode": true` enables the light/dark toggle so visitors can switch themes
+
