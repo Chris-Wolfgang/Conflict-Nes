@@ -1,0 +1,847 @@
+{
+  "name": "Mission 01: First Strike",
+  "width": 12,
+  "height": 10,
+  "tiles": [
+    {
+      "q": 0,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 6,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 7,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 8,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 0,
+      "r": 9,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 1,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 1,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 1,
+      "r": 2,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 1,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 1,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 1,
+      "r": 5,
+      "terrain": "Plains",
+      "building": "Airbase",
+      "owner": "Blue"
+    },
+    {
+      "q": 1,
+      "r": 6,
+      "terrain": "Plains",
+      "building": "Factory",
+      "owner": "Blue"
+    },
+    {
+      "q": 1,
+      "r": 7,
+      "terrain": "Plains",
+      "building": "Hq",
+      "owner": "Blue"
+    },
+    {
+      "q": 1,
+      "r": 8,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 1,
+      "r": 9,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": -1,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 0,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 6,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 7,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 2,
+      "r": 8,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": -1,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 3,
+      "terrain": "Plains",
+      "building": "City",
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 6,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 7,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 3,
+      "r": 8,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": -2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": -1,
+      "terrain": "Forest",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 1,
+      "terrain": "Mountain",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 6,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 4,
+      "r": 7,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": -2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": -1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 1,
+      "terrain": "Mountain",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 6,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 5,
+      "r": 7,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": -3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": -2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": -1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": 0,
+      "terrain": "Mountain",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": 2,
+      "terrain": "Plains",
+      "building": "City",
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 6,
+      "r": 6,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": -3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": -2,
+      "terrain": "Plains",
+      "building": "Airbase",
+      "owner": "Red"
+    },
+    {
+      "q": 7,
+      "r": -1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": 0,
+      "terrain": "Mountain",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 7,
+      "r": 6,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": -4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": -3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": -2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": -1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": 0,
+      "terrain": "Plains",
+      "building": "City",
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 8,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": -4,
+      "terrain": "Plains",
+      "building": "Factory",
+      "owner": "Red"
+    },
+    {
+      "q": 9,
+      "r": -3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": -2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": -1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 9,
+      "r": 5,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": -5,
+      "terrain": "Plains",
+      "building": "City",
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": -4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": -3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": -2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": -1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 10,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": -5,
+      "terrain": "Plains",
+      "building": "Hq",
+      "owner": "Red"
+    },
+    {
+      "q": 11,
+      "r": -4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": -3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": -2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": -1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": 0,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": 1,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": 2,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": 3,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    },
+    {
+      "q": 11,
+      "r": 4,
+      "terrain": "Plains",
+      "building": null,
+      "owner": null
+    }
+  ]
+}

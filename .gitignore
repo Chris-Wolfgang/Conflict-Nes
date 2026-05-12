@@ -13,6 +13,10 @@
 # Claude Code
 .claude/
 
+# Derived artifacts from manual PDF extraction
+images/manual-pages/
+images/Conflict-Game-Manual.txt
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

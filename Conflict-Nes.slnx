@@ -44,7 +44,13 @@
   </Folder>
   <Folder Name="/benchmarks/" />
   <Folder Name="/examples/" />
-  <Folder Name="/src/" />
-  <Folder Name="/tests/" />
+  <Folder Name="/src/">
+    <Project Path="src/Wolfgang.Conflict.Nes.Engine/Wolfgang.Conflict.Nes.Engine.csproj" />
+    <Project Path="src/Wolfgang.Conflict.Nes.UI.Blazor/Wolfgang.Conflict.Nes.UI.Blazor.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Wolfgang.Conflict.Nes.Engine.Tests.Unit/Wolfgang.Conflict.Nes.Engine.Tests.Unit.csproj" />
+    <Project Path="tests/Wolfgang.Conflict.Nes.UI.Blazor.Tests.Unit/Wolfgang.Conflict.Nes.UI.Blazor.Tests.Unit.csproj" />
+  </Folder>
 </Solution>
 
