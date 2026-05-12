@@ -50,19 +50,82 @@ h1 {
     height: auto;
 }
 
-.start-button {
+.start-button, .action-button {
     background: #3868c0;
     color: #fff;
     border: 2px solid #fce19c;
-    padding: 0.75rem 1.25rem;
+    padding: 0.5rem 1rem;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.95rem;
     cursor: pointer;
 }
 
-.start-button:hover {
-    background: #4878d0;
+.start-button { padding: 0.75rem 1.25rem; font-size: 1rem; }
+
+.start-button:hover, .action-button:hover { background: #4878d0; }
+
+.action-button:disabled {
+    background: #283050;
+    color: #8090a8;
+    border-color: #5c6478;
+    cursor: not-allowed;
 }
+
+.board-and-panel {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.side-panel {
+    flex: 0 0 240px;
+    background: #14182a;
+    border: 2px solid #1c2030;
+    padding: 0.75rem 1rem;
+    color: #cfd2d8;
+    font-size: 0.9rem;
+}
+
+.side-panel h2 {
+    color: #fce19c;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+}
+
+.side-panel .unit-stats {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 1rem 0;
+}
+
+.side-panel .unit-stats li {
+    padding: 0.15rem 0;
+    border-bottom: 1px dotted #2a2e44;
+}
+
+.side-panel .hint {
+    color: #8a90a4;
+    font-style: italic;
+}
+
+.side-panel .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.game-over {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #2a1830;
+    border: 2px solid #fce19c;
+    color: #fce19c;
+    font-weight: 700;
+}
+
+.game-over .blue { color: #6890e8; }
+.game-over .red  { color: #e86060; }
 
 #blazor-error-ui {
     background: #b00;

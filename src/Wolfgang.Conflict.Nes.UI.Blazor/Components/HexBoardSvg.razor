@@ -2,18 +2,21 @@
 @using Wolfgang.Conflict.Nes.Engine.Game
 @using Wolfgang.Conflict.Nes.Engine.Hex
 @using Wolfgang.Conflict.Nes.Engine.Map
+@using Wolfgang.Conflict.Nes.Engine.Rules
+@using Wolfgang.Conflict.Nes.Engine.Units
 @using Wolfgang.Conflict.Nes.UI.Blazor.Rendering
 
 @*
-    Top-level board renderer. Walks the map in three layers:
-      1. terrain hexes
-      2. buildings on top of their host hex
-      3. units on top of buildings/terrain
+    Top-level board renderer. Walks the map in z-order: terrain ->
+    movement/attack overlays -> buildings -> units -> selection ring.
+    Each hex is also a transparent click target.
 *@
 
 @{
     var size = HexLayout.BoardSize(State.Map.Width, State.Map.Height);
     var viewBox = $"0 0 {size.Width.ToString("F2", Inv)} {size.Height.ToString("F2", Inv)}";
+    var reachable = ReachableSet();
+    var attackable = AttackableSet();
 }
 
 <svg class="hex-board"
@@ -32,7 +35,25 @@
         <HexTile Tile="tile" Points="@HexLayout.PolygonPoints(centre)" Cx="centre.X" Cy="centre.Y" />
     }
 
-    @* Layer 2: buildings (drawn on the same hex centres) *@
+    @* Layer 2: movement and attack overlays *@
+    @foreach (var hex in reachable)
+    {
+        var centre = HexLayout.Centre(hex);
+        <polygon points="@HexLayout.PolygonPoints(centre)"
+                 fill="@NesPalette.BlueSide" fill-opacity="0.30"
+                 stroke="@NesPalette.BlueSide" stroke-width="1.2"
+                 pointer-events="none" />
+    }
+    @foreach (var hex in attackable)
+    {
+        var centre = HexLayout.Centre(hex);
+        <polygon points="@HexLayout.PolygonPoints(centre)"
+                 fill="@NesPalette.Damage" fill-opacity="0.35"
+                 stroke="@NesPalette.Damage" stroke-width="1.5"
+                 pointer-events="none" />
+    }
+
+    @* Layer 3: buildings *@
     @foreach (var (coord, tile) in OrderedTiles())
     {
         if (tile.Building is { } building)
@@ -43,11 +64,32 @@
         }
     }
 
-    @* Layer 3: units *@
+    @* Layer 4: units *@
     @foreach (var unit in State.Units.Values)
     {
         var c = HexLayout.Centre(unit.Coord);
         <UnitGlyph Unit="unit" Cx="c.X" Cy="c.Y" />
+    }
+
+    @* Layer 5: selection ring on the selected unit's hex *@
+    @if (SelectedUnitId is { } sid && State.Units.TryGetValue(sid, out var selected))
+    {
+        var centre = HexLayout.Centre(selected.Coord);
+        <polygon points="@HexLayout.PolygonPoints(centre)"
+                 fill="none" stroke="@NesPalette.Selection" stroke-width="3"
+                 pointer-events="none" />
+    }
+
+    @* Layer 6: click targets (transparent, full hex area) *@
+    @foreach (var (coord, _) in OrderedTiles())
+    {
+        var centre = HexLayout.Centre(coord);
+        var hex = coord;
+        <polygon points="@HexLayout.PolygonPoints(centre)"
+                 fill="transparent"
+                 stroke="transparent"
+                 style="cursor:pointer"
+                 @onclick="@(_ => OnHexClick.InvokeAsync(hex))" />
     }
 </svg>
 
@@ -55,11 +97,11 @@
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
     [Parameter] public GameState State { get; set; } = default!;
+    [Parameter] public UnitId? SelectedUnitId { get; set; }
+    [Parameter] public EventCallback<HexCoord> OnHexClick { get; set; }
 
     private IEnumerable<(HexCoord Coord, Tile Tile)> OrderedTiles()
     {
-        // Order tiles by Q then R so columns paint left-to-right and adjacent
-        // hexes from later columns layer their right edges over earlier ones.
         foreach (var coord in MapDefinition.EnumerateCoords(State.Map.Width, State.Map.Height))
         {
             if (State.Map.Tiles.TryGetValue(coord, out var tile))
@@ -67,5 +109,35 @@
                 yield return (coord, tile);
             }
         }
+    }
+
+    private HashSet<HexCoord> ReachableSet()
+    {
+        var set = new HashSet<HexCoord>();
+        if (SelectedUnitId is { } sid
+            && State.Units.TryGetValue(sid, out var unit)
+            && !unit.HasMoved)
+        {
+            foreach (var h in MovementRules.GetReachable(State, unit))
+            {
+                set.Add(h);
+            }
+        }
+        return set;
+    }
+
+    private HashSet<HexCoord> AttackableSet()
+    {
+        var set = new HashSet<HexCoord>();
+        if (SelectedUnitId is { } sid
+            && State.Units.TryGetValue(sid, out var unit)
+            && !unit.HasAttacked)
+        {
+            foreach (var targetId in AttackRules.GetLegalTargets(State, unit))
+            {
+                set.Add(State.Units[targetId].Coord);
+            }
+        }
+        return set;
     }
 }

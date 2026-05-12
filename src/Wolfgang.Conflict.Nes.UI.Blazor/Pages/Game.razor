@@ -1,5 +1,8 @@
 @page "/game"
+@using Wolfgang.Conflict.Nes.Engine.Game
+@using Wolfgang.Conflict.Nes.Engine.Hex
 @using Wolfgang.Conflict.Nes.Engine.Players
+@using Wolfgang.Conflict.Nes.Engine.Units
 @using Wolfgang.Conflict.Nes.UI.Blazor.Components
 @using Wolfgang.Conflict.Nes.UI.Blazor.Services
 @inject ConflictService Service
@@ -14,10 +17,17 @@
         {
             <div class="status">
                 <span class="turn">Turn @s.TurnNumber</span>
-                <span class="side @(s.NextToAct == Side.Blue ? "blue" : "red")">@s.NextToAct</span>
+                <span class="side @(s.NextToAct == Side.Blue ? "blue" : "red")">@s.NextToAct's turn</span>
                 <span class="funds">Blue F.P.: @s.Funds[Side.Blue]</span>
                 <span class="funds">Red F.P.: @s.Funds[Side.Red]</span>
             </div>
+            @if (s.Phase == GamePhase.GameOver)
+            {
+                <div class="game-over">
+                    Game over &mdash; <strong class="@(s.Winner == Side.Blue ? "blue" : "red")">@s.Winner</strong> wins.
+                    <button class="start-button" @onclick="StartAsync">Play again</button>
+                </div>
+            }
         }
     </header>
 
@@ -27,7 +37,46 @@
     }
     else
     {
-        <HexBoardSvg State="Service.CurrentState" />
+        <div class="board-and-panel">
+            <HexBoardSvg State="Service.CurrentState"
+                         SelectedUnitId="Service.SelectedUnitId"
+                         OnHexClick="HandleHexClick" />
+
+            <aside class="side-panel">
+                @if (Service.SelectedUnitId is { } sid
+                     && Service.CurrentState.Units.TryGetValue(sid, out var u))
+                {
+                    <h2>@u.Kind @(u.IsCommander ? "(H)" : string.Empty)</h2>
+                    <ul class="unit-stats">
+                        <li>Side: <strong class="@(u.Side == Side.Blue ? "blue" : "red")">@u.Side</strong></li>
+                        <li>LIFE: @u.HitPoints / @UnitStats.MaxHitPoints</li>
+                        <li>FUEL: @u.Fuel</li>
+                        <li>SHELL: @u.Ammo</li>
+                        <li>MOVING left: @u.MovesRemaining</li>
+                        <li>Acted: @(u.HasMoved ? "moved" : "not moved"), @(u.HasAttacked ? "attacked" : "not attacked")</li>
+                    </ul>
+                }
+                else
+                {
+                    <p class="hint">@HintText</p>
+                }
+
+                <div class="controls">
+                    <button class="action-button"
+                            disabled="@(!Service.IsHumanTurn || Service.CurrentState.Phase == GamePhase.GameOver)"
+                            @onclick="EndTurnAsync">
+                        End Turn
+                    </button>
+                    @if (Service.SelectedUnitId is not null)
+                    {
+                        <button class="action-button"
+                                @onclick="Service.ClearSelection">
+                            Deselect
+                        </button>
+                    }
+                </div>
+            </aside>
+        </div>
     }
 </div>
 
@@ -40,6 +89,20 @@
     private void HandleStateChanged(object? sender, EventArgs e) => InvokeAsync(StateHasChanged);
 
     private async Task StartAsync() => await Service.StartMission01Async();
+
+    private void HandleHexClick(HexCoord hex) => Service.OnHexClicked(hex);
+
+    private async Task EndTurnAsync() => await Service.EndTurnAsync();
+
+    private string HintText
+    {
+        get
+        {
+            if (Service.CurrentState?.Phase == GamePhase.GameOver) { return "Game over."; }
+            if (Service.IsHumanTurn) { return "Click one of your units, then click a highlighted hex to move or a red-bordered enemy to attack."; }
+            return "Red is moving...";
+        }
+    }
 
     public void Dispose()
     {
