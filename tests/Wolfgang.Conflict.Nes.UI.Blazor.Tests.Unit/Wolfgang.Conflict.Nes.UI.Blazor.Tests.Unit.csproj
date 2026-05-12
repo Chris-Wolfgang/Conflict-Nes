@@ -25,4 +25,14 @@
     <ProjectReference Include="..\..\src\Wolfgang.Conflict.Nes.Engine\Wolfgang.Conflict.Nes.Engine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      Link-compile non-component types from the Blazor project so they can
+      be tested without dragging in the WebAssembly SDK reference here.
+    -->
+    <Compile Include="..\..\src\Wolfgang.Conflict.Nes.UI.Blazor\Rendering\HexLayout.cs" Link="Linked\HexLayout.cs" />
+    <Compile Include="..\..\src\Wolfgang.Conflict.Nes.UI.Blazor\Rendering\NesPalette.cs" Link="Linked\NesPalette.cs" />
+    <Compile Include="..\..\src\Wolfgang.Conflict.Nes.UI.Blazor\Rendering\TerrainColors.cs" Link="Linked\TerrainColors.cs" />
+  </ItemGroup>
+
 </Project>

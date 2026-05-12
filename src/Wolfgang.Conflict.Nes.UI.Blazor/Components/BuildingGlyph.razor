@@ -1,0 +1,69 @@
+@using Wolfgang.Conflict.Nes.Engine.Map
+@using Wolfgang.Conflict.Nes.Engine.Players
+@using Wolfgang.Conflict.Nes.UI.Blazor.Rendering
+
+@*
+    Original NES-feel building glyph. Each kind is a distinct chunky shape so
+    the player can tell them apart at a glance without copying any NES sprite.
+*@
+
+<g transform="translate(@(Cx.ToString("F2", Inv)),@(Cy.ToString("F2", Inv)))">
+    @switch (Kind)
+    {
+        case BuildingKind.City:
+            <rect x="-12" y="-10" width="24" height="20" fill="@OwnerColor" stroke="#000" stroke-width="1.5" />
+            <rect x="-9" y="-7" width="6" height="6" fill="#fff8" />
+            <rect x="3" y="-7" width="6" height="6" fill="#fff8" />
+            <rect x="-9" y="1" width="6" height="6" fill="#fff8" />
+            <rect x="3" y="1" width="6" height="6" fill="#fff8" />
+            break;
+
+        case BuildingKind.Hq:
+            <rect x="-14" y="-12" width="28" height="24" fill="@OwnerColor" stroke="#000" stroke-width="2" />
+            <polygon points="-14,-12 0,-20 14,-12" fill="@OwnerDarkColor" stroke="#000" stroke-width="1.5" />
+            <rect x="-9" y="-5" width="18" height="3" fill="#000" />
+            <rect x="-9" y="0" width="18" height="3" fill="#000" />
+            <rect x="-9" y="5" width="18" height="3" fill="#000" />
+            break;
+
+        case BuildingKind.Airbase:
+            <rect x="-13" y="-3" width="26" height="6" fill="@OwnerColor" stroke="#000" stroke-width="1.2" />
+            <polygon points="0,-13 -10,3 10,3" fill="@OwnerDarkColor" stroke="#000" stroke-width="1.2" />
+            break;
+
+        case BuildingKind.Port:
+            <rect x="-12" y="-3" width="24" height="6" fill="@OwnerColor" stroke="#000" stroke-width="1.2" />
+            <rect x="-2" y="-12" width="4" height="14" fill="@OwnerDarkColor" stroke="#000" stroke-width="1" />
+            break;
+
+        case BuildingKind.Factory:
+            <rect x="-13" y="-8" width="26" height="18" fill="@OwnerColor" stroke="#000" stroke-width="1.5" />
+            <rect x="6" y="-15" width="5" height="10" fill="@OwnerDarkColor" stroke="#000" stroke-width="1" />
+            <rect x="-9" y="-3" width="6" height="6" fill="#fff8" />
+            <rect x="-1" y="-3" width="6" height="6" fill="#fff8" />
+            break;
+    }
+</g>
+
+@code {
+    private static readonly System.Globalization.CultureInfo Inv = System.Globalization.CultureInfo.InvariantCulture;
+
+    [Parameter] public BuildingKind Kind { get; set; }
+    [Parameter] public Side? Owner { get; set; }
+    [Parameter] public double Cx { get; set; }
+    [Parameter] public double Cy { get; set; }
+
+    private string OwnerColor => Owner switch
+    {
+        Side.Blue => NesPalette.BlueSide,
+        Side.Red => NesPalette.RedSide,
+        _ => NesPalette.NeutralBuilding,
+    };
+
+    private string OwnerDarkColor => Owner switch
+    {
+        Side.Blue => NesPalette.BlueSideDark,
+        Side.Red => NesPalette.RedSideDark,
+        _ => "#604018",
+    };
+}

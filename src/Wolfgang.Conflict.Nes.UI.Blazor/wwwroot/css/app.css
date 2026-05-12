@@ -15,6 +15,55 @@ h1 {
     letter-spacing: 0.1em;
 }
 
+.game-page {
+    max-width: 1200px;
+}
+
+.game-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.game-header .status {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.95rem;
+    color: #cfd2d8;
+}
+
+.game-header .side {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.game-header .side.blue { color: #6890e8; }
+.game-header .side.red  { color: #e86060; }
+
+.hex-board {
+    display: block;
+    image-rendering: pixelated;
+    background: #0a0a18;
+    border: 2px solid #1c2030;
+    max-width: 100%;
+    height: auto;
+}
+
+.start-button {
+    background: #3868c0;
+    color: #fff;
+    border: 2px solid #fce19c;
+    padding: 0.75rem 1.25rem;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.start-button:hover {
+    background: #4878d0;
+}
+
 #blazor-error-ui {
     background: #b00;
     bottom: 0;

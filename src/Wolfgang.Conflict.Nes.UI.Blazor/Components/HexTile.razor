@@ -1,0 +1,57 @@
+@using Wolfgang.Conflict.Nes.Engine.Map
+@using Wolfgang.Conflict.Nes.UI.Blazor.Rendering
+
+@*
+    A single hex polygon plus terrain ornamentation. Ornaments are kept simple
+    so they read at the small per-hex scale.
+*@
+
+<g>
+    <polygon points="@Points"
+             fill="@TerrainColors.FillFor(Tile.Terrain)"
+             stroke="@TerrainColors.StrokeFor(Tile.Terrain)"
+             stroke-width="1" />
+
+    @switch (Tile.Terrain)
+    {
+        case Terrain.Forest:
+            <polygon points="@TreeAt(-7, -2)" fill="@NesPalette.ForestDark" />
+            <polygon points="@TreeAt(6, 1)" fill="@NesPalette.ForestDark" />
+            <polygon points="@TreeAt(-2, 8)" fill="@NesPalette.ForestDark" />
+            break;
+
+        case Terrain.Mountain:
+            <polygon points="@PeakAt(-6, 3)" fill="@NesPalette.MountainDark" />
+            <polygon points="@PeakAt(4, 3)" fill="@NesPalette.MountainDark" />
+            break;
+    }
+</g>
+
+@code {
+    [Parameter] public Tile Tile { get; set; } = default!;
+    [Parameter] public string Points { get; set; } = string.Empty;
+    [Parameter] public double Cx { get; set; }
+    [Parameter] public double Cy { get; set; }
+
+    private static readonly System.Globalization.CultureInfo Inv = System.Globalization.CultureInfo.InvariantCulture;
+
+    private string TreeAt(double dx, double dy)
+    {
+        var x = (Cx + dx).ToString("F2", Inv);
+        var y = (Cy + dy).ToString("F2", Inv);
+        var x1 = (Cx + dx - 4).ToString("F2", Inv);
+        var y1 = (Cy + dy + 7).ToString("F2", Inv);
+        var x2 = (Cx + dx + 4).ToString("F2", Inv);
+        return $"{x},{y} {x1},{y1} {x2},{y1}";
+    }
+
+    private string PeakAt(double dx, double dy)
+    {
+        var x = (Cx + dx).ToString("F2", Inv);
+        var yTop = (Cy + dy - 7).ToString("F2", Inv);
+        var x1 = (Cx + dx - 5).ToString("F2", Inv);
+        var y1 = (Cy + dy + 3).ToString("F2", Inv);
+        var x2 = (Cx + dx + 5).ToString("F2", Inv);
+        return $"{x},{yTop} {x1},{y1} {x2},{y1}";
+    }
+}

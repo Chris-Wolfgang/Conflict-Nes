@@ -1,0 +1,71 @@
+@using System.Globalization
+@using Wolfgang.Conflict.Nes.Engine.Game
+@using Wolfgang.Conflict.Nes.Engine.Hex
+@using Wolfgang.Conflict.Nes.Engine.Map
+@using Wolfgang.Conflict.Nes.UI.Blazor.Rendering
+
+@*
+    Top-level board renderer. Walks the map in three layers:
+      1. terrain hexes
+      2. buildings on top of their host hex
+      3. units on top of buildings/terrain
+*@
+
+@{
+    var size = HexLayout.BoardSize(State.Map.Width, State.Map.Height);
+    var viewBox = $"0 0 {size.Width.ToString("F2", Inv)} {size.Height.ToString("F2", Inv)}";
+}
+
+<svg class="hex-board"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="@viewBox"
+     width="@($"{size.Width.ToString("F0", Inv)}")"
+     height="@($"{size.Height.ToString("F0", Inv)}")"
+     preserveAspectRatio="xMidYMid meet">
+
+    <rect width="100%" height="100%" fill="@NesPalette.Background" />
+
+    @* Layer 1: terrain *@
+    @foreach (var (coord, tile) in OrderedTiles())
+    {
+        var centre = HexLayout.Centre(coord);
+        <HexTile Tile="tile" Points="@HexLayout.PolygonPoints(centre)" Cx="centre.X" Cy="centre.Y" />
+    }
+
+    @* Layer 2: buildings (drawn on the same hex centres) *@
+    @foreach (var (coord, tile) in OrderedTiles())
+    {
+        if (tile.Building is { } building)
+        {
+            var c = HexLayout.Centre(coord);
+            var owner = State.GetBuildingOwner(coord);
+            <BuildingGlyph Kind="building" Owner="owner" Cx="c.X" Cy="c.Y" />
+        }
+    }
+
+    @* Layer 3: units *@
+    @foreach (var unit in State.Units.Values)
+    {
+        var c = HexLayout.Centre(unit.Coord);
+        <UnitGlyph Unit="unit" Cx="c.X" Cy="c.Y" />
+    }
+</svg>
+
+@code {
+    private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
+
+    [Parameter] public GameState State { get; set; } = default!;
+
+    private IEnumerable<(HexCoord Coord, Tile Tile)> OrderedTiles()
+    {
+        // Order tiles by Q then R so columns paint left-to-right and adjacent
+        // hexes from later columns layer their right edges over earlier ones.
+        foreach (var coord in MapDefinition.EnumerateCoords(State.Map.Width, State.Map.Height))
+        {
+            if (State.Map.Tiles.TryGetValue(coord, out var tile))
+            {
+                yield return (coord, tile);
+            }
+        }
+    }
+}
