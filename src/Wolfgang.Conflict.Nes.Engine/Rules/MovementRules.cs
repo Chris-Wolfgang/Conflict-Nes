@@ -89,7 +89,13 @@ public static class MovementRules
         return result;
     }
 
-    private static int Budget(Unit unit) => Math.Min(unit.MovesRemaining, unit.Fuel);
+    /// <summary>
+    /// Per-turn movement budget in hex-cost units. Fuel is consumed once per
+    /// turn the unit moves (deducted at end of turn), not per hex, so the
+    /// budget here is purely <c>MovesRemaining</c>. A unit with zero fuel
+    /// cannot move at all this turn.
+    /// </summary>
+    private static int Budget(Unit unit) => unit.Fuel <= 0 ? 0 : unit.MovesRemaining;
 
     private static HashSet<HexCoord> OccupiedByOthers(GameState state, Unit self)
     {
@@ -118,7 +124,7 @@ public static class MovementRules
         {
             return null;
         }
-        return UnitStats.TerrainCost(unit.Kind, tile.Terrain, tile.Building);
+        return UnitStats.TerrainCost(unit.Type.MovementDomain, tile.Terrain, tile.Building);
     }
 
     private static Dictionary<HexCoord, int> Flood(GameState state, Unit unit, HashSet<HexCoord> occupied, int budget)

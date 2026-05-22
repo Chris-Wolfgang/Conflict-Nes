@@ -1,6 +1,7 @@
 using Wolfgang.Conflict.Nes.Engine.Game;
 using Wolfgang.Conflict.Nes.Engine.Hex;
 using Wolfgang.Conflict.Nes.Engine.Players;
+using Wolfgang.Conflict.Nes.Engine.Rules;
 using Wolfgang.Conflict.Nes.Engine.Strategy;
 using Wolfgang.Conflict.Nes.Engine.Units;
 
@@ -105,6 +106,35 @@ public sealed class ConflictService
         }
     }
 
+    /// <summary>
+    /// Returns true if the selected unit is currently eligible to invoke
+    /// the once-per-turn Supply command.
+    /// </summary>
+    public bool CanSupplySelected()
+    {
+        if (CurrentState is null || !IsHumanTurn || SelectedUnitId is null)
+        {
+            return false;
+        }
+        var unit = CurrentState.Units[SelectedUnitId.Value];
+        return SupplyRules.AvailableSource(CurrentState, unit) is not null;
+    }
+
+    /// <summary>
+    /// Invokes the Supply command on the currently selected unit. Throws via
+    /// the engine if the unit is not eligible (caller should gate the UI
+    /// with <see cref="CanSupplySelected"/>).
+    /// </summary>
+    public void SupplySelected()
+    {
+        if (CurrentState is null || !IsHumanTurn || SelectedUnitId is null)
+        {
+            return;
+        }
+        CurrentState = _engine.SupplyUnit(CurrentState, SelectedUnitId.Value);
+        Notify();
+    }
+
     /// <summary>Clears any current selection.</summary>
     public void ClearSelection()
     {
@@ -155,7 +185,7 @@ public sealed class ConflictService
         StrategyActionKind.Move    => _engine.MoveUnit(state, action.UnitId, action.Hex),
         StrategyActionKind.Attack  => _engine.AttackUnit(state, action.UnitId, action.TargetId),
         StrategyActionKind.Supply  => _engine.SupplyUnit(state, action.UnitId),
-        StrategyActionKind.Build   => _engine.BuildUnit(state, action.Hex, action.ProduceKind),
+        StrategyActionKind.Build   => _engine.BuildUnit(state, action.Hex, action.ProduceTypeId),
         _ => state,
     };
 

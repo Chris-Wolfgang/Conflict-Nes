@@ -23,8 +23,9 @@ public static class EconomyRules
     /// F.P. lost by the side that just lost a unit in combat. Equal to half
     /// the destroyed unit's production cost (rounded down).
     /// </summary>
-    public static int LoserPenalty(UnitKind destroyedUnit)
-        => UnitStats.For(destroyedUnit).ProductionCost / 2;
+    /// <param name="destroyedUnitProductionCost">The destroyed unit's F.P. production cost.</param>
+    public static int LoserPenalty(int destroyedUnitProductionCost)
+        => destroyedUnitProductionCost / 2;
 
     /// <summary>
     /// F.P. awarded to the side that destroyed an enemy unit, based on the

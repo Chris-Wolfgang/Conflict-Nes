@@ -20,6 +20,7 @@ public class SupplyRulesTests
         }
         return new GameState(
             map,
+            TestCatalog.Catalog,
             dict,
             new Dictionary<HexCoord, Side>(),
             Side.Blue,
@@ -37,7 +38,7 @@ public class SupplyRulesTests
             .Select(c => c == new HexCoord(1, 0)
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.City, Owner: Side.Blue)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(1, 0));
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0));
         var state = BuildState(tiles, 3, 1, tank);
 
         Assert.Equal(SupplyRules.SupplySource.Building, SupplyRules.AvailableSource(state, tank));
@@ -50,7 +51,7 @@ public class SupplyRulesTests
             .Select(c => c == new HexCoord(1, 0)
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.Airbase, Owner: Side.Blue)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
-        var fighter = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Fighter, new HexCoord(1, 0));
+        var fighter = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Fighter, new HexCoord(1, 0));
         var state = BuildState(tiles, 3, 1, fighter);
 
         Assert.Equal(SupplyRules.SupplySource.Building, SupplyRules.AvailableSource(state, fighter));
@@ -63,7 +64,7 @@ public class SupplyRulesTests
             .Select(c => c == new HexCoord(1, 0)
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.Airbase, Owner: Side.Blue)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(1, 0));
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0));
         var state = BuildState(tiles, 3, 1, tank);
 
         Assert.Null(SupplyRules.AvailableSource(state, tank));
@@ -76,7 +77,7 @@ public class SupplyRulesTests
             .Select(c => c == new HexCoord(1, 0)
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.City, Owner: Side.Red)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(1, 0));
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0));
         var state = BuildState(tiles, 3, 1, tank);
 
         Assert.Null(SupplyRules.AvailableSource(state, tank));
@@ -89,7 +90,7 @@ public class SupplyRulesTests
             .Select(c => c == new HexCoord(1, 0)
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.City, Owner: Side.Blue)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(1, 0)) with { HasSupplied = true };
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0)) with { HasSupplied = true };
         var state = BuildState(tiles, 3, 1, tank);
 
         Assert.Null(SupplyRules.AvailableSource(state, tank));
@@ -98,7 +99,7 @@ public class SupplyRulesTests
     [Fact]
     public void ApplySupply_from_building_refuels_rearms_and_repairs()
     {
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, HexCoord.Zero) with
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, HexCoord.Zero) with
         {
             Fuel = 1,
             Ammo = 1,
@@ -107,7 +108,7 @@ public class SupplyRulesTests
 
         var supplied = SupplyRules.ApplySupply(tank, SupplyRules.SupplySource.Building);
 
-        var stats = UnitStats.For(UnitKind.Tank);
+        var stats = TestCatalog.Tank;
         Assert.Equal(stats.MaxFuel, supplied.Fuel);
         Assert.Equal(stats.MaxAmmo, supplied.Ammo);
         Assert.Equal(4 + SupplyRules.RepairAmount, supplied.HitPoints);
@@ -117,7 +118,7 @@ public class SupplyRulesTests
     [Fact]
     public void ApplySupply_from_vehicle_does_not_repair()
     {
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, HexCoord.Zero) with
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, HexCoord.Zero) with
         {
             Fuel = 1,
             Ammo = 1,
@@ -126,7 +127,7 @@ public class SupplyRulesTests
 
         var supplied = SupplyRules.ApplySupply(tank, SupplyRules.SupplySource.Vehicle);
 
-        Assert.Equal(UnitStats.For(UnitKind.Tank).MaxFuel, supplied.Fuel);
+        Assert.Equal(TestCatalog.Tank.MaxFuel, supplied.Fuel);
         Assert.Equal(4, supplied.HitPoints);
         Assert.True(supplied.HasSupplied);
     }
@@ -134,7 +135,7 @@ public class SupplyRulesTests
     [Fact]
     public void ApplySupply_caps_at_max_hit_points()
     {
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, HexCoord.Zero) with
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, HexCoord.Zero) with
         {
             HitPoints = UnitStats.MaxHitPoints - 1,
         };

@@ -19,13 +19,13 @@ public class EconomyRulesTests
     }
 
     [Theory]
-    [InlineData(UnitKind.Infantry,    300)]   // 600 / 2
-    [InlineData(UnitKind.Tank,       3000)]   // 6000 / 2
-    [InlineData(UnitKind.Helicopter, 1200)]   // 2400 / 2
-    [InlineData(UnitKind.Fighter,    3150)]   // 6300 / 2
-    public void LoserPenalty_is_half_production_cost(UnitKind kind, int expected)
+    [InlineData(600, 300)]
+    [InlineData(6000, 3000)]
+    [InlineData(2400, 1200)]
+    [InlineData(6301, 3150)]
+    public void LoserPenalty_is_half_production_cost(int productionCost, int expected)
     {
-        Assert.Equal(expected, EconomyRules.LoserPenalty(kind));
+        Assert.Equal(expected, EconomyRules.LoserPenalty(productionCost));
     }
 
     [Theory]

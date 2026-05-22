@@ -19,6 +19,9 @@ public sealed class GameState
     /// <summary>The map for the current mission.</summary>
     public MapDefinition Map { get; }
 
+    /// <summary>The data-driven unit catalog in effect for this game.</summary>
+    public UnitCatalog Catalog { get; }
+
     /// <summary>All living units, indexed by id.</summary>
     public IReadOnlyDictionary<UnitId, Unit> Units => _units;
 
@@ -50,6 +53,7 @@ public sealed class GameState
     /// <summary>Constructs a state snapshot. Most callers should go through <c>GameEngine.StartGame</c> instead.</summary>
     public GameState(
         MapDefinition map,
+        UnitCatalog catalog,
         IReadOnlyDictionary<UnitId, Unit> units,
         IReadOnlyDictionary<HexCoord, Side> buildingOwners,
         Side nextToAct,
@@ -60,6 +64,7 @@ public sealed class GameState
         int randomSeed)
     {
         Map = map ?? throw new ArgumentNullException(nameof(map));
+        Catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         _units = units ?? throw new ArgumentNullException(nameof(units));
         _buildingOwners = buildingOwners ?? throw new ArgumentNullException(nameof(buildingOwners));
         _funds = funds ?? throw new ArgumentNullException(nameof(funds));

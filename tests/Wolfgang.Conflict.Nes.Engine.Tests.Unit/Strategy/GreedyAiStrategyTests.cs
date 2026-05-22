@@ -20,7 +20,7 @@ public class GreedyAiStrategyTests
         {
             dict[u.Id] = u;
         }
-        return new GameState(map, dict,
+        return new GameState(map, TestCatalog.Catalog, dict,
             new Dictionary<HexCoord, Side>(),
             Side.Blue, turnNumber: 1, phase: GamePhase.PlayerTurn,
             new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
@@ -30,8 +30,8 @@ public class GreedyAiStrategyTests
     [Fact]
     public async Task Attacks_adjacent_enemy_when_possible()
     {
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank,     new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Infantry, new HexCoord(1, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Infantry, new HexCoord(1, 0));
         var state = OpenState(atk, def);
 
         var action = await new GreedyAiStrategy().ChooseNextActionAsync(state, Side.Blue);
@@ -44,8 +44,8 @@ public class GreedyAiStrategyTests
     [Fact]
     public async Task Moves_toward_distant_enemy_when_no_adjacent_target()
     {
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Tank, new HexCoord(8, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Tank, new HexCoord(8, 0));
         var state = OpenState(atk, def);
 
         var action = await new GreedyAiStrategy().ChooseNextActionAsync(state, Side.Blue);
@@ -59,7 +59,7 @@ public class GreedyAiStrategyTests
     [Fact]
     public async Task Returns_EndTurn_when_no_unit_has_any_action()
     {
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(0, 0))
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0))
             with { HasMoved = true, HasAttacked = true };
         var state = OpenState(atk);
 

@@ -60,8 +60,10 @@ public class StartGameTests
         var blueCmd = state.Units.Values.Single(u => u.Side == Side.Blue && u.IsCommander);
         var redCmd = state.Units.Values.Single(u => u.Side == Side.Red && u.IsCommander);
 
-        Assert.Equal(UnitKind.Tank, blueCmd.Kind);
-        Assert.Equal(UnitKind.Tank, redCmd.Kind);
+        Assert.Equal(UnitCategory.BattleTank, blueCmd.Category);
+        Assert.Equal(UnitCategory.BattleTank, redCmd.Category);
+        Assert.Equal("m1a1", blueCmd.Type.Id);
+        Assert.Equal("t80", redCmd.Type.Id);
     }
 
     [Fact]
@@ -140,10 +142,10 @@ public class StartGameTests
                 .Select(c => new Tile(c, Terrain.Plains, Building: null, Owner: null)));
         var placements = new List<UnitPlacement>
         {
-            new(Side.Blue, UnitKind.Tank, new HexCoord(0, 0), IsCommander: true),
-            new(Side.Red,  UnitKind.Tank, new HexCoord(0, 0), IsCommander: true),
+            new(Side.Blue, TestCatalog.Tank.Id, new HexCoord(0, 0), IsCommander: true),
+            new(Side.Red,  TestCatalog.Tank.Id, new HexCoord(0, 0), IsCommander: true),
         };
-        var mission = new MissionDefinition(map, placements);
+        var mission = new MissionDefinition(map, TestCatalog.Catalog, placements);
 
         Assert.Throws<ArgumentException>(() => sut.StartGame(mission, 1));
     }
@@ -157,10 +159,10 @@ public class StartGameTests
                 .Select(c => new Tile(c, Terrain.Plains, Building: null, Owner: null)));
         var placements = new List<UnitPlacement>
         {
-            new(Side.Blue, UnitKind.Tank, new HexCoord(0, 0), IsCommander: true),
-            new(Side.Red,  UnitKind.Tank, new HexCoord(1, 0), IsCommander: false),
+            new(Side.Blue, TestCatalog.Tank.Id, new HexCoord(0, 0), IsCommander: true),
+            new(Side.Red,  TestCatalog.Tank.Id, new HexCoord(1, 0), IsCommander: false),
         };
-        var mission = new MissionDefinition(map, placements);
+        var mission = new MissionDefinition(map, TestCatalog.Catalog, placements);
 
         Assert.Throws<ArgumentException>(() => sut.StartGame(mission, 1));
     }

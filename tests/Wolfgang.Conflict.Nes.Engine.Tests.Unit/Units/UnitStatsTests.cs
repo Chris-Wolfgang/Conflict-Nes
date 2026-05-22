@@ -13,98 +13,57 @@ public class UnitStatsTests
     }
 
     [Theory]
-    [InlineData(UnitKind.Infantry,   MovementDomain.Foot,        4, 10,  8,  600, true)]
-    [InlineData(UnitKind.Tank,       MovementDomain.Tread,       5,  8, 14, 6000, false)]
-    [InlineData(UnitKind.Helicopter, MovementDomain.Helicopter,  7,  5,  6, 2400, false)]
-    [InlineData(UnitKind.Fighter,    MovementDomain.Fighter,    10,  6,  6, 6300, false)]
-    public void For_returns_manual_stats(
-        UnitKind kind,
-        MovementDomain domain,
-        int movePoints,
-        int maxFuel,
-        int maxAmmo,
-        int productionCost,
-        bool canCapture)
+    [InlineData(MovementDomain.Foot,  Terrain.Plains,   1)]
+    [InlineData(MovementDomain.Foot,  Terrain.Road,     1)]
+    [InlineData(MovementDomain.Foot,  Terrain.Beach,    2)]
+    [InlineData(MovementDomain.Foot,  Terrain.Forest,   2)]
+    [InlineData(MovementDomain.Foot,  Terrain.Mountain, 3)]
+    [InlineData(MovementDomain.Foot,  Terrain.Bridge,   2)]
+    [InlineData(MovementDomain.Tread, Terrain.Plains,   1)]
+    [InlineData(MovementDomain.Tread, Terrain.Mountain, 3)]
+    public void TerrainCost_ground_passable_matches_manual(MovementDomain domain, Terrain terrain, int expected)
     {
-        var stats = UnitStats.For(kind);
-
-        Assert.Equal(kind, stats.Kind);
-        Assert.Equal(domain, stats.MovementDomain);
-        Assert.Equal(movePoints, stats.MovementPoints);
-        Assert.Equal(maxFuel, stats.MaxFuel);
-        Assert.Equal(maxAmmo, stats.MaxAmmo);
-        Assert.Equal(productionCost, stats.ProductionCost);
-        Assert.Equal(canCapture, stats.CanCapture);
+        Assert.Equal(expected, UnitStats.TerrainCost(domain, terrain, building: null));
     }
 
     [Theory]
-    [InlineData(UnitKind.Infantry,   false)]
-    [InlineData(UnitKind.Helicopter, false)]
-    [InlineData(UnitKind.Tank,       true)]
-    [InlineData(UnitKind.Fighter,    true)]
-    public void HasManeuver5_matches_manual_high_end_units(UnitKind kind, bool expected)
+    [InlineData(MovementDomain.Foot,  Terrain.River)]
+    [InlineData(MovementDomain.Foot,  Terrain.Sea)]
+    [InlineData(MovementDomain.Tread, Terrain.River)]
+    [InlineData(MovementDomain.Tread, Terrain.Sea)]
+    [InlineData(MovementDomain.Tread, Terrain.Reef)]
+    public void TerrainCost_ground_water_is_impassable(MovementDomain domain, Terrain terrain)
     {
-        Assert.Equal(expected, UnitStats.For(kind).HasManeuver5);
-    }
-
-    [Fact]
-    public void For_unknown_kind_throws()
-    {
-        Assert.Throws<ArgumentOutOfRangeException>(() => UnitStats.For((UnitKind)99));
+        Assert.Null(UnitStats.TerrainCost(domain, terrain, building: null));
     }
 
     [Theory]
-    [InlineData(UnitKind.Infantry, Terrain.Plains,   1)]
-    [InlineData(UnitKind.Infantry, Terrain.Road,     1)]
-    [InlineData(UnitKind.Infantry, Terrain.Beach,    2)]
-    [InlineData(UnitKind.Infantry, Terrain.Forest,   2)]
-    [InlineData(UnitKind.Infantry, Terrain.Mountain, 3)]
-    [InlineData(UnitKind.Infantry, Terrain.Bridge,   2)]
-    [InlineData(UnitKind.Tank,     Terrain.Plains,   1)]
-    [InlineData(UnitKind.Tank,     Terrain.Mountain, 3)]
-    public void TerrainCost_ground_passable_matches_manual(UnitKind kind, Terrain terrain, int expected)
+    [InlineData(MovementDomain.Helicopter, Terrain.Mountain)]
+    [InlineData(MovementDomain.Helicopter, Terrain.Sea)]
+    [InlineData(MovementDomain.Fighter,    Terrain.Mountain)]
+    [InlineData(MovementDomain.Fighter,    Terrain.River)]
+    public void TerrainCost_air_treats_every_terrain_as_one(MovementDomain domain, Terrain terrain)
     {
-        Assert.Equal(expected, UnitStats.TerrainCost(kind, terrain, building: null));
+        Assert.Equal(1, UnitStats.TerrainCost(domain, terrain, building: null));
     }
 
     [Theory]
-    [InlineData(UnitKind.Infantry, Terrain.River)]
-    [InlineData(UnitKind.Infantry, Terrain.Sea)]
-    [InlineData(UnitKind.Tank,     Terrain.River)]
-    [InlineData(UnitKind.Tank,     Terrain.Sea)]
-    [InlineData(UnitKind.Tank,     Terrain.Reef)]
-    public void TerrainCost_ground_water_is_impassable(UnitKind kind, Terrain terrain)
+    [InlineData(MovementDomain.Foot)]
+    [InlineData(MovementDomain.Tread)]
+    [InlineData(MovementDomain.Helicopter)]
+    [InlineData(MovementDomain.Fighter)]
+    public void TerrainCost_factory_is_impassable_to_all(MovementDomain domain)
     {
-        Assert.Null(UnitStats.TerrainCost(kind, terrain, building: null));
+        Assert.Null(UnitStats.TerrainCost(domain, Terrain.Plains, BuildingKind.Factory));
     }
 
     [Theory]
-    [InlineData(UnitKind.Helicopter, Terrain.Mountain)]
-    [InlineData(UnitKind.Helicopter, Terrain.Sea)]
-    [InlineData(UnitKind.Fighter,    Terrain.Mountain)]
-    [InlineData(UnitKind.Fighter,    Terrain.River)]
-    public void TerrainCost_air_treats_every_terrain_as_one(UnitKind kind, Terrain terrain)
+    [InlineData(MovementDomain.Foot,    BuildingKind.City)]
+    [InlineData(MovementDomain.Tread,   BuildingKind.Hq)]
+    [InlineData(MovementDomain.Fighter, BuildingKind.Airbase)]
+    public void TerrainCost_buildings_passable_at_cost_one(MovementDomain domain, BuildingKind building)
     {
-        Assert.Equal(1, UnitStats.TerrainCost(kind, terrain, building: null));
-    }
-
-    [Theory]
-    [InlineData(UnitKind.Infantry,   BuildingKind.Factory)]
-    [InlineData(UnitKind.Tank,       BuildingKind.Factory)]
-    [InlineData(UnitKind.Helicopter, BuildingKind.Factory)]
-    [InlineData(UnitKind.Fighter,    BuildingKind.Factory)]
-    public void TerrainCost_factory_is_impassable_to_all(UnitKind kind, BuildingKind factory)
-    {
-        Assert.Null(UnitStats.TerrainCost(kind, Terrain.Plains, factory));
-    }
-
-    [Theory]
-    [InlineData(UnitKind.Infantry, BuildingKind.City,    1)]
-    [InlineData(UnitKind.Tank,     BuildingKind.Hq,      1)]
-    [InlineData(UnitKind.Fighter,  BuildingKind.Airbase, 1)]
-    public void TerrainCost_buildings_passable_at_cost_one(UnitKind kind, BuildingKind building, int expected)
-    {
-        Assert.Equal(expected, UnitStats.TerrainCost(kind, Terrain.Plains, building));
+        Assert.Equal(1, UnitStats.TerrainCost(domain, Terrain.Plains, building));
     }
 
     [Theory]
@@ -132,21 +91,6 @@ public class UnitStatsTests
     [Fact]
     public void DefenseBonus_building_overrides_terrain()
     {
-        // A city built on forest hex uses the city bonus, not forest.
         Assert.Equal(2, UnitStats.DefenseBonus(Terrain.Forest, BuildingKind.City));
-    }
-
-    [Theory]
-    [InlineData(UnitKind.Tank,       UnitKind.Infantry,   10)]
-    [InlineData(UnitKind.Tank,       UnitKind.Tank,        6)]
-    [InlineData(UnitKind.Tank,       UnitKind.Fighter,     0)]
-    [InlineData(UnitKind.Helicopter, UnitKind.Tank,        7)]
-    [InlineData(UnitKind.Helicopter, UnitKind.Fighter,     1)]
-    [InlineData(UnitKind.Fighter,    UnitKind.Helicopter, 10)]
-    [InlineData(UnitKind.Fighter,    UnitKind.Tank,        0)]
-    [InlineData(UnitKind.Infantry,   UnitKind.Fighter,     0)]
-    public void BaseAttack_matches_design_table(UnitKind attacker, UnitKind defender, int expected)
-    {
-        Assert.Equal(expected, UnitStats.BaseAttack(attacker, defender));
     }
 }

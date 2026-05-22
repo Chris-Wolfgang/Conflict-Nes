@@ -1,3 +1,4 @@
+using Wolfgang.Conflict.Nes.Engine.Combat;
 using Wolfgang.Conflict.Nes.Engine.Game;
 using Wolfgang.Conflict.Nes.Engine.Units;
 
@@ -44,7 +45,7 @@ public static class AttackRules
             return false;
         }
 
-        if (UnitStats.BaseAttack(attacker.Kind, defender.Kind) <= 0)
+        if (RelationsTable.BaseAttack(attacker.Category, defender.Category) <= 0)
         {
             return false;
         }

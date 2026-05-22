@@ -27,6 +27,7 @@ public class CombatResolverTests
         }
         return new GameState(
             map,
+            TestCatalog.Catalog,
             dict,
             new Dictionary<HexCoord, Side>(),
             Side.Blue,
@@ -40,25 +41,25 @@ public class CombatResolverTests
     [Fact]
     public void Tank_attacks_infantry_inflicts_damage_no_counter()
     {
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank,     new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Infantry, new HexCoord(1, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Infantry, new HexCoord(1, 0));
         var state = OpenMapState(atk, def);
 
         var result = CombatResolver.Resolve(state, atk, def, new FixedRng(0));
 
-        // Tank base attack vs Infantry = 10; defense = 0 (plains, no building); shooter full HP.
-        Assert.Equal(10, result.DamageToDefender);
-        Assert.False(result.DefenderDestroyed); // 15 HP - 10 = 5
-        Assert.True(result.DefenderCountered);  // Infantry can attack Tank (base=1), so counter happens
-        // Infantry base attack vs Tank = 1; with -2/+0/+2 swing the damage is small.
+        // BattleTank vs Infantry is a TotalVictory matchup => base attack 11;
+        // defense 0 (plains), shooter at full HP, roll 0.
+        Assert.Equal(11, result.DamageToDefender);
+        Assert.False(result.DefenderDestroyed); // 15 HP - 11 = 4
+        Assert.True(result.DefenderCountered);  // Infantry can still chip a Tank, so it counters.
     }
 
     [Fact]
     public void Defender_killed_does_not_counter()
     {
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank,     new HexCoord(0, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
         // Wounded infantry: 5 HP, dies to Tank hit.
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Infantry, new HexCoord(1, 0)) with { HitPoints = 5 };
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Infantry, new HexCoord(1, 0)) with { HitPoints = 5 };
         var state = OpenMapState(atk, def);
 
         var result = CombatResolver.Resolve(state, atk, def, new FixedRng(0));
@@ -69,15 +70,16 @@ public class CombatResolverTests
     }
 
     [Fact]
-    public void Fighter_vs_tank_does_nothing_both_ways()
+    public void Fighter_strafes_tank_for_chip_damage_no_counter()
     {
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Fighter, new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Tank,    new HexCoord(1, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Fighter, new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Tank,    new HexCoord(1, 0));
         var state = OpenMapState(atk, def);
 
-        var result = CombatResolver.Resolve(state, atk, def, new FixedRng(2));
+        var result = CombatResolver.Resolve(state, atk, def, new FixedRng(0));
 
-        Assert.Equal(0, result.DamageToDefender);
+        // Fighter base vs Tank = 2 at full HP, plains defense = 0.
+        Assert.Equal(2, result.DamageToDefender);
         Assert.False(result.DefenderDestroyed);
         Assert.False(result.DefenderCountered); // tank base vs fighter = 0
     }
@@ -89,11 +91,12 @@ public class CombatResolverTests
         var tiles = MapDefinition.EnumerateCoords(10, 5)
             .Select(c => new Tile(c, c == new HexCoord(1, 0) ? Terrain.Forest : Terrain.Plains, Building: null, Owner: null));
         var map = new MapDefinition("mixed", 10, 5, tiles);
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Fighter, new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Fighter, new HexCoord(1, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Fighter, new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Fighter, new HexCoord(1, 0));
         var dict = new Dictionary<UnitId, Unit> { [atk.Id] = atk, [def.Id] = def };
         var state = new GameState(
             map,
+            TestCatalog.Catalog,
             dict,
             new Dictionary<HexCoord, Side>(),
             Side.Blue,

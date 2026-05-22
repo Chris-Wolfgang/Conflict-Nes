@@ -30,8 +30,8 @@ public class CaptureRulesTests
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.City, Owner: null)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
         var map = new MapDefinition("city", 3, 1, tiles);
-        var infantry = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Infantry, cityCoord);
-        var state = new GameState(map,
+        var infantry = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Infantry, cityCoord);
+        var state = new GameState(map, TestCatalog.Catalog,
             new Dictionary<UnitId, Unit> { [infantry.Id] = infantry },
             new Dictionary<HexCoord, Side>(),
             Side.Blue, turnNumber: 1, phase: GamePhase.PlayerTurn,
@@ -53,8 +53,8 @@ public class CaptureRulesTests
                 ? new Tile(c, Terrain.Plains, BuildingKind.City, Side.Blue)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
         var map = new MapDefinition("city", 3, 1, tiles);
-        var infantry = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Infantry, cityCoord);
-        var state = new GameState(map,
+        var infantry = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Infantry, cityCoord);
+        var state = new GameState(map, TestCatalog.Catalog,
             new Dictionary<UnitId, Unit> { [infantry.Id] = infantry },
             new Dictionary<HexCoord, Side>(),
             Side.Blue, turnNumber: 1, phase: GamePhase.PlayerTurn,
@@ -73,8 +73,8 @@ public class CaptureRulesTests
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.City, Owner: null)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
         var map = new MapDefinition("city", 3, 1, tiles);
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, cityCoord);
-        var state = new GameState(map,
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, cityCoord);
+        var state = new GameState(map, TestCatalog.Catalog,
             new Dictionary<UnitId, Unit> { [tank.Id] = tank },
             new Dictionary<HexCoord, Side>(),
             Side.Blue, turnNumber: 1, phase: GamePhase.PlayerTurn,

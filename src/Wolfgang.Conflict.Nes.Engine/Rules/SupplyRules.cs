@@ -76,15 +76,14 @@ public static class SupplyRules
             throw new ArgumentNullException(nameof(unit));
         }
 
-        var stats = UnitStats.For(unit.Kind);
         var newHp = source == SupplySource.Building
             ? Math.Min(UnitStats.MaxHitPoints, unit.HitPoints + RepairAmount)
             : unit.HitPoints;
 
         return unit with
         {
-            Fuel = stats.MaxFuel,
-            Ammo = stats.MaxAmmo,
+            Fuel = unit.Type.MaxFuel,
+            Ammo = unit.Type.MaxAmmo,
             HitPoints = newHp,
             HasSupplied = true,
         };
@@ -105,8 +104,7 @@ public static class SupplyRules
             return false;
         }
 
-        var stats = UnitStats.For(unit.Kind);
-        return stats.MovementDomain switch
+        return unit.Type.MovementDomain switch
         {
             MovementDomain.Foot or MovementDomain.Tread => building == BuildingKind.City,
             MovementDomain.Helicopter or MovementDomain.Fighter => building == BuildingKind.Airbase,

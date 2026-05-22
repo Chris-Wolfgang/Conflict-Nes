@@ -3,47 +3,55 @@
 @using Wolfgang.Conflict.Nes.UI.Blazor.Rendering
 
 @*
-    Original chunky unit glyphs. Each kind has a distinct silhouette so the
-    player can read the board at a glance. Side colour is the fill.
+    Rectangular unit tile in the style of the NES original. Sized at
+    UnitTileScale of the full hex (keeping the 1 : √3 ratio) so it sits
+    inside the hex with a margin. Filled with the side colour, with the
+    unit name printed vertically. Commander tanks get a gold "H" badge.
 *@
 
 <g transform="translate(@(Cx.ToString("F2", Inv)),@(Cy.ToString("F2", Inv)))">
-    @switch (Unit.Kind)
+    @* Tile body *@
+    <rect x="@((-Half.W).ToString("F2", Inv))"
+          y="@((-Half.H).ToString("F2", Inv))"
+          width="@(Width.ToString("F2", Inv))"
+          height="@(Height.ToString("F2", Inv))"
+          fill="@SideColor"
+          stroke="#000"
+          stroke-width="1.5" />
+    @* Inner highlight band so the tile reads as a chunky piece *@
+    <rect x="@((-Half.W + 2).ToString("F2", Inv))"
+          y="@((-Half.H + 2).ToString("F2", Inv))"
+          width="@((Width - 4).ToString("F2", Inv))"
+          height="@((Height - 4).ToString("F2", Inv))"
+          fill="none"
+          stroke="@SideDarkColor"
+          stroke-width="1" />
+
+    @* Vertical unit name. Razor's <text> block syntax conflicts with the
+       SVG <text> element, so we emit the element as a MarkupString. *@
+    @NameText
+
+    @if (Unit.IsCommander)
     {
-        case UnitKind.Infantry:
-            <circle cx="0" cy="-3" r="4" fill="@SideColor" stroke="#000" stroke-width="1.2" />
-            <rect x="-4" y="0" width="8" height="9" fill="@SideColor" stroke="#000" stroke-width="1.2" />
-            break;
-
-        case UnitKind.Tank:
-            <rect x="-11" y="-3" width="22" height="9" rx="1.5" fill="@SideColor" stroke="#000" stroke-width="1.5" />
-            <rect x="-7" y="-9" width="14" height="6" rx="1.5" fill="@SideDarkColor" stroke="#000" stroke-width="1.2" />
-            <rect x="2" y="-7" width="12" height="2" fill="#000" />
-            @if (Unit.IsCommander)
-            {
-                <rect x="-3" y="-13" width="6" height="3" fill="@NesPalette.Selection" stroke="#000" stroke-width="0.8" />
-                <polygon points="0,-15 -2.5,-12.5 2.5,-12.5" fill="@NesPalette.Selection" stroke="#000" stroke-width="0.8" />
-            }
-            break;
-
-        case UnitKind.Helicopter:
-            <rect x="-9" y="-2" width="18" height="6" rx="2.5" fill="@SideColor" stroke="#000" stroke-width="1.2" />
-            <rect x="-12" y="-6" width="24" height="1.5" fill="#000" />
-            <rect x="-1" y="-9" width="2" height="4" fill="#000" />
-            <rect x="3" y="4" width="2" height="4" fill="#000" />
-            break;
-
-        case UnitKind.Fighter:
-            <polygon points="-13,4 0,-10 13,4 7,4 0,-2 -7,4" fill="@SideColor" stroke="#000" stroke-width="1.2" />
-            <rect x="-1" y="-2" width="2" height="9" fill="@SideDarkColor" />
-            break;
+        <rect x="@((-Half.W + 1.5).ToString("F2", Inv))"
+              y="@((-Half.H + 1.5).ToString("F2", Inv))"
+              width="8" height="8"
+              fill="@NesPalette.Selection"
+              stroke="#000"
+              stroke-width="0.8" />
+        @CommanderBadge
     }
 
-    @* HP bar - only show if below max *@
     @if (Unit.HitPoints < UnitStats.MaxHitPoints)
     {
-        <rect x="-12" y="11" width="24" height="3" fill="#000" />
-        <rect x="-12" y="11" width="@HpBarWidth.ToString("F2", Inv)" height="3" fill="@HpBarColor" />
+        <rect x="@((-Half.W + 1).ToString("F2", Inv))"
+              y="@((Half.H + 1).ToString("F2", Inv))"
+              width="@((Width - 2).ToString("F2", Inv))"
+              height="3" fill="#000" />
+        <rect x="@((-Half.W + 1).ToString("F2", Inv))"
+              y="@((Half.H + 1).ToString("F2", Inv))"
+              width="@HpBarWidth.ToString("F2", Inv)" height="3"
+              fill="@HpBarColor" />
     }
 </g>
 
@@ -54,10 +62,44 @@
     [Parameter] public double Cx { get; set; }
     [Parameter] public double Cy { get; set; }
 
+    // Tile dimensions: a uniform UnitTileScale of the hex, so the tile keeps
+    // the 1 : √3 ratio but leaves a margin inside the hex.
+    private static double Width => HexLayout.HexSize * HexLayout.UnitTileScale;
+    private static double Height => HexLayout.HexHeight * HexLayout.UnitTileScale;
+    private static (double W, double H) Half => (Width / 2.0, Height / 2.0);
+
     private string SideColor => Unit.Side == Side.Blue ? NesPalette.BlueSide : NesPalette.RedSide;
     private string SideDarkColor => Unit.Side == Side.Blue ? NesPalette.BlueSideDark : NesPalette.RedSideDark;
 
-    private double HpBarWidth => 24.0 * Math.Max(0, Unit.HitPoints) / (double)UnitStats.MaxHitPoints;
+    private string UnitName => Unit.Type.Name.ToUpperInvariant();
+
+    private MarkupString NameText
+    {
+        get
+        {
+            // Rotated -90deg so the name reads bottom-to-top, centred on the tile.
+            var fontSize = UnitName.Length > 7 ? 6 : 8;
+            var svg = $"<text x=\"0\" y=\"3\" fill=\"#fff\" stroke=\"#000\" stroke-width=\"0.4\" " +
+                      $"font-family=\"Consolas,monospace\" font-weight=\"700\" font-size=\"{fontSize}\" " +
+                      $"text-anchor=\"middle\" transform=\"rotate(-90)\">{UnitName}</text>";
+            return new MarkupString(svg);
+        }
+    }
+
+    private static MarkupString CommanderBadge
+    {
+        get
+        {
+            var x = (-Half.W + 5.5).ToString("F2", Inv);
+            var y = (-Half.H + 8).ToString("F2", Inv);
+            var svg = $"<text x=\"{x}\" y=\"{y}\" " +
+                      $"fill=\"#000\" font-family=\"Consolas,monospace\" font-weight=\"700\" " +
+                      $"font-size=\"8\" text-anchor=\"middle\">H</text>";
+            return new MarkupString(svg);
+        }
+    }
+
+    private double HpBarWidth => (Width - 2) * Math.Max(0, Unit.HitPoints) / (double)UnitStats.MaxHitPoints;
 
     private string HpBarColor
     {

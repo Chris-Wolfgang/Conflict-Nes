@@ -1,3 +1,4 @@
+using Wolfgang.Conflict.Nes.Engine.Combat;
 using Wolfgang.Conflict.Nes.Engine.Game;
 using Wolfgang.Conflict.Nes.Engine.Hex;
 using Wolfgang.Conflict.Nes.Engine.Players;
@@ -60,10 +61,10 @@ public sealed class GreedyAiStrategy : IPlayerStrategy
 
         // Pick the target whose matchup tier from our perspective is best.
         var bestTarget = targets[0];
-        var bestTier = (int)Matchups.Outlook(unit.Kind, state.Units[bestTarget].Kind);
+        var bestTier = (int)RelationsTable.Outlook(unit.Category, state.Units[bestTarget].Category);
         for (var i = 1; i < targets.Count; i++)
         {
-            var tier = (int)Matchups.Outlook(unit.Kind, state.Units[targets[i]].Kind);
+            var tier = (int)RelationsTable.Outlook(unit.Category, state.Units[targets[i]].Category);
             if (tier > bestTier)
             {
                 bestTier = tier;

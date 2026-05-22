@@ -13,12 +13,12 @@ public class MoveUnitTests
         var mission = await MissionLoader.LoadMission01Async();
         var engine = new GameEngine();
         var state = engine.StartGame(mission, randomSeed: 1);
-        var infantry = state.Units.Values.Single(u => u.Side == Side.Blue && u.Kind == UnitKind.Infantry);
+        var infantry = state.Units.Values.Single(u => u.Side == Side.Blue && u.Type == TestCatalog.Infantry);
         return (engine, state, infantry);
     }
 
     [Fact]
-    public async Task MoveUnit_advances_unit_and_deducts_cost_from_moves_and_fuel()
+    public async Task MoveUnit_advances_unit_and_deducts_path_cost_from_moves_only()
     {
         var (engine, state, infantry) = await Setup();
         var dest = new HexCoord(3, 6); // one step east from (2, 6) on plains
@@ -28,7 +28,8 @@ public class MoveUnitTests
 
         Assert.Equal(dest, moved.Coord);
         Assert.Equal(infantry.MovesRemaining - 1, moved.MovesRemaining);
-        Assert.Equal(infantry.Fuel - 1, moved.Fuel);
+        Assert.Equal(infantry.Fuel, moved.Fuel); // fuel unchanged until EndTurn
+        Assert.True(moved.HasMoved);
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public class MoveUnitTests
     public async Task MoveUnit_when_not_your_turn_throws()
     {
         var (engine, state, _) = await Setup();
-        var redInfantry = state.Units.Values.Single(u => u.Side == Side.Red && u.Kind == UnitKind.Infantry);
+        var redInfantry = state.Units.Values.Single(u => u.Side == Side.Red && u.Category == Engine.Units.UnitCategory.Infantry);
 
         Assert.Throws<InvalidOperationException>(() =>
             engine.MoveUnit(state, redInfantry.Id, new HexCoord(9, -4)));

@@ -3,32 +3,73 @@
 @using Wolfgang.Conflict.Nes.UI.Blazor.Rendering
 
 @*
-    Original NES-feel building glyph. Each kind is a distinct chunky shape so
-    the player can tell them apart at a glance without copying any NES sprite.
+    Original NES-feel building glyphs. Each kind has a distinct silhouette so
+    the player can tell them apart at a glance without copying NES sprites.
+
+    City    : two stacked apartment blocks with windows (densely populated).
+    HQ      : flag-topped fortress.
+    Airbase : runway with stripes and a small control tower.
+    Port    : dock with pylon.
+    Factory : long building with a smoking chimney.
 *@
 
 <g transform="translate(@(Cx.ToString("F2", Inv)),@(Cy.ToString("F2", Inv)))">
     @switch (Kind)
     {
         case BuildingKind.City:
-            <rect x="-12" y="-10" width="24" height="20" fill="@OwnerColor" stroke="#000" stroke-width="1.5" />
-            <rect x="-9" y="-7" width="6" height="6" fill="#fff8" />
-            <rect x="3" y="-7" width="6" height="6" fill="#fff8" />
-            <rect x="-9" y="1" width="6" height="6" fill="#fff8" />
-            <rect x="3" y="1" width="6" height="6" fill="#fff8" />
+            @* Taller back tower (enlarged so the city reads as the biggest building) *@
+            <rect x="-17" y="-21" width="15" height="30" fill="@OwnerColor" stroke="#000" stroke-width="1.5" />
+            <rect x="-14" y="-17" width="3" height="3" fill="#fff8" />
+            <rect x="-8" y="-17" width="3" height="3" fill="#fff8" />
+            <rect x="-14" y="-11" width="3" height="3" fill="#fff8" />
+            <rect x="-8" y="-11" width="3" height="3" fill="#fff8" />
+            <rect x="-14" y="-5" width="3" height="3" fill="#fff8" />
+            <rect x="-8" y="-5" width="3" height="3" fill="#fff8" />
+            <rect x="-14" y="1" width="3" height="3" fill="#fff8" />
+            <rect x="-8" y="1" width="3" height="3" fill="#fff8" />
+            @* Front shorter wing *@
+            <rect x="-3" y="-11" width="21" height="20" fill="@OwnerDarkColor" stroke="#000" stroke-width="1.5" />
+            <rect x="0" y="-7" width="3" height="3" fill="#fff8" />
+            <rect x="6" y="-7" width="3" height="3" fill="#fff8" />
+            <rect x="12" y="-7" width="3" height="3" fill="#fff8" />
+            <rect x="0" y="-1" width="3" height="3" fill="#fff8" />
+            <rect x="6" y="-1" width="3" height="3" fill="#fff8" />
+            <rect x="12" y="-1" width="3" height="3" fill="#fff8" />
+            <rect x="0" y="5" width="3" height="3" fill="#fff8" />
+            <rect x="6" y="5" width="3" height="3" fill="#fff8" />
+            <rect x="12" y="5" width="3" height="3" fill="#fff8" />
             break;
 
         case BuildingKind.Hq:
-            <rect x="-14" y="-12" width="28" height="24" fill="@OwnerColor" stroke="#000" stroke-width="2" />
-            <polygon points="-14,-12 0,-20 14,-12" fill="@OwnerDarkColor" stroke="#000" stroke-width="1.5" />
-            <rect x="-9" y="-5" width="18" height="3" fill="#000" />
-            <rect x="-9" y="0" width="18" height="3" fill="#000" />
-            <rect x="-9" y="5" width="18" height="3" fill="#000" />
+            @* Fortress with flag *@
+            <rect x="-14" y="-10" width="28" height="20" fill="@OwnerColor" stroke="#000" stroke-width="2" />
+            <rect x="-14" y="-13" width="4" height="3" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
+            <rect x="-7" y="-13" width="4" height="3" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
+            <rect x="-1" y="-13" width="4" height="3" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
+            <rect x="5" y="-13" width="4" height="3" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
+            <rect x="10" y="-13" width="4" height="3" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
+            @* Flagpole + flag *@
+            <rect x="-0.5" y="-22" width="1" height="9" fill="#000" />
+            <polygon points="0.5,-22 8,-19 0.5,-16" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
+            @* Gate/door *@
+            <rect x="-4" y="0" width="8" height="10" fill="#000" />
             break;
 
         case BuildingKind.Airbase:
-            <rect x="-13" y="-3" width="26" height="6" fill="@OwnerColor" stroke="#000" stroke-width="1.2" />
-            <polygon points="0,-13 -10,3 10,3" fill="@OwnerDarkColor" stroke="#000" stroke-width="1.2" />
+            @* Wide runway with stripes (no tail/control-tower mush) *@
+            <rect x="-16" y="-4" width="32" height="8" fill="#3a3a40" stroke="#000" stroke-width="1.2" />
+            <rect x="-14" y="-0.5" width="3" height="1" fill="#fff" />
+            <rect x="-9" y="-0.5" width="3" height="1" fill="#fff" />
+            <rect x="-4" y="-0.5" width="3" height="1" fill="#fff" />
+            <rect x="1" y="-0.5" width="3" height="1" fill="#fff" />
+            <rect x="6" y="-0.5" width="3" height="1" fill="#fff" />
+            <rect x="11" y="-0.5" width="3" height="1" fill="#fff" />
+            @* Control tower at the side, painted in side colour *@
+            <rect x="-14" y="-12" width="6" height="8" fill="@OwnerColor" stroke="#000" stroke-width="1.2" />
+            <rect x="-13" y="-11" width="4" height="2" fill="#fff8" />
+            @* Hangar at the other side *@
+            <rect x="8" y="-11" width="8" height="7" fill="@OwnerColor" stroke="#000" stroke-width="1.2" />
+            <polygon points="8,-11 12,-13 16,-11" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
             break;
 
         case BuildingKind.Port:
@@ -39,6 +80,8 @@
         case BuildingKind.Factory:
             <rect x="-13" y="-8" width="26" height="18" fill="@OwnerColor" stroke="#000" stroke-width="1.5" />
             <rect x="6" y="-15" width="5" height="10" fill="@OwnerDarkColor" stroke="#000" stroke-width="1" />
+            <circle cx="8.5" cy="-17" r="2" fill="#888" opacity="0.7" />
+            <circle cx="10" cy="-19" r="2.5" fill="#888" opacity="0.5" />
             <rect x="-9" y="-3" width="6" height="6" fill="#fff8" />
             <rect x="-1" y="-3" width="6" height="6" fill="#fff8" />
             break;

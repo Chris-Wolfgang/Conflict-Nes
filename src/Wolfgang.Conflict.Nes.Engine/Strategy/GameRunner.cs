@@ -99,7 +99,7 @@ public static class GameRunner
         StrategyActionKind.Move    => engine.MoveUnit(state, action.UnitId, action.Hex),
         StrategyActionKind.Attack  => engine.AttackUnit(state, action.UnitId, action.TargetId),
         StrategyActionKind.Supply  => engine.SupplyUnit(state, action.UnitId),
-        StrategyActionKind.Build   => engine.BuildUnit(state, action.Hex, action.ProduceKind),
+        StrategyActionKind.Build   => engine.BuildUnit(state, action.Hex, action.ProduceTypeId),
         _ => throw new InvalidOperationException($"Unknown action kind {action.Kind}."),
     };
 }

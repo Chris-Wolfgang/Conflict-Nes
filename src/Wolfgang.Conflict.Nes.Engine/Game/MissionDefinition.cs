@@ -1,14 +1,17 @@
 using Wolfgang.Conflict.Nes.Engine.Map;
+using Wolfgang.Conflict.Nes.Engine.Units;
 
 namespace Wolfgang.Conflict.Nes.Engine.Game;
 
 /// <summary>
-/// A complete mission specification: the <see cref="MapDefinition"/> plus the
-/// initial unit roster for each side. Future iterations will load this from
-/// JSON; for MVP <c>Mission01</c> is built in code by <c>MissionLoader</c>.
+/// A complete mission specification: the <see cref="MapDefinition"/>, the
+/// <see cref="UnitCatalog"/> in effect, and the initial unit roster for each
+/// side.
 /// </summary>
 /// <param name="Map">The hex map for the mission.</param>
+/// <param name="Catalog">The unit catalog used to resolve placements and production.</param>
 /// <param name="StartingUnits">The starting placements for both sides.</param>
 public sealed record MissionDefinition(
     MapDefinition Map,
+    UnitCatalog Catalog,
     IReadOnlyList<UnitPlacement> StartingUnits);

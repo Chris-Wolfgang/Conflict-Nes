@@ -11,6 +11,13 @@ public static class HexLayout
     /// <summary>Distance from a hex centre to a vertex, in CSS px.</summary>
     public const double HexSize = 30.0;
 
+    /// <summary>
+    /// Uniform scale applied to unit tiles so they sit inside the hex with a
+    /// margin rather than filling it edge-to-edge. Preserves the tile's
+    /// 1 : √3 width-to-height ratio.
+    /// </summary>
+    public const double UnitTileScale = 0.78;
+
     /// <summary>Total width of one flat-top hex (vertex to vertex).</summary>
     public static double HexWidth => 2.0 * HexSize;
 

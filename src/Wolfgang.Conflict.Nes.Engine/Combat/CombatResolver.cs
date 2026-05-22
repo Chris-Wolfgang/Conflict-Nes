@@ -52,7 +52,7 @@ public static class CombatResolver
         var defenderDestroyed = defenderHpAfter == 0;
 
         var defenderCanCounter = !defenderDestroyed
-            && UnitStats.BaseAttack(defender.Kind, attacker.Kind) > 0;
+            && RelationsTable.BaseAttack(defender.Category, attacker.Category) > 0;
 
         var dmgToAttacker = 0;
         var attackerDestroyed = false;
@@ -72,13 +72,13 @@ public static class CombatResolver
             DefenderDestroyed: defenderDestroyed,
             AttackerDestroyed: attackerDestroyed,
             DefenderCountered: defenderCanCounter,
-            AttackerOutlook: Matchups.Outlook(attacker.Kind, defender.Kind),
-            DefenderOutlook: Matchups.Outlook(defender.Kind, attacker.Kind));
+            AttackerOutlook: RelationsTable.Outlook(attacker.Category, defender.Category),
+            DefenderOutlook: RelationsTable.Outlook(defender.Category, attacker.Category));
     }
 
     private static int ComputeDamage(Unit shooter, Unit target, Tile targetTile, IRandomSource rng)
     {
-        var baseAttack = UnitStats.BaseAttack(shooter.Kind, target.Kind);
+        var baseAttack = RelationsTable.BaseAttack(shooter.Category, target.Category);
         if (baseAttack <= 0)
         {
             return 0;

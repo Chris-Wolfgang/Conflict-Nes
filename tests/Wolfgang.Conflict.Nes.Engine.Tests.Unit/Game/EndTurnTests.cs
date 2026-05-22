@@ -52,7 +52,7 @@ public class EndTurnTests
             modifiedUnits[kv.Key] = kv.Key == redUnit.Id ? modified : kv.Value;
         }
         var withRedFlagged = new GameState(
-            state.Map, modifiedUnits, state.BuildingOwners,
+            state.Map, state.Catalog, modifiedUnits, state.BuildingOwners,
             state.NextToAct, state.TurnNumber, state.Phase, state.Funds, state.Winner, state.RandomSeed);
 
         var afterBlueEnded = engine.EndTurn(withRedFlagged);
@@ -79,12 +79,45 @@ public class EndTurnTests
     }
 
     [Fact]
+    public async Task EndTurn_drains_one_fuel_from_units_that_moved_this_turn()
+    {
+        var engine = new GameEngine();
+        var mission = await MissionLoader.LoadMission01Async();
+        var state = engine.StartGame(mission, randomSeed: 1);
+
+        // Move Blue's infantry one hex to its east.
+        var infantry = state.Units.Values.Single(u => u.Side == Side.Blue && u.Type == TestCatalog.Infantry);
+        var fuelBefore = infantry.Fuel;
+        state = engine.MoveUnit(state, infantry.Id, new HexCoord(3, 6));
+        Assert.Equal(fuelBefore, state.Units[infantry.Id].Fuel); // not yet drained
+
+        state = engine.EndTurn(state); // Blue ends -> drain happens for Blue movers
+
+        Assert.Equal(fuelBefore - 1, state.Units[infantry.Id].Fuel);
+    }
+
+    [Fact]
+    public async Task EndTurn_does_not_drain_fuel_for_units_that_did_not_move()
+    {
+        var engine = new GameEngine();
+        var mission = await MissionLoader.LoadMission01Async();
+        var state = engine.StartGame(mission, randomSeed: 1);
+
+        var blueIdle = state.Units.Values.Single(u => u.Side == Side.Blue && u.Type == TestCatalog.Fighter);
+        var fuelBefore = blueIdle.Fuel;
+
+        state = engine.EndTurn(state);
+
+        Assert.Equal(fuelBefore, state.Units[blueIdle.Id].Fuel);
+    }
+
+    [Fact]
     public async Task EndTurn_when_game_over_throws()
     {
         var engine = new GameEngine();
         var mission = await MissionLoader.LoadMission01Async();
         var state = engine.StartGame(mission, randomSeed: 1);
-        var over = new GameState(state.Map, state.Units, state.BuildingOwners,
+        var over = new GameState(state.Map, state.Catalog, state.Units, state.BuildingOwners,
             state.NextToAct, state.TurnNumber, GamePhase.GameOver,
             state.Funds, Side.Blue, state.RandomSeed);
 

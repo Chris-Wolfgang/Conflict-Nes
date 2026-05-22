@@ -11,10 +11,9 @@ namespace Wolfgang.Conflict.Nes.Engine.Game;
 public static class MissionLoader
 {
     /// <summary>
-    /// Loads Mission 01: First Strike. The map data lives in the embedded
-    /// JSON resource <c>Wolfgang.Conflict.Nes.Engine.Maps.mission01.json</c>;
-    /// the unit placement is hardcoded here for MVP and will move to data in
-    /// a future milestone.
+    /// Loads Mission 01: First Strike. Map data and the unit catalog come
+    /// from embedded JSON resources; unit placement is hardcoded here for
+    /// MVP and will move to data in a future milestone.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the underlying I/O.</param>
     /// <returns>The composed <see cref="MissionDefinition"/>.</returns>
@@ -24,22 +23,24 @@ public static class MissionLoader
             "Wolfgang.Conflict.Nes.Engine.Maps.mission01.json",
             cancellationToken).ConfigureAwait(false);
 
+        var catalog = await UnitCatalog.LoadEmbeddedAsync(cancellationToken).ConfigureAwait(false);
+
         var placements = new List<UnitPlacement>
         {
-            // Blue: commander tank on HQ, infantry adjacent,
-            // helicopter on airbase, fighter adjacent.
-            new(Side.Blue, UnitKind.Tank,       new HexCoord(1, 7), IsCommander: true),
-            new(Side.Blue, UnitKind.Infantry,   new HexCoord(2, 6), IsCommander: false),
-            new(Side.Blue, UnitKind.Helicopter, new HexCoord(1, 5), IsCommander: false),
-            new(Side.Blue, UnitKind.Fighter,    new HexCoord(2, 4), IsCommander: false),
+            // Blue: commander M1A1 on HQ, infantry adjacent,
+            // Cobra on airbase, Phantom adjacent.
+            new(Side.Blue, "m1a1",      new HexCoord(1, 7), IsCommander: true),
+            new(Side.Blue, "liberator", new HexCoord(2, 6), IsCommander: false),
+            new(Side.Blue, "ah1s",      new HexCoord(1, 5), IsCommander: false),
+            new(Side.Blue, "f4e",       new HexCoord(2, 4), IsCommander: false),
 
             // Red: mirrored layout near Red HQ in the northeast.
-            new(Side.Red, UnitKind.Tank,       new HexCoord(11, -5), IsCommander: true),
-            new(Side.Red, UnitKind.Infantry,   new HexCoord(10, -4), IsCommander: false),
-            new(Side.Red, UnitKind.Helicopter, new HexCoord(7,  -2), IsCommander: false),
-            new(Side.Red, UnitKind.Fighter,    new HexCoord(8,  -3), IsCommander: false),
+            new(Side.Red, "t80",          new HexCoord(11, -5), IsCommander: true),
+            new(Side.Red, "red-infantry", new HexCoord(10, -4), IsCommander: false),
+            new(Side.Red, "mi24",         new HexCoord(7,  -2), IsCommander: false),
+            new(Side.Red, "mig23",        new HexCoord(8,  -3), IsCommander: false),
         };
 
-        return new MissionDefinition(map, placements);
+        return new MissionDefinition(map, catalog, placements);
     }
 }

@@ -71,6 +71,13 @@ h1 {
     cursor: not-allowed;
 }
 
+.action-button.supply {
+    background: #207040;
+    border-color: #3cd44c;
+}
+
+.action-button.supply:hover { background: #2a8050; }
+
 .board-and-panel {
     display: flex;
     gap: 1rem;
@@ -103,6 +110,13 @@ h1 {
     padding: 0.15rem 0;
     border-bottom: 1px dotted #2a2e44;
 }
+
+.side-panel .unit-stats li.low {
+    color: #e86060;
+    font-weight: 600;
+}
+
+.side-panel .warn { color: #fce19c; font-style: italic; }
 
 .side-panel .hint {
     color: #8a90a4;

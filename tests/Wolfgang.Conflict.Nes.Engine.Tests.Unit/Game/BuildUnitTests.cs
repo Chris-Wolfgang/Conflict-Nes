@@ -13,7 +13,7 @@ public class BuildUnitTests
         var mission = await MissionLoader.LoadMission01Async();
         var engine = new GameEngine();
         var state = engine.StartGame(mission, randomSeed: 1);
-        state = new GameState(state.Map, state.Units, state.BuildingOwners,
+        state = new GameState(state.Map, state.Catalog, state.Units, state.BuildingOwners,
             state.NextToAct, state.TurnNumber, state.Phase,
             new Dictionary<Side, int> { [Side.Blue] = blueFunds, [Side.Red] = state.Funds[Side.Red] },
             state.Winner, state.RandomSeed);
@@ -30,10 +30,10 @@ public class BuildUnitTests
         // Move Blue's helicopter off the airbase by leaving Helicopter where it is.
         // The factory hex (1,6) is currently empty: nothing was placed there.
 
-        var next = engine.BuildUnit(state, BlueFactory, UnitKind.Tank);
+        var next = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
 
         var fresh = next.Units.Values.Single(u => u.Coord == BlueFactory);
-        Assert.Equal(UnitKind.Tank, fresh.Kind);
+        Assert.Equal(TestCatalog.Tank, fresh.Type);
         Assert.Equal(Side.Blue, fresh.Side);
         Assert.Equal(10000 - 6000, next.Funds[Side.Blue]);
     }
@@ -43,7 +43,7 @@ public class BuildUnitTests
     {
         var (engine, state) = await StartMission01WithFunds();
         // Blue Helicopter starts on the airbase (1, 5).
-        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueAirbase, UnitKind.Fighter));
+        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueAirbase, TestCatalog.Fighter.Id));
     }
 
     [Fact]
@@ -51,14 +51,14 @@ public class BuildUnitTests
     {
         var (engine, state) = await StartMission01WithFunds();
         // Factories don't produce air units.
-        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueFactory, UnitKind.Fighter));
+        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueFactory, TestCatalog.Fighter.Id));
     }
 
     [Fact]
     public async Task BuildUnit_without_enough_funds_throws()
     {
         var (engine, state) = await StartMission01WithFunds(blueFunds: 100);
-        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueFactory, UnitKind.Tank));
+        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id));
     }
 
     [Fact]
@@ -72,10 +72,10 @@ public class BuildUnitTests
                 ? kv.Value with { HasMoved = true }
                 : kv.Value;
         }
-        var allMoved = new GameState(state.Map, movedUnits, state.BuildingOwners,
+        var allMoved = new GameState(state.Map, state.Catalog, movedUnits, state.BuildingOwners,
             state.NextToAct, state.TurnNumber, state.Phase, state.Funds, state.Winner, state.RandomSeed);
 
-        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(allMoved, BlueFactory, UnitKind.Tank));
+        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(allMoved, BlueFactory, TestCatalog.Tank.Id));
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class BuildUnitTests
     {
         var (engine, state) = await StartMission01WithFunds();
 
-        var next = engine.BuildUnit(state, BlueFactory, UnitKind.Tank);
+        var next = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
         var fresh = next.Units.Values.Single(u => u.Coord == BlueFactory);
 
         Assert.True(fresh.HasMoved);

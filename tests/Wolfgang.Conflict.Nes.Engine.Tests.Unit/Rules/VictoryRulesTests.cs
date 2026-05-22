@@ -20,7 +20,7 @@ public class VictoryRulesTests
         {
             dict[u.Id] = u;
         }
-        return new GameState(map, dict,
+        return new GameState(map, TestCatalog.Catalog, dict,
             new Dictionary<HexCoord, Side>(),
             Side.Blue, turnNumber: 1, phase: GamePhase.PlayerTurn,
             new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
@@ -30,8 +30,8 @@ public class VictoryRulesTests
     [Fact]
     public void With_both_commanders_alive_no_winner()
     {
-        var blue = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(0, 0), isCommander: true);
-        var red = Unit.FullStrength(new UnitId(2), Side.Red, UnitKind.Tank, new HexCoord(3, 0), isCommander: true);
+        var blue = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0), isCommander: true);
+        var red = Unit.FullStrength(new UnitId(2), Side.Red, TestCatalog.Tank, new HexCoord(3, 0), isCommander: true);
 
         Assert.Null(VictoryRules.DetermineWinner(StateWith(blue, red)));
     }
@@ -39,9 +39,9 @@ public class VictoryRulesTests
     [Fact]
     public void Blue_wins_when_red_commander_dead()
     {
-        var blue = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(0, 0), isCommander: true);
+        var blue = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0), isCommander: true);
         // Red has only a non-commander unit alive.
-        var redGrunt = Unit.FullStrength(new UnitId(2), Side.Red, UnitKind.Infantry, new HexCoord(3, 0));
+        var redGrunt = Unit.FullStrength(new UnitId(2), Side.Red, TestCatalog.Infantry, new HexCoord(3, 0));
 
         Assert.Equal(Side.Blue, VictoryRules.DetermineWinner(StateWith(blue, redGrunt)));
     }
@@ -49,7 +49,7 @@ public class VictoryRulesTests
     [Fact]
     public void Red_wins_when_blue_routed()
     {
-        var red = Unit.FullStrength(new UnitId(1), Side.Red, UnitKind.Tank, new HexCoord(0, 0), isCommander: true);
+        var red = Unit.FullStrength(new UnitId(1), Side.Red, TestCatalog.Tank, new HexCoord(0, 0), isCommander: true);
 
         Assert.Equal(Side.Red, VictoryRules.DetermineWinner(StateWith(red)));
     }

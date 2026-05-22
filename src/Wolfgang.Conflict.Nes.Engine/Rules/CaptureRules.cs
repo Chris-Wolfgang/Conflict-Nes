@@ -45,7 +45,7 @@ public static class CaptureRules
             {
                 continue;
             }
-            if (!UnitStats.For(unit.Kind).CanCapture)
+            if (!unit.Type.CanCapture)
             {
                 continue;
             }

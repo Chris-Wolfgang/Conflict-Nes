@@ -46,13 +46,23 @@
                 @if (Service.SelectedUnitId is { } sid
                      && Service.CurrentState.Units.TryGetValue(sid, out var u))
                 {
-                    <h2>@u.Kind @(u.IsCommander ? "(H)" : string.Empty)</h2>
+                    var stuck = u.Fuel <= 0;
+                    var lowFuel = u.Fuel <= 1;
+
+                    <h2>@u.Type.Name @(u.IsCommander ? "(H)" : string.Empty)</h2>
                     <ul class="unit-stats">
                         <li>Side: <strong class="@(u.Side == Side.Blue ? "blue" : "red")">@u.Side</strong></li>
+                        <li>Class: @u.Category</li>
                         <li>LIFE: @u.HitPoints / @UnitStats.MaxHitPoints</li>
-                        <li>FUEL: @u.Fuel</li>
-                        <li>SHELL: @u.Ammo</li>
-                        <li>MOVING left: @u.MovesRemaining</li>
+                        <li class="@(lowFuel ? "low" : null)">
+                            FUEL: @u.Fuel / @u.Type.MaxFuel turns
+                            @if (stuck)
+                            {
+                                <span class="warn"> (out of fuel)</span>
+                            }
+                        </li>
+                        <li>SHELL: @u.Ammo / @u.Type.MaxAmmo</li>
+                        <li>MOVING this turn: @u.MovesRemaining hexes</li>
                         <li>Acted: @(u.HasMoved ? "moved" : "not moved"), @(u.HasAttacked ? "attacked" : "not attacked")</li>
                     </ul>
                 }
@@ -62,6 +72,13 @@
                 }
 
                 <div class="controls">
+                    @if (Service.CanSupplySelected())
+                    {
+                        <button class="action-button supply"
+                                @onclick="Service.SupplySelected">
+                            Supply (refuel + repair)
+                        </button>
+                    }
                     <button class="action-button"
                             disabled="@(!Service.IsHumanTurn || Service.CurrentState.Phase == GamePhase.GameOver)"
                             @onclick="EndTurnAsync">

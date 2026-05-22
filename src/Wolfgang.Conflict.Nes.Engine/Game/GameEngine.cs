@@ -21,7 +21,7 @@ public sealed class GameEngine
     /// <param name="randomSeed">Seed for the combat RNG; preserved across states.</param>
     /// <returns>The starting state with <c>NextToAct = Blue</c>.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="mission"/> is null.</exception>
-    /// <exception cref="ArgumentException">A unit placement is invalid (off-map, duplicate hex, or duplicate commander for a side).</exception>
+    /// <exception cref="ArgumentException">A unit placement is invalid (off-map, duplicate hex, unknown type, or duplicate commander for a side).</exception>
     public GameState StartGame(MissionDefinition mission, int randomSeed)
     {
         if (mission is null)
@@ -29,8 +29,31 @@ public sealed class GameEngine
             throw new ArgumentNullException(nameof(mission));
         }
 
+        var units = BuildStartingUnits(mission);
+
+        var funds = new Dictionary<Side, int>
+        {
+            [Side.Blue] = 0,
+            [Side.Red]  = 0,
+        };
+
+        return new GameState(
+            map: mission.Map,
+            catalog: mission.Catalog,
+            units: units,
+            buildingOwners: new Dictionary<HexCoord, Side>(),
+            nextToAct: Side.Blue,
+            turnNumber: 1,
+            phase: GamePhase.PlayerTurn,
+            funds: funds,
+            winner: null,
+            randomSeed: randomSeed);
+    }
+
+    private static Dictionary<UnitId, Unit> BuildStartingUnits(MissionDefinition mission)
+    {
         var units = new Dictionary<UnitId, Unit>();
-        var occupied = new HashSet<global::Wolfgang.Conflict.Nes.Engine.Hex.HexCoord>();
+        var occupied = new HashSet<HexCoord>();
         var commanderCount = new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 };
         var nextId = 1;
 
@@ -44,14 +67,19 @@ public sealed class GameEngine
             {
                 throw new ArgumentException($"Duplicate starting hex {placement.Coord}.", nameof(mission));
             }
+            if (!mission.Catalog.Contains(placement.TypeId))
+            {
+                throw new ArgumentException($"Unknown unit type '{placement.TypeId}'.", nameof(mission));
+            }
 
             if (placement.IsCommander)
             {
                 commanderCount[placement.Side]++;
             }
 
+            var type = mission.Catalog.Get(placement.TypeId);
             var id = new UnitId(nextId++);
-            units[id] = Unit.FullStrength(id, placement.Side, placement.Kind, placement.Coord, placement.IsCommander);
+            units[id] = Unit.FullStrength(id, placement.Side, type, placement.Coord, placement.IsCommander);
         }
 
         foreach (var side in new[] { Side.Blue, Side.Red })
@@ -62,22 +90,7 @@ public sealed class GameEngine
             }
         }
 
-        var funds = new Dictionary<Side, int>
-        {
-            [Side.Blue] = 0,
-            [Side.Red]  = 0,
-        };
-
-        return new GameState(
-            map: mission.Map,
-            units: units,
-            buildingOwners: new Dictionary<HexCoord, Side>(),
-            nextToAct: Side.Blue,
-            turnNumber: 1,
-            phase: GamePhase.PlayerTurn,
-            funds: funds,
-            winner: null,
-            randomSeed: randomSeed);
+        return units;
     }
 
     /// <summary>
@@ -102,12 +115,12 @@ public sealed class GameEngine
 
     /// <summary>
     /// Moves the named unit along the cheapest legal path to
-    /// <paramref name="destination"/>, deducting movement points and fuel.
+    /// <paramref name="destination"/>, deducting movement points.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
     /// The game is over, it is not the unit's owner's turn, the unit doesn't
-    /// exist, the destination is not reachable, or the unit has already moved.
+    /// exist, or the destination is not reachable.
     /// </exception>
     public GameState MoveUnit(GameState state, UnitId id, HexCoord destination)
     {
@@ -143,7 +156,6 @@ public sealed class GameEngine
         {
             Coord = destination,
             MovesRemaining = unit.MovesRemaining - path.TotalCost,
-            Fuel = unit.Fuel - path.TotalCost,
             HasMoved = true,
         };
 
@@ -209,21 +221,21 @@ public sealed class GameEngine
         var result = CombatResolver.Resolve(state, attacker, defender, rng);
 
         var updatedUnits = ApplyDamage(state.Units, attacker, defender, result);
-        var updatedFunds = ApplyEconomyAwards(state.Funds, attacker.Side, defender.Side, attacker.Kind, defender.Kind, result);
+        var updatedFunds = ApplyEconomyAwards(
+            state.Funds, attacker.Side, defender.Side,
+            attacker.Type.ProductionCost, defender.Type.ProductionCost, result);
 
         var after = WithUnitsAndFunds(state, updatedUnits, updatedFunds, advanceSeed: true);
         return CheckVictory(after);
     }
 
     /// <summary>
-    /// Produces a new unit of <paramref name="kind"/> on the building at
-    /// <paramref name="buildingCoord"/>. Deducts the F.P. cost. Throws if the
-    /// building is wrong-kind, wrong-owner, occupied, the side cannot afford,
-    /// or every unit on the side has already moved this turn.
+    /// Produces a new unit of the catalog type <paramref name="typeId"/> on the
+    /// building at <paramref name="buildingCoord"/>. Deducts the F.P. cost.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
     /// <exception cref="InvalidOperationException">The build is illegal.</exception>
-    public GameState BuildUnit(GameState state, HexCoord buildingCoord, UnitKind kind)
+    public GameState BuildUnit(GameState state, HexCoord buildingCoord, string typeId)
     {
         if (state is null)
         {
@@ -235,16 +247,15 @@ public sealed class GameEngine
         }
 
         var side = state.NextToAct;
-        ProductionRules.ValidateBuild(state, side, buildingCoord, kind);
+        var type = ProductionRules.ValidateBuild(state, side, buildingCoord, typeId);
 
-        var cost = UnitStats.For(kind).ProductionCost;
         var newFunds = CopyFunds(state.Funds);
-        newFunds[side] -= cost;
+        newFunds[side] -= type.ProductionCost;
 
         var newId = NextUnitId(state);
         // Newly produced units have already "moved" this turn (manual: they
         // cannot move or attack on the turn they were built).
-        var freshUnit = Unit.FullStrength(newId, side, kind, buildingCoord) with
+        var freshUnit = Unit.FullStrength(newId, side, type, buildingCoord) with
         {
             MovesRemaining = 0,
             HasMoved = true,
@@ -255,6 +266,7 @@ public sealed class GameEngine
 
         return new GameState(
             map: state.Map,
+            catalog: state.Catalog,
             units: newUnits,
             buildingOwners: state.BuildingOwners,
             nextToAct: state.NextToAct,
@@ -291,10 +303,13 @@ public sealed class GameEngine
         var flips = CaptureRules.ComputeFlips(state, endingSide);
         var newOwners = MergeOwners(state.BuildingOwners, flips);
 
-        // 2. Refresh the next side's per-turn fields.
-        var refreshedUnits = RefreshUnitsForTurn(state.Units, nextSide);
+        // 2. Drain one fuel from every unit on the ending side that moved.
+        var fuelDrained = DrainFuelForMovers(state.Units, endingSide);
 
-        // 3. Accrue income for the next side from its City and Airbase holdings.
+        // 3. Refresh the next side's per-turn fields.
+        var refreshedUnits = RefreshUnitsForTurn(fuelDrained, nextSide);
+
+        // 4. Accrue income for the next side from its City and Airbase holdings.
         var newFunds = CopyFunds(state.Funds);
         newFunds[nextSide] += ComputeIncome(state.Map, newOwners, nextSide);
 
@@ -303,6 +318,7 @@ public sealed class GameEngine
 
         var next = new GameState(
             map: state.Map,
+            catalog: state.Catalog,
             units: refreshedUnits,
             buildingOwners: newOwners,
             nextToAct: nextSide,
@@ -313,6 +329,44 @@ public sealed class GameEngine
             randomSeed: state.RandomSeed);
 
         return CheckVictory(next);
+    }
+
+    /// <summary>
+    /// Supplies the named unit if it is currently eligible. Refuels, refills
+    /// ammo, and (for buildings) repairs LIFE. Once per turn.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The game is over, it is not the unit's owner's turn, the unit doesn't
+    /// exist, or no supply source is available.
+    /// </exception>
+    public GameState SupplyUnit(GameState state, UnitId id)
+    {
+        if (state is null)
+        {
+            throw new ArgumentNullException(nameof(state));
+        }
+        if (state.Phase != GamePhase.PlayerTurn)
+        {
+            throw new InvalidOperationException("Game is over; no more commands accepted.");
+        }
+        if (!state.Units.TryGetValue(id, out var unit))
+        {
+            throw new InvalidOperationException($"Unit {id} does not exist.");
+        }
+        if (unit.Side != state.NextToAct)
+        {
+            throw new InvalidOperationException($"It is not {unit.Side}'s turn.");
+        }
+
+        var source = SupplyRules.AvailableSource(state, unit)
+            ?? throw new InvalidOperationException($"Unit {id} has no supply source available.");
+
+        var supplied = SupplyRules.ApplySupply(unit, source);
+        var newUnits = CopyUnits(state.Units);
+        newUnits[id] = supplied;
+
+        return WithUnits(state, newUnits);
     }
 
     private static int ComputeIncome(MapDefinition map, IReadOnlyDictionary<HexCoord, Side> owners, Side side)
@@ -343,6 +397,7 @@ public sealed class GameEngine
         }
         return new GameState(
             map: state.Map,
+            catalog: state.Catalog,
             units: state.Units,
             buildingOwners: state.BuildingOwners,
             nextToAct: state.NextToAct,
@@ -382,6 +437,24 @@ public sealed class GameEngine
         return merged;
     }
 
+    private static Dictionary<UnitId, Unit> DrainFuelForMovers(IReadOnlyDictionary<UnitId, Unit> units, Side endingSide)
+    {
+        var drained = new Dictionary<UnitId, Unit>(units.Count);
+        foreach (var kv in units)
+        {
+            var u = kv.Value;
+            if (u.Side == endingSide && u.HasMoved && u.Fuel > 0)
+            {
+                drained[kv.Key] = u with { Fuel = u.Fuel - 1 };
+            }
+            else
+            {
+                drained[kv.Key] = u;
+            }
+        }
+        return drained;
+    }
+
     private static Dictionary<UnitId, Unit> RefreshUnitsForTurn(IReadOnlyDictionary<UnitId, Unit> units, Side sideStartingTurn)
     {
         var refreshed = new Dictionary<UnitId, Unit>(units.Count);
@@ -390,10 +463,9 @@ public sealed class GameEngine
             var u = kv.Value;
             if (u.Side == sideStartingTurn)
             {
-                var stats = UnitStats.For(u.Kind);
                 refreshed[kv.Key] = u with
                 {
-                    MovesRemaining = stats.MovementPoints,
+                    MovesRemaining = u.Type.MovementPoints,
                     HasMoved = false,
                     HasAttacked = false,
                     HasSupplied = false,
@@ -415,47 +487,6 @@ public sealed class GameEngine
             copy[kv.Key] = kv.Value;
         }
         return copy;
-    }
-
-    /// <summary>
-    /// Supplies the named unit if it is currently eligible (standing on its
-    /// side's matched building, or — in future milestones — adjacent to a
-    /// friendly supply vehicle). Refuels, refills ammo, and (for buildings)
-    /// repairs LIFE. A unit may supply at most once per turn.
-    /// </summary>
-    /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
-    /// <exception cref="InvalidOperationException">
-    /// The game is over, it is not the unit's owner's turn, the unit doesn't
-    /// exist, the unit has already supplied this turn, or no supply source is
-    /// available.
-    /// </exception>
-    public GameState SupplyUnit(GameState state, UnitId id)
-    {
-        if (state is null)
-        {
-            throw new ArgumentNullException(nameof(state));
-        }
-        if (state.Phase != GamePhase.PlayerTurn)
-        {
-            throw new InvalidOperationException("Game is over; no more commands accepted.");
-        }
-        if (!state.Units.TryGetValue(id, out var unit))
-        {
-            throw new InvalidOperationException($"Unit {id} does not exist.");
-        }
-        if (unit.Side != state.NextToAct)
-        {
-            throw new InvalidOperationException($"It is not {unit.Side}'s turn.");
-        }
-
-        var source = SupplyRules.AvailableSource(state, unit)
-            ?? throw new InvalidOperationException($"Unit {id} has no supply source available.");
-
-        var supplied = SupplyRules.ApplySupply(unit, source);
-        var newUnits = CopyUnits(state.Units);
-        newUnits[id] = supplied;
-
-        return WithUnits(state, newUnits);
     }
 
     private static Dictionary<UnitId, Unit> ApplyDamage(
@@ -497,8 +528,8 @@ public sealed class GameEngine
         IReadOnlyDictionary<Side, int> source,
         Side attackerSide,
         Side defenderSide,
-        UnitKind attackerKind,
-        UnitKind defenderKind,
+        int attackerProductionCost,
+        int defenderProductionCost,
         CombatResult result)
     {
         var funds = new Dictionary<Side, int>(source.Count);
@@ -510,13 +541,17 @@ public sealed class GameEngine
         if (result.DefenderDestroyed)
         {
             funds[attackerSide] += EconomyRules.WinnerReward(result.AttackerOutlook);
-            funds[defenderSide] -= EconomyRules.LoserPenalty(defenderKind);
+            funds[defenderSide] -= EconomyRules.LoserPenalty(defenderProductionCost);
         }
         if (result.AttackerDestroyed)
         {
             funds[defenderSide] += EconomyRules.WinnerReward(result.DefenderOutlook);
-            funds[attackerSide] -= EconomyRules.LoserPenalty(attackerKind);
+            funds[attackerSide] -= EconomyRules.LoserPenalty(attackerProductionCost);
         }
+
+        // F.P. is floored at zero — a side never carries negative funds.
+        funds[Side.Blue] = Math.Max(0, funds[Side.Blue]);
+        funds[Side.Red] = Math.Max(0, funds[Side.Red]);
 
         return funds;
     }
@@ -534,6 +569,7 @@ public sealed class GameEngine
     private static GameState WithUnits(GameState state, IReadOnlyDictionary<UnitId, Unit> newUnits) =>
         new(
             map: state.Map,
+            catalog: state.Catalog,
             units: newUnits,
             buildingOwners: state.BuildingOwners,
             nextToAct: state.NextToAct,
@@ -550,6 +586,7 @@ public sealed class GameEngine
         bool advanceSeed) =>
         new(
             map: state.Map,
+            catalog: state.Catalog,
             units: newUnits,
             buildingOwners: state.BuildingOwners,
             nextToAct: state.NextToAct,

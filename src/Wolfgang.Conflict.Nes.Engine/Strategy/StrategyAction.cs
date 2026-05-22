@@ -21,35 +21,35 @@ public sealed class StrategyAction
     /// <summary>The destination hex (for Move) or build hex (for Build).</summary>
     public HexCoord Hex { get; }
 
-    /// <summary>The unit kind to produce (for Build only).</summary>
-    public UnitKind ProduceKind { get; }
+    /// <summary>The catalog unit-type id to produce (for Build only).</summary>
+    public string ProduceTypeId { get; }
 
-    private StrategyAction(StrategyActionKind kind, UnitId unitId, UnitId targetId, HexCoord hex, UnitKind produceKind)
+    private StrategyAction(StrategyActionKind kind, UnitId unitId, UnitId targetId, HexCoord hex, string produceTypeId)
     {
         Kind = kind;
         UnitId = unitId;
         TargetId = targetId;
         Hex = hex;
-        ProduceKind = produceKind;
+        ProduceTypeId = produceTypeId;
     }
 
     /// <summary>The "no more commands; switch sides" sentinel.</summary>
-    public static StrategyAction EndTurn { get; } = new(StrategyActionKind.EndTurn, default, default, default, default);
+    public static StrategyAction EndTurn { get; } = new(StrategyActionKind.EndTurn, default, default, default, string.Empty);
 
     /// <summary>Move <paramref name="unitId"/> to <paramref name="destination"/>.</summary>
     public static StrategyAction Move(UnitId unitId, HexCoord destination)
-        => new(StrategyActionKind.Move, unitId, default, destination, default);
+        => new(StrategyActionKind.Move, unitId, default, destination, string.Empty);
 
     /// <summary>Attack <paramref name="targetId"/> with <paramref name="attackerId"/>.</summary>
     public static StrategyAction Attack(UnitId attackerId, UnitId targetId)
-        => new(StrategyActionKind.Attack, attackerId, targetId, default, default);
+        => new(StrategyActionKind.Attack, attackerId, targetId, default, string.Empty);
 
     /// <summary>Invoke the once-per-turn supply on <paramref name="unitId"/>.</summary>
     public static StrategyAction Supply(UnitId unitId)
-        => new(StrategyActionKind.Supply, unitId, default, default, default);
+        => new(StrategyActionKind.Supply, unitId, default, default, string.Empty);
 
-    /// <summary>Build a new <paramref name="kind"/> at <paramref name="buildingHex"/>.</summary>
-    public static StrategyAction Build(HexCoord buildingHex, UnitKind kind)
-        => new(StrategyActionKind.Build, default, default, buildingHex, kind);
+    /// <summary>Build the catalog type <paramref name="typeId"/> at <paramref name="buildingHex"/>.</summary>
+    public static StrategyAction Build(HexCoord buildingHex, string typeId)
+        => new(StrategyActionKind.Build, default, default, buildingHex, typeId);
 }
 

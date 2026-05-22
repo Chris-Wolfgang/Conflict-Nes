@@ -14,15 +14,58 @@ namespace Wolfgang.Conflict.Nes.Engine.Rules;
 public static class ProductionRules
 {
     /// <summary>
-    /// Returns the unit kinds <paramref name="building"/> can produce, or an
-    /// empty list if it is not a production building.
+    /// Returns <see langword="true"/> if a building of the given kind can
+    /// produce units at all.
     /// </summary>
-    public static IReadOnlyList<UnitKind> ProducibleAt(BuildingKind building) => building switch
+    public static bool IsProductionBuilding(BuildingKind building)
+        => building is BuildingKind.Factory or BuildingKind.Airbase or BuildingKind.Port;
+
+    /// <summary>
+    /// Returns <see langword="true"/> if a unit category may be produced at a
+    /// building of the given kind.
+    /// </summary>
+    public static bool CanBuildCategoryAt(BuildingKind building, UnitCategory category) => building switch
     {
-        BuildingKind.Factory => [UnitKind.Infantry, UnitKind.Tank],
-        BuildingKind.Airbase => [UnitKind.Helicopter, UnitKind.Fighter],
-        _ => [],
+        BuildingKind.Factory => category is UnitCategory.Infantry
+            or UnitCategory.Commando
+            or UnitCategory.Jeep
+            or UnitCategory.BattleTank
+            or UnitCategory.BattleMissileLauncher
+            or UnitCategory.FlakPanzer
+            or UnitCategory.SupplyVehicle,
+        BuildingKind.Airbase => category is UnitCategory.Attacker
+            or UnitCategory.Helicopter
+            or UnitCategory.Fighter
+            or UnitCategory.SupplyPlane,
+        _ => false,
     };
+
+    /// <summary>
+    /// Returns the catalog unit types <paramref name="side"/> may produce at a
+    /// building of kind <paramref name="building"/>.
+    /// </summary>
+    /// <param name="catalog">The unit catalog.</param>
+    /// <param name="building">The production building kind.</param>
+    /// <param name="side">The side requesting production.</param>
+    /// <returns>The buildable unit type definitions.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="catalog"/> is null.</exception>
+    public static IReadOnlyList<UnitTypeDefinition> ProducibleAt(UnitCatalog catalog, BuildingKind building, Side side)
+    {
+        if (catalog is null)
+        {
+            throw new ArgumentNullException(nameof(catalog));
+        }
+
+        var result = new List<UnitTypeDefinition>();
+        foreach (var def in catalog.ForSide(side))
+        {
+            if (CanBuildCategoryAt(building, def.Category))
+            {
+                result.Add(def);
+            }
+        }
+        return result;
+    }
 
     /// <summary>
     /// Returns <see langword="true"/> if <paramref name="side"/> may produce
@@ -52,17 +95,16 @@ public static class ProductionRules
 
     /// <summary>
     /// Validates that a build at <paramref name="buildingCoord"/> producing
-    /// <paramref name="kind"/> is currently legal. Returns the resolved
-    /// <see cref="BuildingKind"/> on success.
+    /// the catalog type <paramref name="typeId"/> is currently legal.
     /// </summary>
     /// <param name="state">The current game state.</param>
     /// <param name="side">The side requesting the build.</param>
     /// <param name="buildingCoord">The factory or airbase hex.</param>
-    /// <param name="kind">The unit kind to produce.</param>
-    /// <returns>The kind of building at <paramref name="buildingCoord"/>.</returns>
+    /// <param name="typeId">The catalog id of the unit type to produce.</param>
+    /// <returns>The resolved unit type definition.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
     /// <exception cref="InvalidOperationException">The build is illegal.</exception>
-    public static BuildingKind ValidateBuild(GameState state, Side side, HexCoord buildingCoord, UnitKind kind)
+    public static UnitTypeDefinition ValidateBuild(GameState state, Side side, HexCoord buildingCoord, string typeId)
     {
         if (state is null)
         {
@@ -84,21 +126,26 @@ public static class ProductionRules
             throw new InvalidOperationException($"{side} does not own the building at {buildingCoord}.");
         }
 
-        var allowed = ProducibleAt(building);
-        if (allowed.Count == 0)
+        if (!state.Catalog.Contains(typeId))
         {
-            throw new InvalidOperationException($"{building} does not produce units.");
+            throw new InvalidOperationException($"Unknown unit type '{typeId}'.");
         }
 
-        if (!allowed.Contains(kind))
+        var type = state.Catalog.Get(typeId);
+
+        if (type.Side is { } affinity && affinity != side)
         {
-            throw new InvalidOperationException($"{building} cannot produce {kind}.");
+            throw new InvalidOperationException($"{side} cannot build {type.Name} ({affinity}-only).");
         }
 
-        var cost = UnitStats.For(kind).ProductionCost;
-        if (state.Funds[side] < cost)
+        if (!CanBuildCategoryAt(building, type.Category))
         {
-            throw new InvalidOperationException($"{side} cannot afford {kind} (cost {cost}, funds {state.Funds[side]}).");
+            throw new InvalidOperationException($"{building} cannot produce {type.Name}.");
+        }
+
+        if (state.Funds[side] < type.ProductionCost)
+        {
+            throw new InvalidOperationException($"{side} cannot afford {type.Name} (cost {type.ProductionCost}, funds {state.Funds[side]}).");
         }
 
         if (!CanSideProduce(state, side))
@@ -114,6 +161,6 @@ public static class ProductionRules
             }
         }
 
-        return building;
+        return type;
     }
 }

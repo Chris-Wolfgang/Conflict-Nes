@@ -13,9 +13,11 @@ public static class NesPalette
     public const string Plains = "#7ca84c";
     public const string PlainsDark = "#5c8030";
     public const string Forest = "#2a5a24";
-    public const string ForestDark = "#163818";
-    public const string Mountain = "#8c7044";
-    public const string MountainDark = "#5c4830";
+    public const string ForestDark = "#143010";
+    public const string ForestLight = "#3e7e30";
+    public const string Mountain = "#b06838";
+    public const string MountainDark = "#6e3a1c";
+    public const string MountainLight = "#cc8a52";
     public const string Road = "#c8a868";
     public const string Bridge = "#c08858";
     public const string River = "#3870b8";

@@ -19,6 +19,7 @@ public class SupplyUnitTests
         var dict = new Dictionary<UnitId, Unit> { [unit.Id] = unit };
         return new GameState(
             map,
+            TestCatalog.Catalog,
             dict,
             new Dictionary<HexCoord, Side>(),
             Side.Blue,
@@ -33,7 +34,7 @@ public class SupplyUnitTests
     public void SupplyUnit_on_friendly_city_refuels_rearms_and_repairs()
     {
         var engine = new GameEngine();
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(1, 0)) with
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0)) with
         {
             Fuel = 2,
             Ammo = 2,
@@ -44,7 +45,7 @@ public class SupplyUnitTests
         var next = engine.SupplyUnit(state, tank.Id);
         var refreshed = next.Units[tank.Id];
 
-        var stats = UnitStats.For(UnitKind.Tank);
+        var stats = TestCatalog.Tank;
         Assert.Equal(stats.MaxFuel, refreshed.Fuel);
         Assert.Equal(stats.MaxAmmo, refreshed.Ammo);
         Assert.Equal(10, refreshed.HitPoints);
@@ -55,7 +56,7 @@ public class SupplyUnitTests
     public void SupplyUnit_twice_throws()
     {
         var engine = new GameEngine();
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(1, 0));
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0));
         var state = BuildStateWithFriendlyCity(tank);
         var next = engine.SupplyUnit(state, tank.Id);
 
@@ -66,7 +67,7 @@ public class SupplyUnitTests
     public void SupplyUnit_off_a_building_throws()
     {
         var engine = new GameEngine();
-        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank, new HexCoord(0, 0));
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0));
         var state = BuildStateWithFriendlyCity(tank);
 
         Assert.Throws<InvalidOperationException>(() => engine.SupplyUnit(state, tank.Id));
@@ -76,7 +77,7 @@ public class SupplyUnitTests
     public void SupplyUnit_on_wrong_turn_throws()
     {
         var engine = new GameEngine();
-        var redTank = Unit.FullStrength(new UnitId(1), Side.Red, UnitKind.Tank, new HexCoord(1, 0));
+        var redTank = Unit.FullStrength(new UnitId(1), Side.Red, TestCatalog.Tank, new HexCoord(1, 0));
         var state = BuildStateWithFriendlyCity(redTank);
 
         Assert.Throws<InvalidOperationException>(() => engine.SupplyUnit(state, redTank.Id));

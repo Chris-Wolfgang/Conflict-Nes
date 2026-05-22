@@ -1,6 +1,5 @@
 using Wolfgang.Conflict.Nes.Engine.Hex;
 using Wolfgang.Conflict.Nes.Engine.Players;
-using Wolfgang.Conflict.Nes.Engine.Units;
 
 namespace Wolfgang.Conflict.Nes.Engine.Game;
 
@@ -9,7 +8,7 @@ namespace Wolfgang.Conflict.Nes.Engine.Game;
 /// <see cref="MissionDefinition"/> to seed the initial <c>GameState</c>.
 /// </summary>
 /// <param name="Side">Owning side.</param>
-/// <param name="Kind">Unit kind.</param>
+/// <param name="TypeId">Catalog id of the unit type to place.</param>
 /// <param name="Coord">Starting hex.</param>
 /// <param name="IsCommander">
 /// True for the side's single commander unit. Killing the commander ends the
@@ -18,6 +17,6 @@ namespace Wolfgang.Conflict.Nes.Engine.Game;
 /// </param>
 public sealed record UnitPlacement(
     Side Side,
-    UnitKind Kind,
+    string TypeId,
     HexCoord Coord,
     bool IsCommander);

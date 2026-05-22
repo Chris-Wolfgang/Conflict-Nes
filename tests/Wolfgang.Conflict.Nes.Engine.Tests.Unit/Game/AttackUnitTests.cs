@@ -21,6 +21,7 @@ public class AttackUnitTests
         }
         return new GameState(
             map,
+            TestCatalog.Catalog,
             dict,
             new Dictionary<HexCoord, Side>(),
             Side.Blue,
@@ -35,8 +36,8 @@ public class AttackUnitTests
     public void AttackUnit_marks_attacker_as_having_attacked()
     {
         var engine = new GameEngine();
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank,     new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Infantry, new HexCoord(1, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Infantry, new HexCoord(1, 0));
         var state = BuildPlainsState(atk, def);
 
         var next = engine.AttackUnit(state, atk.Id, def.Id);
@@ -50,24 +51,41 @@ public class AttackUnitTests
     {
         var engine = new GameEngine();
         // Wounded infantry dies to a Tank hit.
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank,     new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Infantry, new HexCoord(1, 0)) with { HitPoints = 3 };
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Infantry, new HexCoord(1, 0)) with { HitPoints = 3 };
         var state = BuildPlainsState(atk, def);
 
         var next = engine.AttackUnit(state, atk.Id, def.Id);
 
         Assert.False(next.Units.ContainsKey(def.Id));
-        // Tank vs Infantry => TotalVictory => +300 winner; Infantry cost 600 => 300 loser penalty.
+        // Tank vs Infantry => TotalVictory => +300 winner; Infantry cost 600
+        // => 300 loser penalty, but F.P. is floored at zero (Red started at 0).
         Assert.Equal(300, next.Funds[Side.Blue]);
-        Assert.Equal(-300, next.Funds[Side.Red]);
+        Assert.Equal(0, next.Funds[Side.Red]);
+    }
+
+    [Fact]
+    public void AttackUnit_loser_funds_never_go_below_zero()
+    {
+        var engine = new GameEngine();
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Infantry, new HexCoord(1, 0)) with { HitPoints = 1 };
+        var state = BuildPlainsState(atk, def); // Red starts at 0 F.P.
+
+        var next = engine.AttackUnit(state, atk.Id, def.Id);
+
+        Assert.True(next.Funds[Side.Red] >= 0);
+        Assert.Equal(0, next.Funds[Side.Red]);
     }
 
     [Fact]
     public void AttackUnit_illegal_pairing_throws()
     {
+        // Tank vs Fighter has zero base damage in our table (tank cannot
+        // track aircraft), so the attack is rejected.
         var engine = new GameEngine();
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Fighter, new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Tank,    new HexCoord(1, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,    new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Fighter, new HexCoord(1, 0));
         var state = BuildPlainsState(atk, def);
 
         Assert.Throws<InvalidOperationException>(() => engine.AttackUnit(state, atk.Id, def.Id));
@@ -77,8 +95,8 @@ public class AttackUnitTests
     public void AttackUnit_not_your_turn_throws()
     {
         var engine = new GameEngine();
-        var redAtk = Unit.FullStrength(new UnitId(1), Side.Red,  UnitKind.Tank,     new HexCoord(0, 0));
-        var def    = Unit.FullStrength(new UnitId(2), Side.Blue, UnitKind.Infantry, new HexCoord(1, 0));
+        var redAtk = Unit.FullStrength(new UnitId(1), Side.Red,  TestCatalog.Tank,     new HexCoord(0, 0));
+        var def    = Unit.FullStrength(new UnitId(2), Side.Blue, TestCatalog.Infantry, new HexCoord(1, 0));
         var state  = BuildPlainsState(redAtk, def); // NextToAct = Blue
 
         Assert.Throws<InvalidOperationException>(() => engine.AttackUnit(state, redAtk.Id, def.Id));
@@ -88,8 +106,8 @@ public class AttackUnitTests
     public void RandomSeed_advances_after_an_attack()
     {
         var engine = new GameEngine();
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, UnitKind.Tank,     new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  UnitKind.Infantry, new HexCoord(1, 0));
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
+        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Infantry, new HexCoord(1, 0));
         var state = BuildPlainsState(atk, def);
 
         var next = engine.AttackUnit(state, atk.Id, def.Id);
