@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Maps\mission01.json" />
+    <EmbeddedResource Include="Units\unit-types.json" />
   </ItemGroup>
 
 </Project>
