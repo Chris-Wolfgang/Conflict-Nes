@@ -19,8 +19,9 @@ public static class RelationsTable
 
     /// <summary>
     /// True if <paramref name="attacker"/> can engage <paramref name="defender"/>
-    /// at all. Supply units never attack; aircraft can only be engaged by
-    /// Fighters, Helicopters and Flak Panzers.
+    /// at all. Supply units never attack. Aircraft can only be engaged by
+    /// other aircraft (Fighter, Attacker, Helicopter) or by Flak Panzers;
+    /// ground units without anti-air weapons cannot reach them.
     /// </summary>
     public static bool CanEngage(UnitCategory attacker, UnitCategory defender)
     {
@@ -30,7 +31,10 @@ public static class RelationsTable
         }
         if (IsAir(defender))
         {
-            return attacker is UnitCategory.FlakPanzer or UnitCategory.Fighter or UnitCategory.Helicopter;
+            return attacker is UnitCategory.FlakPanzer
+                or UnitCategory.Fighter
+                or UnitCategory.Attacker
+                or UnitCategory.Helicopter;
         }
         return true;
     }
@@ -71,8 +75,8 @@ public static class RelationsTable
         };
     }
 
-    // RED defender is an aircraft — only Flak Panzers, Fighters and
-    // Helicopters reach this branch (see CanEngage).
+    // RED defender is an aircraft — only Flak Panzers and aircraft reach
+    // this branch (see CanEngage).
     private static MatchupTier AirDefenderOutlook(UnitCategory attacker, UnitCategory defender) => attacker switch
     {
         // Anti-air vehicles dominate every aircraft (manual: ◎ across the row).
@@ -82,6 +86,14 @@ public static class RelationsTable
             UnitCategory.Helicopter => MatchupTier.TotalVictory,
             UnitCategory.SupplyPlane => MatchupTier.TotalVictory,
             UnitCategory.Attacker => MatchupTier.AtAdvantage,
+            _ => MatchupTier.Equal,
+        },
+        // Ground-attack aircraft can defend themselves against other
+        // aircraft but lose a dogfight to a true fighter.
+        UnitCategory.Attacker => defender switch
+        {
+            UnitCategory.Fighter => MatchupTier.AtDisadvantage,
+            UnitCategory.SupplyPlane => MatchupTier.AtAdvantage,
             _ => MatchupTier.Equal,
         },
         UnitCategory.Helicopter => defender switch

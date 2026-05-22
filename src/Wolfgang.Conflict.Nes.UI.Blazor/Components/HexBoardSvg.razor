@@ -80,7 +80,7 @@
                  pointer-events="none" />
     }
 
-    @* Layer 6: click targets (transparent, full hex area) *@
+    @* Layer 6: click + hover targets (transparent, full hex area) *@
     @foreach (var (coord, _) in OrderedTiles())
     {
         var centre = HexLayout.Centre(coord);
@@ -89,7 +89,32 @@
                  fill="transparent"
                  stroke="transparent"
                  style="cursor:pointer"
-                 @onclick="@(_ => OnHexClick.InvokeAsync(hex))" />
+                 @onclick="@(_ => OnHexClick.InvokeAsync(hex))"
+                 @onmouseover="@(() => _hoveredHex = hex)"
+                 @onmouseout="@(() => ClearHover(hex))" />
+    }
+
+    @* Layer 7: hover cue card for the unit under the cursor *@
+    @if (HoveredUnit is { } hu)
+    {
+        var hc = HexLayout.Centre(hu.Coord);
+        var cardOnLeft = hc.X > size.Width * 0.6;
+        var cardX = cardOnLeft ? hc.X - 158 : hc.X + 22;
+        var cardY = Math.Max(2.0, hc.Y - 52);
+        <foreignObject x="@F(cardX)" y="@F(cardY)" width="150" height="104">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 class="unit-cue-card @(hu.Side == Engine.Players.Side.Blue ? "blue" : "red")">
+                <div class="cue-name">@hu.Type.Name</div>
+                <div class="cue-sub">@hu.Side &#183; @hu.Category@(hu.IsCommander ? " (HQ)" : string.Empty)</div>
+                <div class="cue-stats">
+                    <span>LIFE @hu.HitPoints/@UnitStats.MaxHitPoints</span>
+                    <span>FUEL @hu.Fuel/@hu.Type.MaxFuel</span>
+                    <span>SHELL @hu.Ammo/@hu.Type.MaxAmmo</span>
+                    <span>MOVE @hu.MovesRemaining</span>
+                </div>
+                <div class="cue-status">@StatusLine(hu)</div>
+            </div>
+        </foreignObject>
     }
 </svg>
 
@@ -99,6 +124,31 @@
     [Parameter] public GameState State { get; set; } = default!;
     [Parameter] public UnitId? SelectedUnitId { get; set; }
     [Parameter] public EventCallback<HexCoord> OnHexClick { get; set; }
+
+    private HexCoord? _hoveredHex;
+
+    private static string F(double value) => value.ToString("F2", Inv);
+
+    private Unit? HoveredUnit => _hoveredHex is { } h ? State.GetUnitAt(h) : null;
+
+    private void ClearHover(HexCoord hex)
+    {
+        if (_hoveredHex == hex)
+        {
+            _hoveredHex = null;
+        }
+    }
+
+    private static string StatusLine(Unit unit)
+    {
+        if (unit.Fuel <= 0)
+        {
+            return "Out of fuel";
+        }
+        var moved = unit.HasMoved ? "moved" : "ready";
+        var attacked = unit.HasAttacked ? "fired" : "armed";
+        return $"{moved}, {attacked}";
+    }
 
     private IEnumerable<(HexCoord Coord, Tile Tile)> OrderedTiles()
     {

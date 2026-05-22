@@ -141,6 +141,45 @@ h1 {
 .game-over .blue { color: #6890e8; }
 .game-over .red  { color: #e86060; }
 
+.unit-cue-card {
+    font-family: Consolas, monospace;
+    background: #14182a;
+    border: 2px solid #fce19c;
+    border-radius: 4px;
+    padding: 4px 6px;
+    color: #e8e8e8;
+    font-size: 10px;
+    line-height: 1.35;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+}
+
+.unit-cue-card.blue { border-left: 5px solid #3868c0; }
+.unit-cue-card.red  { border-left: 5px solid #c83030; }
+
+.unit-cue-card .cue-name {
+    font-weight: 700;
+    color: #fce19c;
+    font-size: 11px;
+}
+
+.unit-cue-card .cue-sub {
+    color: #aab0c0;
+    margin-bottom: 2px;
+}
+
+.unit-cue-card .cue-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 6px;
+}
+
+.unit-cue-card .cue-status {
+    margin-top: 2px;
+    color: #8a90a4;
+    font-style: italic;
+}
+
 #blazor-error-ui {
     background: #b00;
     bottom: 0;

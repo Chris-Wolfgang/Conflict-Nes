@@ -14,6 +14,11 @@ public class RelationsTableTests
     [InlineData(UnitCategory.Infantry, UnitCategory.Fighter, false)]
     [InlineData(UnitCategory.SupplyVehicle, UnitCategory.Infantry, false)]
     [InlineData(UnitCategory.SupplyPlane, UnitCategory.Fighter, false)]
+    // Any aircraft can engage any other aircraft.
+    [InlineData(UnitCategory.Attacker, UnitCategory.Attacker, true)]
+    [InlineData(UnitCategory.Attacker, UnitCategory.Helicopter, true)]
+    [InlineData(UnitCategory.Attacker, UnitCategory.Fighter, true)]
+    [InlineData(UnitCategory.Helicopter, UnitCategory.Attacker, true)]
     public void CanEngage_matches_design(UnitCategory attacker, UnitCategory defender, bool expected)
     {
         Assert.Equal(expected, RelationsTable.CanEngage(attacker, defender));

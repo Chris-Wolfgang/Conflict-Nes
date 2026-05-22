@@ -4,9 +4,9 @@
 
 @*
     Rectangular unit tile in the style of the NES original. Sized at
-    UnitTileScale of the full hex (keeping the 1 : √3 ratio) so it sits
-    inside the hex with a margin. Filled with the side colour, with the
-    unit name printed vertically. Commander tanks get a gold "H" badge.
+    UnitTileScale of the full hex. The short designation is printed
+    horizontally on a dark contrast plate so it stays legible at the
+    small per-hex scale; the full name is available via the hover card.
 *@
 
 <g transform="translate(@(Cx.ToString("F2", Inv)),@(Cy.ToString("F2", Inv)))">
@@ -27,15 +27,24 @@
           stroke="@SideDarkColor"
           stroke-width="1" />
 
-    @* Vertical unit name. Razor's <text> block syntax conflicts with the
-       SVG <text> element, so we emit the element as a MarkupString. *@
+    @* Dark contrast plate behind the label. *@
+    <rect x="@((-Half.W - 3).ToString("F2", Inv))"
+          y="-7"
+          width="@((Width + 6).ToString("F2", Inv))"
+          height="14"
+          rx="2"
+          fill="#101018"
+          opacity="0.82" />
+
+    @* Horizontal unit designation. Razor's <text> block syntax conflicts
+       with the SVG <text> element, so it is emitted as a MarkupString. *@
     @NameText
 
     @if (Unit.IsCommander)
     {
         <rect x="@((-Half.W + 1.5).ToString("F2", Inv))"
               y="@((-Half.H + 1.5).ToString("F2", Inv))"
-              width="8" height="8"
+              width="9" height="8"
               fill="@NesPalette.Selection"
               stroke="#000"
               stroke-width="0.8" />
@@ -62,8 +71,6 @@
     [Parameter] public double Cx { get; set; }
     [Parameter] public double Cy { get; set; }
 
-    // Tile dimensions: a uniform UnitTileScale of the hex, so the tile keeps
-    // the 1 : √3 ratio but leaves a margin inside the hex.
     private static double Width => HexLayout.HexSize * HexLayout.UnitTileScale;
     private static double Height => HexLayout.HexHeight * HexLayout.UnitTileScale;
     private static (double W, double H) Half => (Width / 2.0, Height / 2.0);
@@ -77,11 +84,13 @@
     {
         get
         {
-            // Rotated -90deg so the name reads bottom-to-top, centred on the tile.
-            var fontSize = UnitName.Length > 7 ? 6 : 8;
-            var svg = $"<text x=\"0\" y=\"3\" fill=\"#fff\" stroke=\"#000\" stroke-width=\"0.4\" " +
-                      $"font-family=\"Consolas,monospace\" font-weight=\"700\" font-size=\"{fontSize}\" " +
-                      $"text-anchor=\"middle\" transform=\"rotate(-90)\">{UnitName}</text>";
+            // Horizontal, bold, white on the dark plate. Font shrinks a step
+            // for longer designations so they stay inside the plate.
+            var fontSize = UnitName.Length >= 6 ? 6.5 : 8.0;
+            var svg = $"<text x=\"0\" y=\"3\" fill=\"#ffffff\" " +
+                      $"font-family=\"Consolas,monospace\" font-weight=\"700\" " +
+                      $"font-size=\"{fontSize.ToString("0.0", Inv)}\" letter-spacing=\"-0.3\" " +
+                      $"text-anchor=\"middle\">{UnitName}</text>";
             return new MarkupString(svg);
         }
     }
@@ -90,7 +99,7 @@
     {
         get
         {
-            var x = (-Half.W + 5.5).ToString("F2", Inv);
+            var x = (-Half.W + 6).ToString("F2", Inv);
             var y = (-Half.H + 8).ToString("F2", Inv);
             var svg = $"<text x=\"{x}\" y=\"{y}\" " +
                       $"fill=\"#000\" font-family=\"Consolas,monospace\" font-weight=\"700\" " +
