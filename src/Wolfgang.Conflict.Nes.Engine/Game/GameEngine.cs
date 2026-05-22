@@ -144,6 +144,11 @@ public sealed class GameEngine
             throw new InvalidOperationException($"It is not {unit.Side}'s turn.");
         }
 
+        if (unit.HasMoved)
+        {
+            throw new InvalidOperationException($"Unit {id} has already moved this turn.");
+        }
+
         if (destination == unit.Coord)
         {
             throw new InvalidOperationException("Destination is the unit's current hex.");

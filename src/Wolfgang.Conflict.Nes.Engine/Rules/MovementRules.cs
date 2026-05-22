@@ -90,12 +90,13 @@ public static class MovementRules
     }
 
     /// <summary>
-    /// Per-turn movement budget in hex-cost units. Fuel is consumed once per
-    /// turn the unit moves (deducted at end of turn), not per hex, so the
-    /// budget here is purely <c>MovesRemaining</c>. A unit with zero fuel
-    /// cannot move at all this turn.
+    /// Per-turn movement budget in hex-cost units. A unit gets one move
+    /// action per turn: once it has moved (<see cref="Unit.HasMoved"/>) it
+    /// cannot move again, and a unit with zero fuel cannot move at all.
+    /// Otherwise the budget is its <see cref="Unit.MovesRemaining"/>.
     /// </summary>
-    private static int Budget(Unit unit) => unit.Fuel <= 0 ? 0 : unit.MovesRemaining;
+    private static int Budget(Unit unit)
+        => unit.Fuel <= 0 || unit.HasMoved ? 0 : unit.MovesRemaining;
 
     private static HashSet<HexCoord> OccupiedByOthers(GameState state, Unit self)
     {

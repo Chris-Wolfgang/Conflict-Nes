@@ -33,6 +33,28 @@ public class MoveUnitTests
     }
 
     [Fact]
+    public async Task MoveUnit_twice_in_one_turn_throws()
+    {
+        var (engine, state, infantry) = await Setup();
+
+        var afterFirst = engine.MoveUnit(state, infantry.Id, new HexCoord(3, 6));
+
+        // The unit still has MovesRemaining, but one move action per turn.
+        Assert.Throws<InvalidOperationException>(() =>
+            engine.MoveUnit(afterFirst, infantry.Id, new HexCoord(4, 6)));
+    }
+
+    [Fact]
+    public async Task GetLegalMoves_is_empty_after_a_unit_has_moved()
+    {
+        var (engine, state, infantry) = await Setup();
+
+        var afterMove = engine.MoveUnit(state, infantry.Id, new HexCoord(3, 6));
+
+        Assert.Empty(engine.GetLegalMoves(afterMove, infantry.Id));
+    }
+
+    [Fact]
     public async Task MoveUnit_to_unreachable_hex_throws()
     {
         var (engine, state, infantry) = await Setup();
