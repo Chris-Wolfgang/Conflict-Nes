@@ -43,7 +43,26 @@
                          OnHexClick="HandleHexClick" />
 
             <aside class="side-panel">
-                @if (Service.SelectedUnitId is { } sid
+                @if (Service.PendingAttack is { } pa
+                     && Service.CurrentState.Units.TryGetValue(pa.Attacker, out var atkUnit)
+                     && Service.CurrentState.Units.TryGetValue(pa.Target, out var tgtUnit))
+                {
+                    var outlook = Engine.Combat.RelationsTable.Outlook(atkUnit.Category, tgtUnit.Category);
+                    <div class="attack-confirm">
+                        <h2>Confirm Attack</h2>
+                        <p>
+                            <strong class="blue">@atkUnit.Type.ShortName</strong>
+                            &rarr;
+                            <strong class="red">@tgtUnit.Type.ShortName</strong>
+                        </p>
+                        <p class="outlook">Outlook: <strong>@OutlookText(outlook)</strong></p>
+                        <div class="controls">
+                            <button class="action-button attack" @onclick="Service.ConfirmAttack">Attack</button>
+                            <button class="action-button" @onclick="Service.CancelAttack">Cancel</button>
+                        </div>
+                    </div>
+                }
+                else if (Service.SelectedUnitId is { } sid
                      && Service.CurrentState.Units.TryGetValue(sid, out var u))
                 {
                     var stuck = u.Fuel <= 0;
@@ -71,27 +90,30 @@
                     <p class="hint">@HintText</p>
                 }
 
-                <div class="controls">
-                    @if (Service.CanSupplySelected())
-                    {
-                        <button class="action-button supply"
-                                @onclick="Service.SupplySelected">
-                            Supply (refuel + repair)
-                        </button>
-                    }
-                    <button class="action-button"
-                            disabled="@(!Service.IsHumanTurn || Service.CurrentState.Phase == GamePhase.GameOver)"
-                            @onclick="EndTurnAsync">
-                        End Turn
-                    </button>
-                    @if (Service.SelectedUnitId is not null)
-                    {
+                @if (Service.PendingAttack is null)
+                {
+                    <div class="controls">
+                        @if (Service.CanSupplySelected())
+                        {
+                            <button class="action-button supply"
+                                    @onclick="Service.SupplySelected">
+                                Supply (refuel + repair)
+                            </button>
+                        }
                         <button class="action-button"
-                                @onclick="Service.ClearSelection">
-                            Deselect
+                                disabled="@(!Service.IsHumanTurn || Service.CurrentState.Phase == GamePhase.GameOver)"
+                                @onclick="EndTurnAsync">
+                            End Turn
                         </button>
-                    }
-                </div>
+                        @if (Service.SelectedUnitId is not null)
+                        {
+                            <button class="action-button"
+                                    @onclick="Service.ClearSelection">
+                                Deselect
+                            </button>
+                        }
+                    </div>
+                }
             </aside>
         </div>
     }
@@ -110,6 +132,16 @@
     private void HandleHexClick(HexCoord hex) => Service.OnHexClicked(hex);
 
     private async Task EndTurnAsync() => await Service.EndTurnAsync();
+
+    private static string OutlookText(Engine.Units.MatchupTier tier) => tier switch
+    {
+        Engine.Units.MatchupTier.TotalVictory => "Total Victory likely",
+        Engine.Units.MatchupTier.AtAdvantage => "At advantage",
+        Engine.Units.MatchupTier.Equal => "Even fight",
+        Engine.Units.MatchupTier.AtDisadvantage => "At disadvantage",
+        Engine.Units.MatchupTier.CompleteDefeat => "Heavy losses likely",
+        _ => "Unknown",
+    };
 
     private string HintText
     {

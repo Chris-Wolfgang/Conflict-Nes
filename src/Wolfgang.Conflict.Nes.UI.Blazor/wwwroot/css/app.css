@@ -78,6 +78,33 @@ h1 {
 
 .action-button.supply:hover { background: #2a8050; }
 
+.action-button.attack {
+    background: #b03028;
+    border-color: #e86048;
+}
+
+.action-button.attack:hover { background: #c83a30; }
+
+.attack-confirm {
+    background: #2a1820;
+    border: 2px solid #e86048;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.attack-confirm h2 {
+    color: #e86048;
+    margin: 0 0 0.4rem 0;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+}
+
+.attack-confirm p { margin: 0.2rem 0; }
+.attack-confirm .blue { color: #6890e8; }
+.attack-confirm .red  { color: #e86060; }
+.attack-confirm .outlook { color: #cfd2d8; }
+.attack-confirm .controls { margin-top: 0.5rem; }
+
 .board-and-panel {
     display: flex;
     gap: 1rem;

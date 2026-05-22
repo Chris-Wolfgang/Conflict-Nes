@@ -14,6 +14,9 @@ namespace Wolfgang.Conflict.Nes.UI.Blazor.Services;
 /// </summary>
 public sealed class ConflictService
 {
+    /// <summary>Delay between successive AI actions so the player can follow the AI's turn.</summary>
+    private const int AiActionDelayMs = 650;
+
     private readonly GameEngine _engine = new();
     private readonly IPlayerStrategy _aiStrategy = new GreedyAiStrategy();
 
@@ -28,6 +31,12 @@ public sealed class ConflictService
 
     /// <summary>The id of the currently-selected unit, if any.</summary>
     public UnitId? SelectedUnitId { get; private set; }
+
+    /// <summary>
+    /// A pending attack awaiting player confirmation: the attacker and the
+    /// chosen target. <see langword="null"/> when no attack is pending.
+    /// </summary>
+    public (UnitId Attacker, UnitId Target)? PendingAttack { get; private set; }
 
     /// <summary>True if a mission has been started.</summary>
     public bool IsStarted => CurrentState is not null;
@@ -57,6 +66,13 @@ public sealed class ConflictService
             return;
         }
 
+        // While an attack is awaiting confirmation, board clicks are ignored
+        // — the player must resolve the prompt first.
+        if (PendingAttack is not null)
+        {
+            return;
+        }
+
         var unitAtHex = CurrentState.GetUnitAt(hex);
 
         if (SelectedUnitId is null)
@@ -80,14 +96,14 @@ public sealed class ConflictService
             return;
         }
 
-        // Clicking an enemy on the selected unit's target list: attack.
+        // Clicking an enemy on the selected unit's target list raises a
+        // pending attack; the player must then confirm it.
         if (unitAtHex is { } target && target.Side != HumanSide)
         {
             var targets = _engine.GetLegalTargets(CurrentState, selected.Id);
             if (targets.Contains(target.Id))
             {
-                CurrentState = _engine.AttackUnit(CurrentState, selected.Id, target.Id);
-                SelectedUnitId = null;
+                PendingAttack = (selected.Id, target.Id);
                 Notify();
             }
             return;
@@ -135,12 +151,36 @@ public sealed class ConflictService
         Notify();
     }
 
+    /// <summary>Resolves the pending attack — applies it through the engine.</summary>
+    public void ConfirmAttack()
+    {
+        if (CurrentState is null || PendingAttack is not { } pending)
+        {
+            return;
+        }
+        CurrentState = _engine.AttackUnit(CurrentState, pending.Attacker, pending.Target);
+        PendingAttack = null;
+        SelectedUnitId = CurrentState.Units.ContainsKey(pending.Attacker) ? pending.Attacker : null;
+        Notify();
+    }
+
+    /// <summary>Discards the pending attack without applying it.</summary>
+    public void CancelAttack()
+    {
+        if (PendingAttack is not null)
+        {
+            PendingAttack = null;
+            Notify();
+        }
+    }
+
     /// <summary>Clears any current selection.</summary>
     public void ClearSelection()
     {
-        if (SelectedUnitId is not null)
+        if (SelectedUnitId is not null || PendingAttack is not null)
         {
             SelectedUnitId = null;
+            PendingAttack = null;
             Notify();
         }
     }
@@ -176,6 +216,13 @@ public sealed class ConflictService
             var action = await _aiStrategy.ChooseNextActionAsync(s, s.NextToAct, cancellationToken).ConfigureAwait(false);
             CurrentState = ApplyAction(action, s);
             Notify();
+
+            // Pace the AI so the player can watch each move/attack/supply
+            // play out one step at a time rather than all at once.
+            if (action.Kind != StrategyActionKind.EndTurn)
+            {
+                await Task.Delay(AiActionDelayMs, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 
