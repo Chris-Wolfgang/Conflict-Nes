@@ -6,10 +6,10 @@ using Wolfgang.Conflict.Nes.Engine.Units;
 namespace Wolfgang.Conflict.Nes.Engine.Rules;
 
 /// <summary>
-/// Pure rules for capturing buildings. Per the manual, only infantry can
-/// capture; capture flips ownership of a <see cref="BuildingKind.City"/>,
+/// Pure rules for capturing buildings. Per the original game, <i>any</i>
+/// unit can capture: holding a <see cref="BuildingKind.City"/>,
 /// <see cref="BuildingKind.Airbase"/> or <see cref="BuildingKind.Port"/>
-/// when an enemy or neutral building is occupied at end of turn. HQ and
+/// through end of turn flips its ownership ("changes colour"). HQ and
 /// Factory are bound to the commander unit and cannot be captured by
 /// occupation; they vanish when the owning side's commander dies.
 /// </summary>
@@ -42,10 +42,6 @@ public static class CaptureRules
         foreach (var unit in state.Units.Values)
         {
             if (unit.Side != side)
-            {
-                continue;
-            }
-            if (!unit.Type.CanCapture)
             {
                 continue;
             }

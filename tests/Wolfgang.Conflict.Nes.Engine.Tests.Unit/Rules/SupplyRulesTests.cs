@@ -84,8 +84,10 @@ public class SupplyRulesTests
     }
 
     [Fact]
-    public void Unit_on_enemy_city_has_no_supply_source()
+    public void Ground_unit_on_enemy_city_can_still_supply()
     {
+        // Per the original game, a unit refuels/repairs at any city
+        // regardless of ownership (and captures it by holding it).
         var tiles = MapDefinition.EnumerateCoords(3, 1)
             .Select(c => c == new HexCoord(1, 0)
                 ? new Tile(c, Terrain.Plains, Building: BuildingKind.City, Owner: Side.Red)
@@ -93,7 +95,7 @@ public class SupplyRulesTests
         var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0));
         var state = BuildState(tiles, 3, 1, tank);
 
-        Assert.Null(SupplyRules.AvailableSource(state, tank));
+        Assert.Equal(SupplyRules.SupplySource.Building, SupplyRules.AvailableSource(state, tank));
     }
 
     [Fact]

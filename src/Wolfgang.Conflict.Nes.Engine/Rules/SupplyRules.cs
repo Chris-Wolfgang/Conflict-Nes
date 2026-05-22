@@ -100,14 +100,9 @@ public static class SupplyRules
             return false;
         }
 
-        // A building supplies a unit unless it is owned by the enemy.
-        // Friendly and neutral (unowned) buildings both work.
-        var owner = state.GetBuildingOwner(unit.Coord);
-        if (owner is { } o && o != unit.Side)
-        {
-            return false;
-        }
-
+        // Per the original game, a unit refuels and repairs at any city or
+        // airport regardless of ownership — if it is an enemy building the
+        // unit also captures it by holding it through end of turn.
         return unit.Type.MovementDomain switch
         {
             MovementDomain.Foot or MovementDomain.Tread => building == BuildingKind.City,

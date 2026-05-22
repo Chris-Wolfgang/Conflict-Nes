@@ -65,8 +65,9 @@ public class CaptureRulesTests
     }
 
     [Fact]
-    public void ComputeFlips_does_not_flip_for_non_infantry_unit()
+    public void ComputeFlips_any_unit_can_capture_a_city()
     {
+        // Per the original game, any unit captures — not just infantry.
         var cityCoord = new HexCoord(1, 0);
         var tiles = MapDefinition.EnumerateCoords(3, 1)
             .Select(c => c == cityCoord
@@ -81,6 +82,9 @@ public class CaptureRulesTests
             new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
             winner: null, randomSeed: 1);
 
-        Assert.Empty(CaptureRules.ComputeFlips(state, Side.Blue));
+        var flips = CaptureRules.ComputeFlips(state, Side.Blue);
+
+        Assert.Single(flips);
+        Assert.Equal(Side.Blue, flips[cityCoord]);
     }
 }
