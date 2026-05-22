@@ -3,6 +3,7 @@
     {
       "id": "liberator",
       "name": "The Liberator",
+      "shortName": "Inf",
       "category": "Infantry",
       "side": "Blue",
       "movementDomain": "Foot",
@@ -18,6 +19,7 @@
     {
       "id": "us-commando",
       "name": "Commando",
+      "shortName": "Cmdo",
       "category": "Commando",
       "side": "Blue",
       "movementDomain": "Foot",
@@ -33,6 +35,7 @@
     {
       "id": "m151",
       "name": "M151 TOW",
+      "shortName": "M151",
       "category": "BattleMissileLauncher",
       "side": "Blue",
       "movementDomain": "Tread",
@@ -48,6 +51,7 @@
     {
       "id": "m60a3",
       "name": "M60A3",
+      "shortName": "M60A3",
       "category": "BattleTank",
       "side": "Blue",
       "movementDomain": "Tread",
@@ -63,6 +67,7 @@
     {
       "id": "m1a1",
       "name": "M1A1 Abrams",
+      "shortName": "M1A1",
       "category": "BattleTank",
       "side": "Blue",
       "movementDomain": "Tread",
@@ -78,6 +83,7 @@
     {
       "id": "m247",
       "name": "M247 Sergeant York",
+      "shortName": "M247",
       "category": "FlakPanzer",
       "side": "Blue",
       "movementDomain": "Tread",
@@ -93,6 +99,7 @@
     {
       "id": "m48",
       "name": "M48 Chaparral",
+      "shortName": "M48",
       "category": "FlakPanzer",
       "side": "Blue",
       "movementDomain": "Tread",
@@ -108,6 +115,7 @@
     {
       "id": "f4e",
       "name": "F-4E Phantom II",
+      "shortName": "F-4E",
       "category": "Fighter",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -123,6 +131,7 @@
     {
       "id": "f16c",
       "name": "F-16C Fighting Falcon",
+      "shortName": "F-16C",
       "category": "Fighter",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -138,6 +147,7 @@
     {
       "id": "f15e",
       "name": "F-15E Eagle",
+      "shortName": "F-15E",
       "category": "Fighter",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -153,6 +163,7 @@
     {
       "id": "f23",
       "name": "F-23 ATF",
+      "shortName": "F-23",
       "category": "Fighter",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -168,6 +179,7 @@
     {
       "id": "a7",
       "name": "A-7 Corsair II",
+      "shortName": "A-7",
       "category": "Attacker",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -183,6 +195,7 @@
     {
       "id": "a10",
       "name": "A-10 Thunderbolt II",
+      "shortName": "A-10",
       "category": "Attacker",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -198,6 +211,7 @@
     {
       "id": "ah1s",
       "name": "AH-1S Huey Cobra",
+      "shortName": "AH-1S",
       "category": "Helicopter",
       "side": "Blue",
       "movementDomain": "Helicopter",
@@ -213,6 +227,7 @@
     {
       "id": "ah64",
       "name": "AH-64 Apache",
+      "shortName": "AH-64",
       "category": "Helicopter",
       "side": "Blue",
       "movementDomain": "Helicopter",
@@ -228,6 +243,7 @@
     {
       "id": "av8b",
       "name": "AV-8B Harrier",
+      "shortName": "AV-8B",
       "category": "Fighter",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -243,6 +259,7 @@
     {
       "id": "kc135",
       "name": "KC-135",
+      "shortName": "KC-135",
       "category": "SupplyPlane",
       "side": "Blue",
       "movementDomain": "Fighter",
@@ -258,6 +275,7 @@
     {
       "id": "us-supply-truck",
       "name": "Supply Truck",
+      "shortName": "Truck",
       "category": "SupplyVehicle",
       "side": "Blue",
       "movementDomain": "Tread",
@@ -273,6 +291,7 @@
     {
       "id": "red-infantry",
       "name": "Motor Rifle",
+      "shortName": "Inf",
       "category": "Infantry",
       "side": "Red",
       "movementDomain": "Foot",
@@ -288,6 +307,7 @@
     {
       "id": "red-commando",
       "name": "Spetsnaz",
+      "shortName": "Cmdo",
       "category": "Commando",
       "side": "Red",
       "movementDomain": "Foot",
@@ -303,6 +323,7 @@
     {
       "id": "brdm2",
       "name": "BRDM-2",
+      "shortName": "BRDM-2",
       "category": "BattleMissileLauncher",
       "side": "Red",
       "movementDomain": "Tread",
@@ -318,6 +339,7 @@
     {
       "id": "t62",
       "name": "T-62",
+      "shortName": "T-62",
       "category": "BattleTank",
       "side": "Red",
       "movementDomain": "Tread",
@@ -333,6 +355,7 @@
     {
       "id": "t80",
       "name": "T-80",
+      "shortName": "T-80",
       "category": "BattleTank",
       "side": "Red",
       "movementDomain": "Tread",
@@ -348,6 +371,7 @@
     {
       "id": "zsu23",
       "name": "ZSU-23 Shilka",
+      "shortName": "ZSU-23",
       "category": "FlakPanzer",
       "side": "Red",
       "movementDomain": "Tread",
@@ -363,6 +387,7 @@
     {
       "id": "sa8",
       "name": "SA-8 Gecko",
+      "shortName": "SA-8",
       "category": "FlakPanzer",
       "side": "Red",
       "movementDomain": "Tread",
@@ -378,6 +403,7 @@
     {
       "id": "mig23",
       "name": "MiG-23 Flogger",
+      "shortName": "MiG-23",
       "category": "Fighter",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -393,6 +419,7 @@
     {
       "id": "mig29",
       "name": "MiG-29 Fulcrum",
+      "shortName": "MiG-29",
       "category": "Fighter",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -408,6 +435,7 @@
     {
       "id": "su27",
       "name": "Su-27 Flanker",
+      "shortName": "Su-27",
       "category": "Fighter",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -423,6 +451,7 @@
     {
       "id": "mig31",
       "name": "MiG-31 Foxhound",
+      "shortName": "MiG-31",
       "category": "Fighter",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -438,6 +467,7 @@
     {
       "id": "su17",
       "name": "Su-17 Fitter",
+      "shortName": "Su-17",
       "category": "Attacker",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -453,6 +483,7 @@
     {
       "id": "su25",
       "name": "Su-25 Frogfoot",
+      "shortName": "Su-25",
       "category": "Attacker",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -468,6 +499,7 @@
     {
       "id": "mi24",
       "name": "Mi-24 Hind",
+      "shortName": "Mi-24",
       "category": "Helicopter",
       "side": "Red",
       "movementDomain": "Helicopter",
@@ -483,6 +515,7 @@
     {
       "id": "mi28",
       "name": "Mi-28 Havoc",
+      "shortName": "Mi-28",
       "category": "Helicopter",
       "side": "Red",
       "movementDomain": "Helicopter",
@@ -498,6 +531,7 @@
     {
       "id": "yak38",
       "name": "Yak-38 Forger",
+      "shortName": "Yak-38",
       "category": "Fighter",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -513,6 +547,7 @@
     {
       "id": "il76",
       "name": "IL-76 Candid",
+      "shortName": "IL-76",
       "category": "SupplyPlane",
       "side": "Red",
       "movementDomain": "Fighter",
@@ -528,6 +563,7 @@
     {
       "id": "red-supply-truck",
       "name": "Supply Vehicle",
+      "shortName": "Truck",
       "category": "SupplyVehicle",
       "side": "Red",
       "movementDomain": "Tread",

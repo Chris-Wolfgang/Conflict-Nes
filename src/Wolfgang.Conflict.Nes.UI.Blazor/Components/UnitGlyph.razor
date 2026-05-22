@@ -71,7 +71,7 @@
     private string SideColor => Unit.Side == Side.Blue ? NesPalette.BlueSide : NesPalette.RedSide;
     private string SideDarkColor => Unit.Side == Side.Blue ? NesPalette.BlueSideDark : NesPalette.RedSideDark;
 
-    private string UnitName => Unit.Type.Name.ToUpperInvariant();
+    private string UnitName => Unit.Type.ShortName.ToUpperInvariant();
 
     private MarkupString NameText
     {

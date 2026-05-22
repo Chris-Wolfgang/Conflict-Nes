@@ -9,6 +9,7 @@ namespace Wolfgang.Conflict.Nes.Engine.Units;
 /// </summary>
 /// <param name="Id">Stable lower-case identifier, e.g. <c>"m1a1"</c>.</param>
 /// <param name="Name">Human-readable display name, e.g. <c>"M1A1 Abrams"</c>.</param>
+/// <param name="ShortName">Compact designation for on-board tiles, e.g. <c>"M1A1"</c>.</param>
 /// <param name="Category">Functional role used by combat, movement and AI.</param>
 /// <param name="Side">
 /// The faction whose roster this model belongs to, or <see langword="null"/>
@@ -26,6 +27,7 @@ namespace Wolfgang.Conflict.Nes.Engine.Units;
 public sealed record UnitTypeDefinition(
     string Id,
     string Name,
+    string ShortName,
     UnitCategory Category,
     Side? Side,
     MovementDomain MovementDomain,

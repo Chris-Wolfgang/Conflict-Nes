@@ -27,17 +27,26 @@ public static class MissionLoader
 
         var placements = new List<UnitPlacement>
         {
-            // Blue: commander M1A1 on HQ, infantry adjacent,
-            // Cobra on airbase, Phantom adjacent.
+            // Blue: commander M1A1 on HQ, plus a mixed-arms force around it.
             new(Side.Blue, "m1a1",      new HexCoord(1, 7), IsCommander: true),
             new(Side.Blue, "liberator", new HexCoord(2, 6), IsCommander: false),
+            new(Side.Blue, "us-commando", new HexCoord(3, 7), IsCommander: false),
+            new(Side.Blue, "m60a3",     new HexCoord(2, 7), IsCommander: false),
+            new(Side.Blue, "m151",      new HexCoord(0, 8), IsCommander: false),
+            new(Side.Blue, "m48",       new HexCoord(2, 8), IsCommander: false),
             new(Side.Blue, "ah1s",      new HexCoord(1, 5), IsCommander: false),
+            new(Side.Blue, "a10",       new HexCoord(2, 5), IsCommander: false),
             new(Side.Blue, "f4e",       new HexCoord(2, 4), IsCommander: false),
 
-            // Red: mirrored layout near Red HQ in the northeast.
+            // Red: mirrored mixed-arms force near Red HQ in the northeast.
             new(Side.Red, "t80",          new HexCoord(11, -5), IsCommander: true),
             new(Side.Red, "red-infantry", new HexCoord(10, -4), IsCommander: false),
+            new(Side.Red, "red-commando", new HexCoord(10, -3), IsCommander: false),
+            new(Side.Red, "t62",          new HexCoord(10, -5), IsCommander: false),
+            new(Side.Red, "brdm2",        new HexCoord(11, -4), IsCommander: false),
+            new(Side.Red, "zsu23",        new HexCoord(11, -3), IsCommander: false),
             new(Side.Red, "mi24",         new HexCoord(7,  -2), IsCommander: false),
+            new(Side.Red, "su25",         new HexCoord(8,  -2), IsCommander: false),
             new(Side.Red, "mig23",        new HexCoord(8,  -3), IsCommander: false),
         };
 

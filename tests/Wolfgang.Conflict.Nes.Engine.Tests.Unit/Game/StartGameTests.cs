@@ -26,7 +26,7 @@ public class StartGameTests
     }
 
     [Fact]
-    public async Task Mission01_places_four_units_per_side()
+    public async Task Mission01_places_equal_mixed_arms_force_per_side()
     {
         var sut = new GameEngine();
 
@@ -35,8 +35,9 @@ public class StartGameTests
         var blue = state.Units.Values.Count(u => u.Side == Side.Blue);
         var red = state.Units.Values.Count(u => u.Side == Side.Red);
 
-        Assert.Equal(4, blue);
-        Assert.Equal(4, red);
+        Assert.Equal(9, blue);
+        Assert.Equal(9, red);
+        Assert.Equal(blue, red);
     }
 
     [Fact]
