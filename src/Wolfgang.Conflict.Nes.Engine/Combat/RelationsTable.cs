@@ -3,15 +3,11 @@ using Wolfgang.Conflict.Nes.Engine.Units;
 namespace Wolfgang.Conflict.Nes.Engine.Combat;
 
 /// <summary>
-/// Combat matchup table keyed by <see cref="UnitCategory"/>. Encodes the
-/// manual's rock-paper-scissors core (Attacker ▸ BattleTank ▸ FlakPanzer ▸
-/// Fighter ▸ Attacker) plus sensible defaults for the remaining roles.
+/// Combat matchup table keyed by <see cref="UnitCategory"/>, calibrated to
+/// the manual's section-4 RELATIONS chart. The chart is per-model, but its
+/// rows are category-determined (all fighters share a row, both tanks share
+/// a row, &#x2026;), so a category matrix reproduces it faithfully.
 /// </summary>
-/// <remarks>
-/// This is the category-default tier table. A future per-model
-/// <c>relations.json</c> (transcribed from the manual's RELATIONS chart)
-/// will override specific unit pairs without code changes.
-/// </remarks>
 public static class RelationsTable
 {
     /// <summary>True if a category is an aircraft.</summary>
@@ -23,8 +19,8 @@ public static class RelationsTable
 
     /// <summary>
     /// True if <paramref name="attacker"/> can engage <paramref name="defender"/>
-    /// at all. Supply units never attack; only Fighters, Helicopters and
-    /// Flak Panzers can engage aircraft.
+    /// at all. Supply units never attack; aircraft can only be engaged by
+    /// Fighters, Helicopters and Flak Panzers.
     /// </summary>
     public static bool CanEngage(UnitCategory attacker, UnitCategory defender)
     {
@@ -40,7 +36,8 @@ public static class RelationsTable
     }
 
     /// <summary>
-    /// Returns the pre-combat matchup outlook from the attacker's perspective.
+    /// Returns the pre-combat matchup outlook from the attacker's perspective,
+    /// calibrated to the manual's RELATIONS chart.
     /// </summary>
     public static MatchupTier Outlook(UnitCategory attacker, UnitCategory defender)
     {
@@ -74,9 +71,12 @@ public static class RelationsTable
         };
     }
 
+    // RED defender is an aircraft — only Flak Panzers, Fighters and
+    // Helicopters reach this branch (see CanEngage).
     private static MatchupTier AirDefenderOutlook(UnitCategory attacker, UnitCategory defender) => attacker switch
     {
-        UnitCategory.FlakPanzer => MatchupTier.AtAdvantage,
+        // Anti-air vehicles dominate every aircraft (manual: ◎ across the row).
+        UnitCategory.FlakPanzer => MatchupTier.TotalVictory,
         UnitCategory.Fighter => defender switch
         {
             UnitCategory.Helicopter => MatchupTier.TotalVictory,
@@ -84,53 +84,101 @@ public static class RelationsTable
             UnitCategory.Attacker => MatchupTier.AtAdvantage,
             _ => MatchupTier.Equal,
         },
-        UnitCategory.Helicopter => defender == UnitCategory.Helicopter
-            ? MatchupTier.Equal
-            : MatchupTier.AtDisadvantage,
+        UnitCategory.Helicopter => defender switch
+        {
+            UnitCategory.Helicopter => MatchupTier.Equal,
+            UnitCategory.SupplyPlane => MatchupTier.AtAdvantage,
+            _ => MatchupTier.AtDisadvantage,
+        },
         _ => MatchupTier.CompleteDefeat,
     };
 
+    // RED defender is on the ground.
     private static MatchupTier GroundDefenderOutlook(UnitCategory attacker, UnitCategory defender) => attacker switch
     {
-        UnitCategory.Attacker => defender == UnitCategory.BattleTank
-            ? MatchupTier.AtAdvantage
-            : MatchupTier.AtAdvantage,
-        UnitCategory.Helicopter => MatchupTier.AtAdvantage,
-        UnitCategory.Fighter => MatchupTier.CompleteDefeat,
-        UnitCategory.BattleTank => BattleTankOutlook(defender),
-        UnitCategory.BattleMissileLauncher => defender switch
-        {
-            UnitCategory.BattleTank => MatchupTier.AtAdvantage,
-            UnitCategory.Infantry => MatchupTier.AtDisadvantage,
-            _ => MatchupTier.Equal,
-        },
-        UnitCategory.Commando => defender switch
-        {
-            UnitCategory.Infantry => MatchupTier.AtAdvantage,
-            UnitCategory.BattleTank => MatchupTier.AtDisadvantage,
-            _ => MatchupTier.Equal,
-        },
-        UnitCategory.Infantry => defender switch
-        {
-            UnitCategory.Infantry => MatchupTier.Equal,
-            UnitCategory.BattleTank => MatchupTier.CompleteDefeat,
-            _ => MatchupTier.AtDisadvantage,
-        },
-        UnitCategory.Jeep => defender == UnitCategory.Infantry
+        UnitCategory.Infantry => InfantryOutlook(defender),
+        UnitCategory.Commando => CommandoOutlook(defender),
+        UnitCategory.Jeep => defender is UnitCategory.Infantry or UnitCategory.SupplyVehicle
             ? MatchupTier.Equal
             : MatchupTier.AtDisadvantage,
-        UnitCategory.FlakPanzer => MatchupTier.AtDisadvantage,
+        UnitCategory.BattleMissileLauncher => MissileLauncherOutlook(defender),
+        UnitCategory.BattleTank => BattleTankOutlook(defender),
+        UnitCategory.FlakPanzer => FlakPanzerVsGroundOutlook(defender),
+        UnitCategory.Attacker => AttackerOutlook(defender),
+        UnitCategory.Helicopter => HelicopterVsGroundOutlook(defender),
+        // A Fighter strafing ground (M61 Vulcan) — always a poor matchup.
+        UnitCategory.Fighter => MatchupTier.CompleteDefeat,
+        _ => MatchupTier.Equal,
+    };
+
+    private static MatchupTier InfantryOutlook(UnitCategory defender) => defender switch
+    {
+        UnitCategory.Infantry => MatchupTier.Equal,
+        UnitCategory.Commando => MatchupTier.AtDisadvantage,
+        UnitCategory.SupplyVehicle => MatchupTier.Equal,
+        _ => MatchupTier.CompleteDefeat,
+    };
+
+    private static MatchupTier CommandoOutlook(UnitCategory defender) => defender switch
+    {
+        UnitCategory.Infantry => MatchupTier.AtAdvantage,
+        UnitCategory.Commando => MatchupTier.Equal,
+        UnitCategory.SupplyVehicle => MatchupTier.AtAdvantage,
+        UnitCategory.BattleMissileLauncher => MatchupTier.AtDisadvantage,
+        // RPG-armed — can hurt armour, but loses the exchange.
+        UnitCategory.BattleTank => MatchupTier.AtDisadvantage,
+        _ => MatchupTier.CompleteDefeat,
+    };
+
+    private static MatchupTier MissileLauncherOutlook(UnitCategory defender) => defender switch
+    {
+        UnitCategory.Infantry => MatchupTier.TotalVictory,
+        UnitCategory.Commando => MatchupTier.AtAdvantage,
+        UnitCategory.SupplyVehicle => MatchupTier.TotalVictory,
+        UnitCategory.BattleMissileLauncher => MatchupTier.Equal,
+        UnitCategory.BattleTank => MatchupTier.AtAdvantage,
+        UnitCategory.FlakPanzer => MatchupTier.AtAdvantage,
         _ => MatchupTier.Equal,
     };
 
     private static MatchupTier BattleTankOutlook(UnitCategory defender) => defender switch
     {
         UnitCategory.Infantry => MatchupTier.TotalVictory,
+        UnitCategory.Commando => MatchupTier.TotalVictory,
         UnitCategory.Jeep => MatchupTier.TotalVictory,
         UnitCategory.SupplyVehicle => MatchupTier.TotalVictory,
-        UnitCategory.Commando => MatchupTier.AtAdvantage,
-        UnitCategory.FlakPanzer => MatchupTier.AtAdvantage,
-        UnitCategory.BattleMissileLauncher => MatchupTier.AtDisadvantage,
+        UnitCategory.BattleMissileLauncher => MatchupTier.AtAdvantage,
+        UnitCategory.FlakPanzer => MatchupTier.TotalVictory,
+        UnitCategory.BattleTank => MatchupTier.Equal,
         _ => MatchupTier.Equal,
+    };
+
+    private static MatchupTier FlakPanzerVsGroundOutlook(UnitCategory defender) => defender switch
+    {
+        // Anti-air vehicles are poor against ground armour.
+        UnitCategory.BattleTank => MatchupTier.CompleteDefeat,
+        UnitCategory.BattleMissileLauncher => MatchupTier.AtDisadvantage,
+        UnitCategory.Infantry => MatchupTier.AtDisadvantage,
+        UnitCategory.Commando => MatchupTier.AtDisadvantage,
+        UnitCategory.SupplyVehicle => MatchupTier.AtAdvantage,
+        _ => MatchupTier.AtDisadvantage,
+    };
+
+    private static MatchupTier AttackerOutlook(UnitCategory defender) => defender switch
+    {
+        // Fixed-wing ground-attack — a tank-buster.
+        UnitCategory.BattleTank => MatchupTier.TotalVictory,
+        UnitCategory.FlakPanzer => MatchupTier.AtAdvantage,
+        UnitCategory.BattleMissileLauncher => MatchupTier.TotalVictory,
+        _ => MatchupTier.TotalVictory,
+    };
+
+    private static MatchupTier HelicopterVsGroundOutlook(UnitCategory defender) => defender switch
+    {
+        UnitCategory.BattleTank => MatchupTier.AtAdvantage,
+        UnitCategory.FlakPanzer => MatchupTier.AtDisadvantage,
+        UnitCategory.Infantry => MatchupTier.TotalVictory,
+        UnitCategory.Commando => MatchupTier.AtAdvantage,
+        _ => MatchupTier.AtAdvantage,
     };
 }
