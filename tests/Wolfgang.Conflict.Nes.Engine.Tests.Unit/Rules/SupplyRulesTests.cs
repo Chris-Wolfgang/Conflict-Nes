@@ -71,6 +71,19 @@ public class SupplyRulesTests
     }
 
     [Fact]
+    public void Ground_unit_on_neutral_city_can_supply_from_building()
+    {
+        var tiles = MapDefinition.EnumerateCoords(3, 1)
+            .Select(c => c == new HexCoord(1, 0)
+                ? new Tile(c, Terrain.Plains, Building: BuildingKind.City, Owner: null)
+                : new Tile(c, Terrain.Plains, Building: null, Owner: null));
+        var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0));
+        var state = BuildState(tiles, 3, 1, tank);
+
+        Assert.Equal(SupplyRules.SupplySource.Building, SupplyRules.AvailableSource(state, tank));
+    }
+
+    [Fact]
     public void Unit_on_enemy_city_has_no_supply_source()
     {
         var tiles = MapDefinition.EnumerateCoords(3, 1)

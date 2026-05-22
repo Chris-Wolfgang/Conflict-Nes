@@ -50,7 +50,7 @@ public static class SupplyRules
             return null;
         }
 
-        if (StandingOnMatchedFriendlyBuilding(state, unit))
+        if (StandingOnSuppliableBuilding(state, unit))
         {
             return SupplySource.Building;
         }
@@ -89,7 +89,7 @@ public static class SupplyRules
         };
     }
 
-    private static bool StandingOnMatchedFriendlyBuilding(GameState state, Unit unit)
+    private static bool StandingOnSuppliableBuilding(GameState state, Unit unit)
     {
         if (!state.Map.Tiles.TryGetValue(unit.Coord, out var tile))
         {
@@ -99,7 +99,11 @@ public static class SupplyRules
         {
             return false;
         }
-        if (state.GetBuildingOwner(unit.Coord) != unit.Side)
+
+        // A building supplies a unit unless it is owned by the enemy.
+        // Friendly and neutral (unowned) buildings both work.
+        var owner = state.GetBuildingOwner(unit.Coord);
+        if (owner is { } o && o != unit.Side)
         {
             return false;
         }
