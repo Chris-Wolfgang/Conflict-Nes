@@ -103,7 +103,7 @@
       "category": "FlakPanzer",
       "side": "Blue",
       "movementDomain": "Tread",
-      "movementPoints": 6,
+      "movementPoints": 5,
       "maxFuel": 6,
       "maxAmmo": 6,
       "productionCost": 4600,
