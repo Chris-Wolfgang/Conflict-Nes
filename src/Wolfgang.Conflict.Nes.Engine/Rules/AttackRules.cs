@@ -96,6 +96,17 @@ public static class AttackRules
         {
             return false;
         }
+        // Capturable buildings (City, Airbase, Port) flip ownership by
+        // occupation — they are never attacked. Only buildings bound to the
+        // commander (Factory) can be destroyed.
+        if (!state.Map.Tiles.TryGetValue(buildingCoord, out var tile) || tile.Building is not { } building)
+        {
+            return false;
+        }
+        if (CaptureRules.IsCapturable(building))
+        {
+            return false;
+        }
         return true;
     }
 
