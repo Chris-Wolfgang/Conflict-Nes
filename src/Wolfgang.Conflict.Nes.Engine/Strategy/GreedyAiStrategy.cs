@@ -36,9 +36,17 @@ public sealed class GreedyAiStrategy : IPlayerStrategy
                 continue;
             }
 
+            // The commander is the "H" — losing it ends the game. It will
+            // defend itself if an enemy walks adjacent, but it never marches
+            // out to look for trouble.
             if (!unit.HasAttacked && TryAttack(state, unit, out var attack))
             {
                 return attack;
+            }
+
+            if (unit.IsCommander)
+            {
+                continue;
             }
 
             if (!unit.HasMoved && TryMoveTowardEnemy(state, unit, side, out var move))

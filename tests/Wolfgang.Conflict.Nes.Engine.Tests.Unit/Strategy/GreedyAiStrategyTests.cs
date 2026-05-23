@@ -57,6 +57,36 @@ public class GreedyAiStrategyTests
     }
 
     [Fact]
+    public async Task Commander_defends_itself_against_adjacent_enemy()
+    {
+        // The commander is the "H" — losing it ends the game. It won't
+        // march out looking for trouble, but if an enemy walks up to it,
+        // it absolutely fights back.
+        var hq = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0), isCommander: true);
+        var enemy = Unit.FullStrength(new UnitId(2), Side.Red, TestCatalog.Infantry, new HexCoord(1, 0));
+        var state = OpenState(hq, enemy);
+
+        var action = await new GreedyAiStrategy().ChooseNextActionAsync(state, Side.Blue);
+
+        Assert.Equal(StrategyActionKind.Attack, action.Kind);
+        Assert.Equal(hq.Id, action.UnitId);
+    }
+
+    [Fact]
+    public async Task Commander_does_not_move_toward_enemy()
+    {
+        // With only the commander available, the AI should EndTurn rather
+        // than march the HQ unit into harm's way.
+        var hq = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0), isCommander: true);
+        var enemy = Unit.FullStrength(new UnitId(2), Side.Red, TestCatalog.Tank, new HexCoord(8, 0));
+        var state = OpenState(hq, enemy);
+
+        var action = await new GreedyAiStrategy().ChooseNextActionAsync(state, Side.Blue);
+
+        Assert.Equal(StrategyActionKind.EndTurn, action.Kind);
+    }
+
+    [Fact]
     public async Task Returns_EndTurn_when_no_unit_has_any_action()
     {
         var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0))
