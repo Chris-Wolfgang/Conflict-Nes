@@ -125,6 +125,13 @@ public static class MovementRules
         {
             return null;
         }
+        // Factories are bound to the commander and cannot be entered by any
+        // unit. (Cities, airbases and ports are still traversable — they're
+        // the supply / capture buildings.)
+        if (tile.Building == Map.BuildingKind.Factory)
+        {
+            return null;
+        }
         return UnitStats.TerrainCost(unit.Type.MovementDomain, tile.Terrain, tile.Building);
     }
 

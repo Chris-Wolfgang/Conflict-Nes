@@ -36,8 +36,9 @@ public sealed class GreedyAiStrategy : IPlayerStrategy
                 continue;
             }
 
-            // The commander is the "H" — losing it ends the game. It will
-            // defend itself if an enemy walks adjacent, but it never marches
+            // The commander is the "H" — losing it ends the game. It holds
+            // its ground (ideally a friendly city for supply / repair), only
+            // counter-attacking enemies that walk adjacent. It never marches
             // out to look for trouble.
             if (!unit.HasAttacked && TryAttack(state, unit, out var attack))
             {
