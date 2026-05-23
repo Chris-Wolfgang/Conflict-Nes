@@ -121,27 +121,17 @@ public static class ProductionRules
             throw new InvalidOperationException($"Tile {buildingCoord} has no building.");
         }
 
+        if (!state.HasIntactBuilding(buildingCoord))
+        {
+            throw new InvalidOperationException($"Building at {buildingCoord} has been destroyed.");
+        }
+
         if (state.GetBuildingOwner(buildingCoord) != side)
         {
             throw new InvalidOperationException($"{side} does not own the building at {buildingCoord}.");
         }
 
-        if (!state.Catalog.Contains(typeId))
-        {
-            throw new InvalidOperationException($"Unknown unit type '{typeId}'.");
-        }
-
-        var type = state.Catalog.Get(typeId);
-
-        if (type.Side is { } affinity && affinity != side)
-        {
-            throw new InvalidOperationException($"{side} cannot build {type.Name} ({affinity}-only).");
-        }
-
-        if (!CanBuildCategoryAt(building, type.Category))
-        {
-            throw new InvalidOperationException($"{building} cannot produce {type.Name}.");
-        }
+        var type = ResolveAndValidateType(state, side, building, typeId);
 
         if (state.Funds[side] < type.ProductionCost)
         {
@@ -159,6 +149,28 @@ public static class ProductionRules
             {
                 throw new InvalidOperationException($"Building hex {buildingCoord} is occupied by unit {existing.Id}.");
             }
+        }
+
+        return type;
+    }
+
+    private static UnitTypeDefinition ResolveAndValidateType(GameState state, Side side, BuildingKind building, string typeId)
+    {
+        if (!state.Catalog.Contains(typeId))
+        {
+            throw new InvalidOperationException($"Unknown unit type '{typeId}'.");
+        }
+
+        var type = state.Catalog.Get(typeId);
+
+        if (type.Side is { } affinity && affinity != side)
+        {
+            throw new InvalidOperationException($"{side} cannot build {type.Name} ({affinity}-only).");
+        }
+
+        if (!CanBuildCategoryAt(building, type.Category))
+        {
+            throw new InvalidOperationException($"{building} cannot produce {type.Name}.");
         }
 
         return type;

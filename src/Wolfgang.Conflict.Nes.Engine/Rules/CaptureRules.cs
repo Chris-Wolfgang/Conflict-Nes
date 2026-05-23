@@ -53,6 +53,10 @@ public static class CaptureRules
             {
                 continue;
             }
+            if (!state.HasIntactBuilding(unit.Coord))
+            {
+                continue;
+            }
             if (state.GetBuildingOwner(unit.Coord) == side)
             {
                 continue;

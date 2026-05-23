@@ -187,6 +187,10 @@
             {
                 set.Add(State.Units[targetId].Coord);
             }
+            foreach (var hex in AttackRules.GetAttackableBuildings(State, unit))
+            {
+                set.Add(hex);
+            }
         }
         return set;
     }

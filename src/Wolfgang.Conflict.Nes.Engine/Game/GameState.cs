@@ -12,9 +12,13 @@ namespace Wolfgang.Conflict.Nes.Engine.Game;
 /// </summary>
 public sealed class GameState
 {
+    /// <summary>Maximum hit points for a building (Factory, Airbase, City, ...).</summary>
+    public const int MaxBuildingHitPoints = 15;
+
     private readonly IReadOnlyDictionary<UnitId, Unit> _units;
     private readonly IReadOnlyDictionary<HexCoord, Side> _buildingOwners;
     private readonly IReadOnlyDictionary<Side, int> _funds;
+    private readonly IReadOnlyDictionary<HexCoord, int> _buildingHitPoints;
 
     /// <summary>The map for the current mission.</summary>
     public MapDefinition Map { get; }
@@ -50,6 +54,13 @@ public sealed class GameState
     /// <summary>Seed for the combat RNG; preserved across states so combat is reproducible.</summary>
     public int RandomSeed { get; }
 
+    /// <summary>
+    /// Sparse map of building HP overrides. Hexes not in this map use
+    /// <see cref="MaxBuildingHitPoints"/>. HP &lt;= 0 means the building has
+    /// been destroyed.
+    /// </summary>
+    public IReadOnlyDictionary<HexCoord, int> BuildingHitPoints => _buildingHitPoints;
+
     /// <summary>Constructs a state snapshot. Most callers should go through <c>GameEngine.StartGame</c> instead.</summary>
     public GameState(
         MapDefinition map,
@@ -61,13 +72,15 @@ public sealed class GameState
         GamePhase phase,
         IReadOnlyDictionary<Side, int> funds,
         Side? winner,
-        int randomSeed)
+        int randomSeed,
+        IReadOnlyDictionary<HexCoord, int>? buildingHitPoints = null)
     {
         Map = map ?? throw new ArgumentNullException(nameof(map));
         Catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         _units = units ?? throw new ArgumentNullException(nameof(units));
         _buildingOwners = buildingOwners ?? throw new ArgumentNullException(nameof(buildingOwners));
         _funds = funds ?? throw new ArgumentNullException(nameof(funds));
+        _buildingHitPoints = buildingHitPoints ?? new Dictionary<HexCoord, int>();
         NextToAct = nextToAct;
         TurnNumber = turnNumber;
         Phase = phase;
@@ -87,6 +100,20 @@ public sealed class GameState
         }
 
         return Map.Tiles.TryGetValue(coord, out var tile) ? tile.Owner : null;
+    }
+
+    /// <summary>Current HP of the building at <paramref name="coord"/> (or max if untouched).</summary>
+    public int GetBuildingHitPoints(HexCoord coord)
+        => _buildingHitPoints.TryGetValue(coord, out var hp) ? hp : MaxBuildingHitPoints;
+
+    /// <summary>True if the hex has a building that hasn't been destroyed.</summary>
+    public bool HasIntactBuilding(HexCoord coord)
+    {
+        if (!Map.Tiles.TryGetValue(coord, out var tile) || tile.Building is null)
+        {
+            return false;
+        }
+        return GetBuildingHitPoints(coord) > 0;
     }
 
     /// <summary>

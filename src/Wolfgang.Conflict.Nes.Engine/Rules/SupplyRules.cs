@@ -99,6 +99,10 @@ public static class SupplyRules
         {
             return false;
         }
+        if (!state.HasIntactBuilding(unit.Coord))
+        {
+            return false;
+        }
 
         // Per the original game, a unit refuels and repairs at any city or
         // airport regardless of ownership — if it is an enemy building the

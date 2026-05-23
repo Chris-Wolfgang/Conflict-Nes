@@ -44,18 +44,33 @@
 
             <aside class="side-panel">
                 @if (Service.PendingAttack is { } pa
-                     && Service.CurrentState.Units.TryGetValue(pa.Attacker, out var atkUnit)
-                     && Service.CurrentState.Units.TryGetValue(pa.Target, out var tgtUnit))
+                     && Service.CurrentState.Units.TryGetValue(pa.AttackerId, out var atkUnit))
                 {
-                    var outlook = Engine.Combat.RelationsTable.Outlook(atkUnit.Category, tgtUnit.Category);
                     <div class="attack-confirm">
                         <h2>Confirm Attack</h2>
-                        <p>
-                            <strong class="blue">@atkUnit.Type.ShortName</strong>
-                            &rarr;
-                            <strong class="red">@tgtUnit.Type.ShortName</strong>
-                        </p>
-                        <p class="outlook">Outlook: <strong>@OutlookText(outlook)</strong></p>
+                        @if (pa.TargetUnitId is { } tid
+                             && Service.CurrentState.Units.TryGetValue(tid, out var tgtUnit))
+                        {
+                            var outlook = Engine.Combat.RelationsTable.Outlook(atkUnit.Category, tgtUnit.Category);
+                            <p>
+                                <strong class="blue">@atkUnit.Type.ShortName</strong>
+                                &rarr;
+                                <strong class="red">@tgtUnit.Type.ShortName</strong>
+                            </p>
+                            <p class="outlook">Outlook: <strong>@OutlookText(outlook)</strong></p>
+                        }
+                        else if (pa.TargetBuildingCoord is { } bc
+                                 && Service.CurrentState.Map.Tiles.TryGetValue(bc, out var btile)
+                                 && btile.Building is { } bk)
+                        {
+                            var bhp = Service.CurrentState.GetBuildingHitPoints(bc);
+                            <p>
+                                <strong class="blue">@atkUnit.Type.ShortName</strong>
+                                &rarr;
+                                <strong class="red">@bk</strong>
+                            </p>
+                            <p class="outlook">Target LIFE: <strong>@bhp / @GameState.MaxBuildingHitPoints</strong></p>
+                        }
                         <div class="controls">
                             <button class="action-button attack" @onclick="Service.ConfirmAttack">Attack</button>
                             <button class="action-button" @onclick="Service.CancelAttack">Cancel</button>

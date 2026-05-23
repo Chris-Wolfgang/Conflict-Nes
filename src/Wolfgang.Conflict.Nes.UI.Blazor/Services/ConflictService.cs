@@ -33,10 +33,11 @@ public sealed class ConflictService
     public UnitId? SelectedUnitId { get; private set; }
 
     /// <summary>
-    /// A pending attack awaiting player confirmation: the attacker and the
-    /// chosen target. <see langword="null"/> when no attack is pending.
+    /// A pending attack awaiting player confirmation. Exactly one of
+    /// <see cref="PendingAttackInfo.TargetUnitId"/> or
+    /// <see cref="PendingAttackInfo.TargetBuildingCoord"/> is set.
     /// </summary>
-    public (UnitId Attacker, UnitId Target)? PendingAttack { get; private set; }
+    public PendingAttackInfo? PendingAttack { get; private set; }
 
     /// <summary>True if a mission has been started.</summary>
     public bool IsStarted => CurrentState is not null;
@@ -103,22 +104,36 @@ public sealed class ConflictService
             var targets = _engine.GetLegalTargets(CurrentState, selected.Id);
             if (targets.Contains(target.Id))
             {
-                PendingAttack = (selected.Id, target.Id);
+                PendingAttack = PendingAttackInfo.Unit(selected.Id, target.Id);
                 Notify();
             }
             return;
         }
 
-        // Clicking an empty reachable hex: move.
+        // Clicking an empty hex: building attack takes precedence over move
+        // if the hex contains an attackable enemy/neutral building.
         if (unitAtHex is null)
         {
-            var moves = _engine.GetLegalMoves(CurrentState, selected.Id);
-            if (moves.Contains(hex))
-            {
-                CurrentState = _engine.MoveUnit(CurrentState, selected.Id, hex);
-                SelectedUnitId = CurrentState.Units.ContainsKey(selected.Id) ? selected.Id : null;
-                Notify();
-            }
+            HandleEmptyHexClick(selected, hex);
+        }
+    }
+
+    private void HandleEmptyHexClick(Unit selected, HexCoord hex)
+    {
+        var attackableBuildings = AttackRules.GetAttackableBuildings(CurrentState!, selected);
+        if (attackableBuildings.Contains(hex))
+        {
+            PendingAttack = PendingAttackInfo.Building(selected.Id, hex);
+            Notify();
+            return;
+        }
+
+        var moves = _engine.GetLegalMoves(CurrentState!, selected.Id);
+        if (moves.Contains(hex))
+        {
+            CurrentState = _engine.MoveUnit(CurrentState!, selected.Id, hex);
+            SelectedUnitId = CurrentState.Units.ContainsKey(selected.Id) ? selected.Id : null;
+            Notify();
         }
     }
 
@@ -158,9 +173,18 @@ public sealed class ConflictService
         {
             return;
         }
-        CurrentState = _engine.AttackUnit(CurrentState, pending.Attacker, pending.Target);
+
+        if (pending.TargetUnitId is { } targetUnit)
+        {
+            CurrentState = _engine.AttackUnit(CurrentState, pending.AttackerId, targetUnit);
+        }
+        else if (pending.TargetBuildingCoord is { } buildingCoord)
+        {
+            CurrentState = _engine.AttackBuilding(CurrentState, pending.AttackerId, buildingCoord);
+        }
+
         PendingAttack = null;
-        SelectedUnitId = CurrentState.Units.ContainsKey(pending.Attacker) ? pending.Attacker : null;
+        SelectedUnitId = CurrentState.Units.ContainsKey(pending.AttackerId) ? pending.AttackerId : null;
         Notify();
     }
 

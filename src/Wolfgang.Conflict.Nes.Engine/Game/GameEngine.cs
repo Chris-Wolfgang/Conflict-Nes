@@ -235,6 +235,101 @@ public sealed class GameEngine
     }
 
     /// <summary>
+    /// Attacks the building at <paramref name="buildingCoord"/> with the
+    /// named unit. Buildings are stationary targets: damage is applied
+    /// directly to the building's HP and there is no counter-attack. A
+    /// building reduced to zero HP is considered destroyed.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">The attack is illegal.</exception>
+    public GameState AttackBuilding(GameState state, UnitId attackerId, HexCoord buildingCoord)
+    {
+        if (state is null)
+        {
+            throw new ArgumentNullException(nameof(state));
+        }
+        if (state.Phase != GamePhase.PlayerTurn)
+        {
+            throw new InvalidOperationException("Game is over; no more attacks accepted.");
+        }
+        if (!state.Units.TryGetValue(attackerId, out var attacker))
+        {
+            throw new InvalidOperationException($"Attacker {attackerId} does not exist.");
+        }
+        if (attacker.Side != state.NextToAct)
+        {
+            throw new InvalidOperationException($"It is not {attacker.Side}'s turn.");
+        }
+        if (!AttackRules.CanAttackBuilding(state, attacker, buildingCoord))
+        {
+            throw new InvalidOperationException($"{attackerId} cannot attack the building at {buildingCoord}.");
+        }
+
+        var rng = new SeededRandomSource(state.RandomSeed);
+        var damage = ComputeBuildingDamage(attacker, rng);
+        var currentHp = state.GetBuildingHitPoints(buildingCoord);
+        var newHp = Math.Max(0, currentHp - damage);
+
+        var newHits = CopyBuildingHits(state.BuildingHitPoints);
+        newHits[buildingCoord] = newHp;
+
+        var newUnits = CopyUnits(state.Units);
+        newUnits[attackerId] = attacker with
+        {
+            Ammo = Math.Max(0, attacker.Ammo - 1),
+            HasAttacked = true,
+        };
+
+        var newFunds = (newHp == 0 && currentHp > 0)
+            ? AwardBuildingBounty(state.Funds, attacker.Side)
+            : state.Funds;
+
+        return new GameState(
+            map: state.Map,
+            catalog: state.Catalog,
+            units: newUnits,
+            buildingOwners: state.BuildingOwners,
+            nextToAct: state.NextToAct,
+            turnNumber: state.TurnNumber,
+            phase: state.Phase,
+            funds: newFunds,
+            winner: state.Winner,
+            randomSeed: unchecked(state.RandomSeed * 1103515245 + 12345),
+            buildingHitPoints: newHits);
+    }
+
+    private static Dictionary<HexCoord, int> CopyBuildingHits(IReadOnlyDictionary<HexCoord, int> source)
+    {
+        var copy = new Dictionary<HexCoord, int>(source.Count);
+        foreach (var kv in source)
+        {
+            copy[kv.Key] = kv.Value;
+        }
+        return copy;
+    }
+
+    private static Dictionary<Side, int> AwardBuildingBounty(IReadOnlyDictionary<Side, int> source, Side beneficiary)
+    {
+        var funds = CopyFunds(source);
+        funds[beneficiary] += 500;
+        return funds;
+    }
+
+    private static int ComputeBuildingDamage(Unit attacker, IRandomSource rng)
+    {
+        // Treat buildings as soft stationary ground targets — the attacker's
+        // power vs a SupplyVehicle-class defender is a reasonable proxy.
+        var baseAttack = RelationsTable.BaseAttack(attacker.Category, UnitCategory.SupplyVehicle);
+        if (baseAttack <= 0)
+        {
+            return 0;
+        }
+        var scaled = (baseAttack * attacker.HitPoints) / UnitStats.MaxHitPoints;
+        var roll = rng.NextInt(-2, 2);
+        return Math.Max(0, scaled + roll);
+    }
+
+    /// <summary>
     /// Produces a new unit of the catalog type <paramref name="typeId"/> on the
     /// building at <paramref name="buildingCoord"/>. Deducts the F.P. cost.
     /// </summary>
@@ -279,6 +374,7 @@ public sealed class GameEngine
             phase: state.Phase,
             funds: newFunds,
             winner: state.Winner,
+            buildingHitPoints: state.BuildingHitPoints,
             randomSeed: state.RandomSeed);
     }
 
@@ -316,7 +412,7 @@ public sealed class GameEngine
 
         // 4. Accrue income for the next side from its City and Airbase holdings.
         var newFunds = CopyFunds(state.Funds);
-        newFunds[nextSide] += ComputeIncome(state.Map, newOwners, nextSide);
+        newFunds[nextSide] += ComputeIncome(state.Map, newOwners, nextSide, state.BuildingHitPoints);
 
         // Turn number increments when Blue is about to act again (a full round).
         var newTurnNumber = nextSide == Side.Blue ? state.TurnNumber + 1 : state.TurnNumber;
@@ -331,7 +427,8 @@ public sealed class GameEngine
             phase: state.Phase,
             funds: newFunds,
             winner: state.Winner,
-            randomSeed: state.RandomSeed);
+            randomSeed: state.RandomSeed,
+            buildingHitPoints: state.BuildingHitPoints);
 
         return CheckVictory(next);
     }
@@ -374,7 +471,11 @@ public sealed class GameEngine
         return WithUnits(state, newUnits);
     }
 
-    private static int ComputeIncome(MapDefinition map, IReadOnlyDictionary<HexCoord, Side> owners, Side side)
+    private static int ComputeIncome(
+        MapDefinition map,
+        IReadOnlyDictionary<HexCoord, Side> owners,
+        Side side,
+        IReadOnlyDictionary<HexCoord, int> buildingHitPoints)
     {
         var income = 0;
         foreach (var tile in map.Tiles.Values)
@@ -385,6 +486,12 @@ public sealed class GameEngine
             }
             var currentOwner = owners.TryGetValue(tile.Coord, out var o) ? o : tile.Owner;
             if (currentOwner != side)
+            {
+                continue;
+            }
+            // Destroyed buildings produce no income.
+            var hp = buildingHitPoints.TryGetValue(tile.Coord, out var h) ? h : GameState.MaxBuildingHitPoints;
+            if (hp <= 0)
             {
                 continue;
             }
@@ -410,6 +517,7 @@ public sealed class GameEngine
             phase: GamePhase.GameOver,
             funds: state.Funds,
             winner: winner,
+            buildingHitPoints: state.BuildingHitPoints,
             randomSeed: state.RandomSeed);
     }
 
@@ -582,7 +690,8 @@ public sealed class GameEngine
             phase: state.Phase,
             funds: state.Funds,
             winner: state.Winner,
-            randomSeed: state.RandomSeed);
+            randomSeed: state.RandomSeed,
+            buildingHitPoints: state.BuildingHitPoints);
 
     private static GameState WithUnitsAndFunds(
         GameState state,
@@ -599,5 +708,6 @@ public sealed class GameEngine
             phase: state.Phase,
             funds: newFunds,
             winner: state.Winner,
-            randomSeed: advanceSeed ? unchecked(state.RandomSeed * 1103515245 + 12345) : state.RandomSeed);
+            randomSeed: advanceSeed ? unchecked(state.RandomSeed * 1103515245 + 12345) : state.RandomSeed,
+            buildingHitPoints: state.BuildingHitPoints);
 }
