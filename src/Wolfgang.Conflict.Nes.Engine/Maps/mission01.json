@@ -126,8 +126,8 @@
       "q": 1,
       "r": 7,
       "terrain": "Plains",
-      "building": "Hq",
-      "owner": "Blue"
+      "building": null,
+      "owner": null
     },
     {
       "q": 1,
@@ -777,8 +777,8 @@
       "q": 11,
       "r": -5,
       "terrain": "Plains",
-      "building": "Hq",
-      "owner": "Red"
+      "building": null,
+      "owner": null
     },
     {
       "q": 11,

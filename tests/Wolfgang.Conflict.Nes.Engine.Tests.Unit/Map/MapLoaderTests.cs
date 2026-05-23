@@ -71,14 +71,18 @@ public class MapLoaderTests
     }
 
     [Fact]
-    public async Task Mission01_has_one_HQ_per_side()
+    public async Task Mission01_has_one_factory_per_side()
     {
+        // There is no separate HQ building in the manual's model — the
+        // commander tank's "H" badge is the HQ. Each side has one Factory
+        // its commander guards.
         var map = await MapLoader.LoadEmbeddedAsync("Wolfgang.Conflict.Nes.Engine.Maps.mission01.json");
 
-        var hqs = map.Tiles.Values.Where(t => t.Building == BuildingKind.Hq).ToList();
+        var factories = map.Tiles.Values.Where(t => t.Building == BuildingKind.Factory).ToList();
 
-        Assert.Equal(2, hqs.Count);
-        Assert.Contains(hqs, t => t.Owner == Side.Blue);
-        Assert.Contains(hqs, t => t.Owner == Side.Red);
+        Assert.Equal(2, factories.Count);
+        Assert.Contains(factories, t => t.Owner == Side.Blue);
+        Assert.Contains(factories, t => t.Owner == Side.Red);
+        Assert.Empty(map.Tiles.Values.Where(t => t.Building == BuildingKind.Hq));
     }
 }

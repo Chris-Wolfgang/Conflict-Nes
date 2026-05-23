@@ -27,18 +27,21 @@ public static class MissionLoader
 
         var placements = new List<UnitPlacement>
         {
-            // Blue: commander M1A1 on HQ, plus a mixed-arms force around it.
-            new(Side.Blue, "m1a1",      new HexCoord(1, 7), IsCommander: true),
-            new(Side.Blue, "liberator", new HexCoord(2, 6), IsCommander: false),
+            // Blue: commander M1A1 guards the Factory at (1,6); mixed-arms
+            // force fans out around it. The commander's "H" badge is the HQ
+            // — there is no separate HQ building.
+            new(Side.Blue, "m1a1",        new HexCoord(1, 7), IsCommander: true),
+            new(Side.Blue, "liberator",   new HexCoord(2, 6), IsCommander: false),
             new(Side.Blue, "us-commando", new HexCoord(3, 7), IsCommander: false),
-            new(Side.Blue, "m60a3",     new HexCoord(2, 7), IsCommander: false),
-            new(Side.Blue, "m151",      new HexCoord(0, 8), IsCommander: false),
-            new(Side.Blue, "m48",       new HexCoord(2, 8), IsCommander: false),
-            new(Side.Blue, "ah1s",      new HexCoord(1, 5), IsCommander: false),
-            new(Side.Blue, "a10",       new HexCoord(2, 5), IsCommander: false),
-            new(Side.Blue, "f4e",       new HexCoord(2, 4), IsCommander: false),
+            new(Side.Blue, "m60a3",       new HexCoord(2, 7), IsCommander: false),
+            new(Side.Blue, "m151",        new HexCoord(0, 8), IsCommander: false),
+            new(Side.Blue, "m48",         new HexCoord(2, 8), IsCommander: false),
+            new(Side.Blue, "ah1s",        new HexCoord(1, 5), IsCommander: false),
+            new(Side.Blue, "a10",         new HexCoord(2, 5), IsCommander: false),
+            new(Side.Blue, "f4e",         new HexCoord(2, 4), IsCommander: false),
 
-            // Red: mirrored mixed-arms force near Red HQ in the northeast.
+            // Red: commander T-80 guards the Factory at (9,-4); mirrored
+            // mixed-arms force around it.
             new(Side.Red, "t80",          new HexCoord(11, -5), IsCommander: true),
             new(Side.Red, "red-infantry", new HexCoord(10, -4), IsCommander: false),
             new(Side.Red, "red-commando", new HexCoord(10, -3), IsCommander: false),
