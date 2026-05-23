@@ -19,23 +19,15 @@ public static class RelationsTable
 
     /// <summary>
     /// True if <paramref name="attacker"/> can engage <paramref name="defender"/>
-    /// at all. Supply units never attack. Aircraft can only be engaged by
-    /// other aircraft (Fighter, Attacker, Helicopter) or by Flak Panzers;
-    /// ground units without anti-air weapons cannot reach them.
+    /// at all. Every unit carries at least a machine gun, so every adjacent
+    /// engagement is permitted; the matchup tier and the resulting
+    /// <see cref="BaseAttack"/> value determine whether the attack does
+    /// anything useful.
     /// </summary>
     public static bool CanEngage(UnitCategory attacker, UnitCategory defender)
     {
-        if (attacker is UnitCategory.SupplyVehicle or UnitCategory.SupplyPlane)
-        {
-            return false;
-        }
-        if (IsAir(defender))
-        {
-            return attacker is UnitCategory.FlakPanzer
-                or UnitCategory.Fighter
-                or UnitCategory.Attacker
-                or UnitCategory.Helicopter;
-        }
+        _ = attacker;
+        _ = defender;
         return true;
     }
 
@@ -120,6 +112,9 @@ public static class RelationsTable
         UnitCategory.Helicopter => HelicopterVsGroundOutlook(defender),
         // A Fighter strafing ground (M61 Vulcan) — always a poor matchup.
         UnitCategory.Fighter => MatchupTier.CompleteDefeat,
+        // Supply vehicles and supply planes carry only a defensive machine
+        // gun; if they engage they take heavy losses.
+        UnitCategory.SupplyVehicle or UnitCategory.SupplyPlane => MatchupTier.CompleteDefeat,
         _ => MatchupTier.Equal,
     };
 

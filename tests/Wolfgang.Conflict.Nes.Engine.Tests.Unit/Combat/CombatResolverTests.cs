@@ -78,10 +78,13 @@ public class CombatResolverTests
 
         var result = CombatResolver.Resolve(state, atk, def, new FixedRng(0));
 
-        // Fighter base vs Tank = 2 at full HP, plains defense = 0.
+        // Fighter strafing Tank: CompleteDefeat tier => base 2, plains defense 0.
         Assert.Equal(2, result.DamageToDefender);
         Assert.False(result.DefenderDestroyed);
-        Assert.False(result.DefenderCountered); // tank base vs fighter = 0
+        // Tank's coaxial MG can plink back at the Fighter (CompleteDefeat
+        // tier for the Tank too) — both take light chip damage.
+        Assert.True(result.DefenderCountered);
+        Assert.True(result.DamageToAttacker > 0);
     }
 
     [Fact]

@@ -6,22 +6,22 @@ namespace Wolfgang.Conflict.Nes.Engine.Tests.Combat;
 
 public class RelationsTableTests
 {
+    // Every unit carries at least a machine gun, so every pair can engage —
+    // effectiveness is governed by the matchup tier, not by an engagement gate.
     [Theory]
-    [InlineData(UnitCategory.Fighter, UnitCategory.Helicopter, true)]
-    [InlineData(UnitCategory.FlakPanzer, UnitCategory.Fighter, true)]
-    [InlineData(UnitCategory.BattleTank, UnitCategory.Infantry, true)]
-    [InlineData(UnitCategory.BattleTank, UnitCategory.Fighter, false)]
-    [InlineData(UnitCategory.Infantry, UnitCategory.Fighter, false)]
-    [InlineData(UnitCategory.SupplyVehicle, UnitCategory.Infantry, false)]
-    [InlineData(UnitCategory.SupplyPlane, UnitCategory.Fighter, false)]
-    // Any aircraft can engage any other aircraft.
-    [InlineData(UnitCategory.Attacker, UnitCategory.Attacker, true)]
-    [InlineData(UnitCategory.Attacker, UnitCategory.Helicopter, true)]
-    [InlineData(UnitCategory.Attacker, UnitCategory.Fighter, true)]
-    [InlineData(UnitCategory.Helicopter, UnitCategory.Attacker, true)]
-    public void CanEngage_matches_design(UnitCategory attacker, UnitCategory defender, bool expected)
+    [InlineData(UnitCategory.Fighter, UnitCategory.Helicopter)]
+    [InlineData(UnitCategory.FlakPanzer, UnitCategory.Fighter)]
+    [InlineData(UnitCategory.BattleTank, UnitCategory.Infantry)]
+    [InlineData(UnitCategory.BattleTank, UnitCategory.Fighter)]
+    [InlineData(UnitCategory.Infantry, UnitCategory.Helicopter)]
+    [InlineData(UnitCategory.Commando, UnitCategory.Helicopter)]
+    [InlineData(UnitCategory.Helicopter, UnitCategory.Fighter)]
+    [InlineData(UnitCategory.SupplyVehicle, UnitCategory.Infantry)]
+    [InlineData(UnitCategory.SupplyPlane, UnitCategory.Fighter)]
+    [InlineData(UnitCategory.Attacker, UnitCategory.Helicopter)]
+    public void CanEngage_is_always_true(UnitCategory attacker, UnitCategory defender)
     {
-        Assert.Equal(expected, RelationsTable.CanEngage(attacker, defender));
+        Assert.True(RelationsTable.CanEngage(attacker, defender));
     }
 
     [Theory]
@@ -36,17 +36,27 @@ public class RelationsTableTests
     }
 
     [Fact]
-    public void BaseAttack_is_zero_when_cannot_engage()
+    public void BaseAttack_is_positive_for_every_pair()
     {
-        Assert.Equal(0, RelationsTable.BaseAttack(UnitCategory.BattleTank, UnitCategory.Fighter));
-        Assert.Equal(0, RelationsTable.BaseAttack(UnitCategory.SupplyVehicle, UnitCategory.Infantry));
+        // Every unit carries at least a machine gun, so every matchup yields
+        // a positive (if sometimes very small) base attack value.
+        var categories = (UnitCategory[])Enum.GetValues(typeof(UnitCategory));
+        foreach (var atk in categories)
+        {
+            foreach (var def in categories)
+            {
+                Assert.True(RelationsTable.BaseAttack(atk, def) > 0,
+                    $"BaseAttack({atk}, {def}) should be > 0");
+            }
+        }
     }
 
     [Fact]
-    public void BaseAttack_is_positive_for_engageable_pairs()
+    public void BaseAttack_is_higher_for_strong_matchups_than_weak_ones()
     {
-        Assert.True(RelationsTable.BaseAttack(UnitCategory.BattleTank, UnitCategory.Infantry) > 0);
-        Assert.True(RelationsTable.BaseAttack(UnitCategory.Fighter, UnitCategory.Helicopter) > 0);
+        var strong = RelationsTable.BaseAttack(UnitCategory.BattleTank, UnitCategory.Infantry);
+        var weak = RelationsTable.BaseAttack(UnitCategory.Infantry, UnitCategory.Fighter);
+        Assert.True(strong > weak);
     }
 
     [Theory]

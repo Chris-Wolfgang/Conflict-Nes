@@ -79,16 +79,15 @@ public class AttackUnitTests
     }
 
     [Fact]
-    public void AttackUnit_illegal_pairing_throws()
+    public void AttackUnit_friendly_fire_throws()
     {
-        // Tank vs Fighter has zero base damage in our table (tank cannot
-        // track aircraft), so the attack is rejected.
+        // Friendly fire is rejected by AttackRules regardless of pairing.
         var engine = new GameEngine();
-        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,    new HexCoord(0, 0));
-        var def = Unit.FullStrength(new UnitId(2), Side.Red,  TestCatalog.Fighter, new HexCoord(1, 0));
-        var state = BuildPlainsState(atk, def);
+        var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank,     new HexCoord(0, 0));
+        var ally = Unit.FullStrength(new UnitId(2), Side.Blue, TestCatalog.Infantry, new HexCoord(1, 0));
+        var state = BuildPlainsState(atk, ally);
 
-        Assert.Throws<InvalidOperationException>(() => engine.AttackUnit(state, atk.Id, def.Id));
+        Assert.Throws<InvalidOperationException>(() => engine.AttackUnit(state, atk.Id, ally.Id));
     }
 
     [Fact]

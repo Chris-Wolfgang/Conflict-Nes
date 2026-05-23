@@ -48,12 +48,13 @@ public class AttackRulesTests
     }
 
     [Fact]
-    public void CanAttack_zero_base_damage_pairing_is_illegal()
+    public void CanAttack_allows_every_adjacent_cross_side_pair()
     {
-        // A battle tank cannot engage an aircraft (cannot track it).
+        // Every unit has a machine gun, so even a Battle Tank may take a
+        // (poor) shot at an aircraft. The matchup tier handles effectiveness.
         var atk = Make(1, Side.Blue, TestCatalog.Tank,    new HexCoord(0, 0));
         var def = Make(2, Side.Red,  TestCatalog.Fighter, new HexCoord(1, 0));
 
-        Assert.False(AttackRules.CanAttack(atk, def));
+        Assert.True(AttackRules.CanAttack(atk, def));
     }
 }
