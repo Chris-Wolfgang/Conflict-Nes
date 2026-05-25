@@ -289,7 +289,17 @@ public sealed class ConflictService
         {
             return;
         }
-        CurrentState = _engine.BuildUnit(CurrentState, factory, typeId);
+        try
+        {
+            CurrentState = _engine.BuildUnit(CurrentState, factory, typeId);
+        }
+        catch (InvalidOperationException)
+        {
+            // UI is meant to gate this (occupied factory, etc.) — swallow
+            // any race that slipped past so the page doesn't crash with
+            // Blazor's red error bar.
+            return;
+        }
         // Close the menu once the build lands. The newly-built unit now
         // sits on the factory hex and the player can pick it up via a
         // normal hex click.

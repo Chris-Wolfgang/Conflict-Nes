@@ -44,7 +44,10 @@
     // turn. Stuck-on preview state from a prior turn must never lock the
     // menu controls during the human's turn (Cancel / Build / tabs).
     var aiActive = AiPreviewTypeId is not null && State.NextToAct != HumanSide;
-    var canCommit = !sideAlreadyBuilt && !aiActive && side == HumanSide && _selectedTypeId is not null;
+    // A unit on the factory hex blocks production. The engine rejects it
+    // with an exception, so the UI must gate the Build button itself.
+    var factoryOccupied = State.GetUnitAt(Factory.Value) is not null;
+    var canCommit = !sideAlreadyBuilt && !aiActive && !factoryOccupied && side == HumanSide && _selectedTypeId is not null;
 }
 
 <div class="production-menu @(side == Side.Blue ? "blue" : "red")">
@@ -115,6 +118,10 @@
         else if (sideAlreadyBuilt)
         {
             <div class="production-hint">Built this turn. Cancel to close.</div>
+        }
+        else if (factoryOccupied && side == HumanSide)
+        {
+            <div class="production-hint">Factory blocked &mdash; move the unit on this hex first.</div>
         }
         else if (side == HumanSide)
         {
