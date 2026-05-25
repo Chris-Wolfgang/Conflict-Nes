@@ -307,10 +307,42 @@ public sealed class ConflictService
 
         CurrentState = _engine.EndTurn(CurrentState);
         SelectedUnitId = null;
+        // Close any production menu so it doesn't carry into the AI's turn
+        // showing the wrong side's label.
+        OpenedFactory = null;
+        AiBuildPreviewTypeId = null;
         Notify();
 
         // Drive the AI's whole phase synchronously (it's fast).
         await RunAiPhaseAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Switches the open production menu to the other production building
+    /// of the same kind on the human's side — used by the Land/Air tabs
+    /// inside the menu so the player can browse both without going back
+    /// to the map.
+    /// </summary>
+    public void SwitchFactoryView(BuildingKind targetKind)
+    {
+        if (CurrentState is null || OpenedFactory is null)
+        {
+            return;
+        }
+        foreach (var tile in CurrentState.Map.Tiles.Values)
+        {
+            if (tile.Building != targetKind)
+            {
+                continue;
+            }
+            if (CurrentState.GetBuildingOwner(tile.Coord) != HumanSide)
+            {
+                continue;
+            }
+            OpenedFactory = tile.Coord;
+            Notify();
+            return;
+        }
     }
 
     private async Task RunAiPhaseAsync(CancellationToken cancellationToken)

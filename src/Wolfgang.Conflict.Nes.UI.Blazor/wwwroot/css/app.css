@@ -389,3 +389,31 @@ h1 {
     color: #555;
     cursor: default;
 }
+
+.factory-tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.6rem;
+}
+
+.factory-tab {
+    appearance: none;
+    background: #1c2030;
+    color: #a0a0c0;
+    border: 1px solid #2a3050;
+    border-radius: 4px 4px 0 0;
+    padding: 0.4rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.factory-tab.active {
+    background: #2a3050;
+    color: #fce18c;
+    border-color: #fce18c;
+}
+
+.factory-tab:disabled {
+    cursor: default;
+}

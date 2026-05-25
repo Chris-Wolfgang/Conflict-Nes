@@ -46,9 +46,33 @@
 
 <div class="production-menu @(side == Side.Blue ? "blue" : "red")">
     <div class="production-header">
-        <h2>@(buildingKind == BuildingKind.AirFactory ? "Air Factory" : "Land Factory") &mdash; @side</h2>
+        <h2>@side &mdash; Production</h2>
         <div class="production-funds">F.P. @funds</div>
     </div>
+
+    @if (side == HumanSide)
+    {
+        <div class="factory-tabs">
+            <button class="factory-tab @(buildingKind == BuildingKind.LandFactory ? "active" : null)"
+                    type="button"
+                    disabled="@(aiActive || buildingKind == BuildingKind.LandFactory)"
+                    @onclick="@(() => OnSwitch.InvokeAsync(BuildingKind.LandFactory))">
+                Land Factory
+            </button>
+            <button class="factory-tab @(buildingKind == BuildingKind.AirFactory ? "active" : null)"
+                    type="button"
+                    disabled="@(aiActive || buildingKind == BuildingKind.AirFactory)"
+                    @onclick="@(() => OnSwitch.InvokeAsync(BuildingKind.AirFactory))">
+                Air Factory
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="factory-tabs">
+            <span class="factory-tab active">@(buildingKind == BuildingKind.AirFactory ? "Air Factory" : "Land Factory")</span>
+        </div>
+    }
 
     <div class="production-grid">
         @foreach (var def in roster)
@@ -121,6 +145,7 @@
     [Parameter] public string? AiPreviewTypeId { get; set; }
     [Parameter] public EventCallback<string> OnBuild { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<BuildingKind> OnSwitch { get; set; }
 
     /// <summary>Catalog id of the slot the player has selected (not yet committed).</summary>
     private string? _selectedTypeId;
