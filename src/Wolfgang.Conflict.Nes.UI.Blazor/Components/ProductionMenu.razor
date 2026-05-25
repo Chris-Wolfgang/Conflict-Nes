@@ -40,7 +40,10 @@
         }
     }
     var sideAlreadyBuilt = State.HasBuiltThisTurn(side);
-    var aiActive = AiPreviewTypeId is not null;
+    // The AI preview only counts as "active" when it really is the AI's
+    // turn. Stuck-on preview state from a prior turn must never lock the
+    // menu controls during the human's turn (Cancel / Build / tabs).
+    var aiActive = AiPreviewTypeId is not null && State.NextToAct != HumanSide;
     var canCommit = !sideAlreadyBuilt && !aiActive && side == HumanSide && _selectedTypeId is not null;
 }
 
