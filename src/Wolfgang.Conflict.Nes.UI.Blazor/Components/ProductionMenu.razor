@@ -6,11 +6,13 @@
 @using Wolfgang.Conflict.Nes.Engine.Units
 
 @*
-    Production screen for a single factory or airbase. Shows six slots:
-    those the side can currently afford are filled with the unit's name +
-    cost, the rest are shown as empty placeholders the player must save up
-    for. The slot of the unit just built is outlined; if an AI build is
-    being previewed, that slot is outlined in red instead.
+    Production screen for one factory. Shows six slots; affordable ones
+    show the unit's name + cost, the rest just show a blank placeholder
+    (no cost — the player can browse to see what's available but isn't
+    told the locked price until they can afford it).
+
+    Workflow: tap a slot to select it (yellow outline), then commit with
+    the Build button or back out with Cancel.
 *@
 
 @if (State is null || Factory is null)
@@ -28,7 +30,6 @@
     var builtTypeId = string.Empty;
     if (builtHere == Factory.Value)
     {
-        // Find the unit just built — newest unit on this hex on this side.
         var fresh = State.Units.Values
             .Where(u => u.Coord == Factory.Value && u.Side == side)
             .OrderByDescending(u => u.Id.Value)
@@ -38,7 +39,9 @@
             builtTypeId = fresh.Type.Id;
         }
     }
-    var canBuildMore = !State.HasBuiltThisTurn(side) && AiPreviewTypeId is null && side == HumanSide;
+    var sideAlreadyBuilt = State.HasBuiltThisTurn(side);
+    var aiActive = AiPreviewTypeId is not null;
+    var canCommit = !sideAlreadyBuilt && !aiActive && side == HumanSide && _selectedTypeId is not null;
 }
 
 <div class="production-menu @(side == Side.Blue ? "blue" : "red")">
@@ -53,15 +56,17 @@
             var affordable = def.ProductionCost <= funds;
             var isBuilt = string.Equals(def.Id, builtTypeId, StringComparison.Ordinal);
             var isAiPreview = string.Equals(def.Id, AiPreviewTypeId, StringComparison.Ordinal);
+            var isSelected = string.Equals(def.Id, _selectedTypeId, StringComparison.Ordinal);
             var slotClass = "production-slot"
                 + (affordable ? " affordable" : " empty")
                 + (isBuilt ? " built" : string.Empty)
-                + (isAiPreview ? " ai-preview" : string.Empty);
+                + (isAiPreview ? " ai-preview" : string.Empty)
+                + (isSelected ? " selected" : string.Empty);
 
             <button class="@slotClass"
                     type="button"
-                    disabled="@(!affordable || !canBuildMore || isBuilt)"
-                    @onclick="@(_ => OnBuild.InvokeAsync(def.Id))">
+                    disabled="@(!affordable || isBuilt || aiActive || sideAlreadyBuilt || side != HumanSide)"
+                    @onclick="@(_ => SelectSlot(def.Id))">
                 @if (affordable || isBuilt || isAiPreview)
                 {
                     <div class="slot-name">@def.ShortName</div>
@@ -70,35 +75,42 @@
                 else
                 {
                     <div class="slot-empty-marker">&mdash;</div>
-                    <div class="slot-cost-locked">@def.ProductionCost F.P.</div>
                 }
             </button>
         }
     </div>
 
     <div class="production-footer">
-        @if (AiPreviewTypeId is not null)
+        @if (aiActive)
         {
             <div class="production-hint">Red is building&hellip;</div>
         }
-        else if (State.HasBuiltThisTurn(side))
+        else if (sideAlreadyBuilt)
         {
-            <div class="production-hint">Built this turn. Close when ready.</div>
+            <div class="production-hint">Built this turn. Cancel to close.</div>
         }
         else if (side == HumanSide)
         {
-            <div class="production-hint">Choose a unit, or close to browse another factory.</div>
+            <div class="production-hint">@(_selectedTypeId is null ? "Tap a unit to select it." : "Press Build to confirm.")</div>
         }
         else
         {
             <div class="production-hint">Viewing enemy factory.</div>
         }
-        <button class="action-button"
-                type="button"
-                disabled="@(AiPreviewTypeId is not null)"
-                @onclick="OnClose">
-            Close
-        </button>
+        <div class="footer-buttons">
+            <button class="action-button build"
+                    type="button"
+                    disabled="@(!canCommit)"
+                    @onclick="ConfirmBuild">
+                Build
+            </button>
+            <button class="action-button"
+                    type="button"
+                    disabled="@aiActive"
+                    @onclick="OnClose">
+                Cancel
+            </button>
+        </div>
     </div>
 </div>
 
@@ -109,4 +121,37 @@
     [Parameter] public string? AiPreviewTypeId { get; set; }
     [Parameter] public EventCallback<string> OnBuild { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
+
+    /// <summary>Catalog id of the slot the player has selected (not yet committed).</summary>
+    private string? _selectedTypeId;
+
+    /// <summary>The factory hex the current selection belongs to — clears on switch.</summary>
+    private HexCoord? _selectionFactory;
+
+    protected override void OnParametersSet()
+    {
+        // Clear the in-flight selection if the player navigated to a
+        // different factory, so a stale highlight doesn't carry over.
+        if (_selectionFactory != Factory)
+        {
+            _selectedTypeId = null;
+            _selectionFactory = Factory;
+        }
+    }
+
+    private void SelectSlot(string typeId)
+    {
+        _selectedTypeId = string.Equals(_selectedTypeId, typeId, StringComparison.Ordinal)
+            ? null  // tapping the selected slot again deselects.
+            : typeId;
+    }
+
+    private async Task ConfirmBuild()
+    {
+        if (_selectedTypeId is { } id)
+        {
+            await OnBuild.InvokeAsync(id);
+            _selectedTypeId = null;
+        }
+    }
 }

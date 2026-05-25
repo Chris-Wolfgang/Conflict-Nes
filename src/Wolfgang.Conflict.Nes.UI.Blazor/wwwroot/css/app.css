@@ -365,3 +365,27 @@ h1 {
     color: #a0a0c0;
     font-size: 0.85rem;
 }
+
+.production-slot.selected:not(:disabled) {
+    border-color: #fce18c;
+    background: #2a2410;
+    box-shadow: 0 0 0 2px #fce18c inset;
+}
+
+.footer-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-button.build {
+    background: #2a4a1c;
+    border: 1px solid #5c8030;
+    color: #e8f0d8;
+}
+
+.action-button.build:disabled {
+    background: #1a1f10;
+    border-color: #303820;
+    color: #555;
+    cursor: default;
+}
