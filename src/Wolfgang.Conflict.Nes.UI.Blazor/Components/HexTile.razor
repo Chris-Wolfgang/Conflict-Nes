@@ -31,6 +31,65 @@
                 <polygon points="@PeakDarkFace(peak)" fill="@NesPalette.MountainDark" />
             }
             break;
+
+        case Terrain.Road:
+            // Brown ribbon across the hex with a dashed centre line.
+            <rect x="@F(Cx - 14)" y="@F(Cy - 4)" width="28" height="8"
+                  fill="@NesPalette.Road" stroke="@NesPalette.MountainDark" stroke-width="0.6" />
+            <line x1="@F(Cx - 11)" y1="@F(Cy)" x2="@F(Cx - 5)" y2="@F(Cy)"
+                  stroke="@NesPalette.Text" stroke-width="0.8" />
+            <line x1="@F(Cx - 1)" y1="@F(Cy)" x2="@F(Cx + 5)" y2="@F(Cy)"
+                  stroke="@NesPalette.Text" stroke-width="0.8" />
+            <line x1="@F(Cx + 9)" y1="@F(Cy)" x2="@F(Cx + 13)" y2="@F(Cy)"
+                  stroke="@NesPalette.Text" stroke-width="0.8" />
+            break;
+
+        case Terrain.River:
+            // Two darker wavy lines suggest current.
+            <path d="@RiverPath(Cy - 3)" stroke="@NesPalette.Reef" stroke-width="1.4"
+                  fill="none" stroke-linecap="round" />
+            <path d="@RiverPath(Cy + 4)" stroke="@NesPalette.Reef" stroke-width="1.4"
+                  fill="none" stroke-linecap="round" />
+            break;
+
+        case Terrain.Bridge:
+            // River under, with a road span and railings.
+            <path d="@RiverPath(Cy + 7)" stroke="@NesPalette.Reef" stroke-width="1.2"
+                  fill="none" stroke-linecap="round" />
+            <rect x="@F(Cx - 14)" y="@F(Cy - 5)" width="28" height="10"
+                  fill="@NesPalette.Road" stroke="@NesPalette.MountainDark" stroke-width="0.6" />
+            <line x1="@F(Cx - 14)" y1="@F(Cy - 6)" x2="@F(Cx + 14)" y2="@F(Cy - 6)"
+                  stroke="@NesPalette.MountainDark" stroke-width="0.8" />
+            <line x1="@F(Cx - 14)" y1="@F(Cy + 6)" x2="@F(Cx + 14)" y2="@F(Cy + 6)"
+                  stroke="@NesPalette.MountainDark" stroke-width="0.8" />
+            break;
+
+        case Terrain.Beach:
+            // Three little wave caps on a sandy backdrop.
+            @foreach (var (dx, dy) in WaveCaps)
+            {
+                <path d="@WavePath(Cx + dx, Cy + dy)" stroke="@NesPalette.Sea"
+                      stroke-width="0.9" fill="none" stroke-linecap="round" />
+            }
+            break;
+
+        case Terrain.Sea:
+            // Three longer wave lines across the hex.
+            @foreach (var dy in SeaWaves)
+            {
+                <path d="@RiverPath(Cy + dy)" stroke="@NesPalette.Reef"
+                      stroke-width="1.0" fill="none" stroke-linecap="round" />
+            }
+            break;
+
+        case Terrain.Reef:
+            // Dark sea with three rocky outcrops.
+            @foreach (var (dx, dy) in ReefRocks)
+            {
+                <circle cx="@F(Cx + dx)" cy="@F(Cy + dy)" r="3.5" fill="@NesPalette.MountainDark" />
+                <circle cx="@F(Cx + dx - 1)" cy="@F(Cy + dy - 1)" r="1.4" fill="@NesPalette.MountainLight" />
+            }
+            break;
     }
 </g>
 
@@ -80,5 +139,33 @@
         var baseY = Cy + p.BaseY;
         var baseRightX = Cx + p.Dx + p.HalfWidth;
         return $"{F(apexX)},{F(apexY)} {F(baseMidX)},{F(baseY)} {F(baseRightX)},{F(baseY)}";
+    }
+
+    // Three small wave-cap positions on a Beach hex.
+    private static readonly (double Dx, double Dy)[] WaveCaps =
+    [
+        (-6, -2), (4, 1), (-2, 6),
+    ];
+
+    // Three vertical offsets at which to draw a Sea wave line.
+    private static readonly double[] SeaWaves = [-6, 0, 6];
+
+    // Three reef-rock positions inside a Reef hex.
+    private static readonly (double Dx, double Dy)[] ReefRocks =
+    [
+        (-7, 0), (5, -4), (3, 6),
+    ];
+
+    // Sinusoid path across the hex at the given y, used for water lines.
+    private string RiverPath(double y)
+    {
+        var p = F;
+        return $"M {p(Cx - 14)} {p(y)} Q {p(Cx - 7)} {p(y - 3)} {p(Cx)} {p(y)} T {p(Cx + 14)} {p(y)}";
+    }
+
+    // A small ~^~ cap for a beach wave.
+    private static string WavePath(double cx, double cy)
+    {
+        return $"M {F(cx - 3)} {F(cy)} Q {F(cx - 1.5)} {F(cy - 2)} {F(cx)} {F(cy)} T {F(cx + 3)} {F(cy)}";
     }
 }

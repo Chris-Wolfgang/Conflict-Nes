@@ -34,7 +34,7 @@ public static class MissionLoader
             new(Side.Blue, "liberator",   new HexCoord(2, 6), IsCommander: false),
             new(Side.Blue, "us-commando", new HexCoord(3, 7), IsCommander: false),
             new(Side.Blue, "m60a3",       new HexCoord(2, 7), IsCommander: false),
-            new(Side.Blue, "m151",        new HexCoord(0, 8), IsCommander: false),
+            new(Side.Blue, "m151",        new HexCoord(0, 6), IsCommander: false),
             new(Side.Blue, "m48",         new HexCoord(2, 8), IsCommander: false),
             new(Side.Blue, "ah1s",        new HexCoord(1, 5), IsCommander: false),
             new(Side.Blue, "a10",         new HexCoord(2, 5), IsCommander: false),
