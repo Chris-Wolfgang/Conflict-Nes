@@ -31,7 +31,7 @@ public static class MissionLoader
             // force fans out around it. The commander's "H" badge is the HQ
             // — there is no separate HQ building.
             new(Side.Blue, "m1a1",        new HexCoord(1, 7), IsCommander: true),
-            new(Side.Blue, "liberator",   new HexCoord(2, 6), IsCommander: false),
+            new(Side.Blue, "us-infantry",   new HexCoord(2, 6), IsCommander: false),
             new(Side.Blue, "us-commando", new HexCoord(3, 7), IsCommander: false),
             new(Side.Blue, "m60a3",       new HexCoord(2, 7), IsCommander: false),
             new(Side.Blue, "m151",        new HexCoord(0, 6), IsCommander: false),

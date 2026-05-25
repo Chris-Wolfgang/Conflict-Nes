@@ -33,7 +33,9 @@ public static class ProductionRules
             or UnitCategory.BattleMissileLauncher
             or UnitCategory.FlakPanzer
             or UnitCategory.SupplyVehicle,
-        BuildingKind.Airbase => category is UnitCategory.Attacker
+        // Airbases ship in infantry (airlifted / paratrooper) in addition to aircraft.
+        BuildingKind.Airbase => category is UnitCategory.Infantry
+            or UnitCategory.Attacker
             or UnitCategory.Helicopter
             or UnitCategory.Fighter
             or UnitCategory.SupplyPlane,
@@ -54,21 +56,19 @@ public static class ProductionRules
     /// </remarks>
     private static readonly Dictionary<(BuildingKind Building, Side Side), string[]> Rosters = new()
     {
-        // Blue land: NATO infantry, commando, jeep, MBT, SAM, AA-gun.
+        // Land factories: infantry first, then commando, jeep, MBT, SAM, AA-gun.
         [(BuildingKind.Factory, Side.Blue)] =
-            ["liberator", "us-commando", "m151", "m60a3", "m48", "m247"],
+            ["us-infantry", "us-commando", "m151", "m60a3", "m48", "m247"],
 
-        // Red land: Soviet infantry, commando, jeep, MBT, SAM, AA-gun.
         [(BuildingKind.Factory, Side.Red)] =
             ["red-infantry", "red-commando", "brdm2", "t62", "sa8", "zsu23"],
 
-        // Blue air: scout/attack helo, attack helo, A-10, A-7, F-4E, F-16C.
+        // Air factories: infantry first (paratroopers / airlifted), then five aircraft.
         [(BuildingKind.Airbase, Side.Blue)] =
-            ["ah1s", "ah64", "a10", "a7", "f4e", "f16c"],
+            ["us-infantry", "ah1s", "ah64", "a10", "f4e", "f16c"],
 
-        // Red air: Hind, Havoc, Frogfoot, Fitter, Flogger, Fulcrum.
         [(BuildingKind.Airbase, Side.Red)] =
-            ["mi24", "mi28", "su25", "su17", "mig23", "mig29"],
+            ["red-infantry", "mi24", "mi28", "su25", "mig23", "mig29"],
     };
 
     /// <summary>

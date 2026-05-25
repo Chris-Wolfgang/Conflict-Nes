@@ -1,8 +1,8 @@
 {
   "unitTypes": [
     {
-      "id": "liberator",
-      "name": "The Liberator",
+      "id": "us-infantry",
+      "name": "US Infantry",
       "shortName": "Inf",
       "category": "Infantry",
       "side": "Blue",

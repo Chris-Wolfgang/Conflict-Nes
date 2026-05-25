@@ -44,7 +44,7 @@ public class ProductionRulesTests
         // M48 SAM, M247 AA-gun. The HQ M1A1 must NOT be buildable.
         Assert.Equal(6, producible.Count);
         var ids = new HashSet<string>(producible.Select(d => d.Id), StringComparer.Ordinal);
-        Assert.Contains("liberator", ids);
+        Assert.Contains("us-infantry", ids);
         Assert.Contains("us-commando", ids);
         Assert.Contains("m151", ids);
         Assert.Contains("m60a3", ids);
@@ -55,19 +55,33 @@ public class ProductionRulesTests
     }
 
     [Fact]
-    public void ProducibleAt_airbase_for_red_returns_curated_six_air_units()
+    public void ProducibleAt_airbase_for_red_returns_infantry_plus_five_air()
     {
         var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Red);
 
         Assert.Equal(6, producible.Count);
+        // Infantry leads the airbase roster (airlift / paratroopers).
+        Assert.Equal("red-infantry", producible[0].Id);
         var ids = new HashSet<string>(producible.Select(d => d.Id), StringComparer.Ordinal);
         Assert.Contains("mi24", ids);
         Assert.Contains("mi28", ids);
         Assert.Contains("su25", ids);
-        Assert.Contains("su17", ids);
         Assert.Contains("mig23", ids);
         Assert.Contains("mig29", ids);
-        Assert.All(producible, d => Assert.True(RelationsTableIsAir(d.Category)));
+    }
+
+    [Fact]
+    public void Both_factories_lead_with_infantry()
+    {
+        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
+        var redLand  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Red);
+        var blueAir  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Blue);
+        var redAir   = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Red);
+
+        Assert.Equal(UnitCategory.Infantry, blueLand[0].Category);
+        Assert.Equal(UnitCategory.Infantry, redLand[0].Category);
+        Assert.Equal(UnitCategory.Infantry, blueAir[0].Category);
+        Assert.Equal(UnitCategory.Infantry, redAir[0].Category);
     }
 
     [Fact]
