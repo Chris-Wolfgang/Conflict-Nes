@@ -147,8 +147,11 @@ public class ProductionRulesTests
     }
 
     [Fact]
-    public async Task AffordableAt_returns_empty_when_side_is_broke()
+    public async Task AffordableAt_always_includes_infantry_even_when_broke()
     {
+        // A side with 0 F.P. can still raise infantry — this is a special
+        // case from the original game's rules. Anything else priced > 0
+        // must be filtered out.
         var mission = await MissionLoader.LoadMission01Async();
         var engine = new GameEngine();
         var start = engine.StartGame(mission, randomSeed: 1);
@@ -157,9 +160,13 @@ public class ProductionRulesTests
             new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
             start.Winner, start.RandomSeed);
 
-        var affordable = ProductionRules.AffordableAt(broke, BuildingKind.Factory, Side.Blue);
+        var land = ProductionRules.AffordableAt(broke, BuildingKind.Factory, Side.Blue);
+        var air  = ProductionRules.AffordableAt(broke, BuildingKind.Airbase, Side.Blue);
 
-        Assert.Empty(affordable);
+        Assert.Contains(land, d => d.Category == UnitCategory.Infantry);
+        Assert.Contains(air,  d => d.Category == UnitCategory.Infantry);
+        Assert.All(land, d => Assert.True(d.Category == UnitCategory.Infantry));
+        Assert.All(air,  d => Assert.True(d.Category == UnitCategory.Infantry));
     }
 
     private static bool RelationsTableIsAir(UnitCategory c)

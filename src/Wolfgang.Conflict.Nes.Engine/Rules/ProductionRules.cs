@@ -108,8 +108,9 @@ public static class ProductionRules
     /// <summary>
     /// Returns the curated production roster filtered down to what
     /// <paramref name="side"/> can currently afford given its F.P. in
-    /// <paramref name="state"/>, sorted cheapest first. This is the list a
-    /// production menu should display.
+    /// <paramref name="state"/>, sorted cheapest first. Infantry is always
+    /// included regardless of funds — every side can always raise infantry.
+    /// This is the list a production menu should display.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
     public static IReadOnlyList<UnitTypeDefinition> AffordableAt(GameState state, BuildingKind building, Side side)
@@ -125,7 +126,7 @@ public static class ProductionRules
         var result = new List<UnitTypeDefinition>(all.Count);
         foreach (var def in all)
         {
-            if (def.ProductionCost <= funds)
+            if (def.Category == UnitCategory.Infantry || def.ProductionCost <= funds)
             {
                 result.Add(def);
             }
