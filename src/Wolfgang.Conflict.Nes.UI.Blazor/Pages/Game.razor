@@ -42,6 +42,18 @@
                          SelectedUnitId="Service.SelectedUnitId"
                          OnHexClick="HandleHexClick" />
 
+            @if (Service.OpenedFactory is { } fac)
+            {
+                <div class="production-overlay">
+                    <ProductionMenu State="Service.CurrentState"
+                                    Factory="fac"
+                                    HumanSide="Service.HumanSide"
+                                    AiPreviewTypeId="Service.AiBuildPreviewTypeId"
+                                    OnBuild="BuildSelected"
+                                    OnClose="Service.CloseFactoryMenu" />
+                </div>
+            }
+
             <aside class="side-panel">
                 @if (Service.PendingAttack is { } pa
                      && Service.CurrentState.Units.TryGetValue(pa.AttackerId, out var atkUnit))
@@ -147,6 +159,8 @@
     private void HandleHexClick(HexCoord hex) => Service.OnHexClicked(hex);
 
     private async Task EndTurnAsync() => await Service.EndTurnAsync();
+
+    private void BuildSelected(string typeId) => Service.BuildAtOpenedFactory(typeId);
 
     private static string OutlookText(Engine.Units.MatchupTier tier) => tier switch
     {

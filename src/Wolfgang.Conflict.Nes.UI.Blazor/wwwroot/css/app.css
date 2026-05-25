@@ -225,3 +225,143 @@ h1 {
     right: 0.75rem;
     top: 0.5rem;
 }
+
+/* Production menu --------------------------------------------------------- */
+
+.production-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(8, 8, 18, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.board-and-panel {
+    position: relative;
+}
+
+.production-menu {
+    width: min(560px, 92%);
+    background: #14182a;
+    border: 3px solid #3868c0;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7);
+}
+
+.production-menu.red {
+    border-color: #c83030;
+}
+
+.production-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.6rem;
+}
+
+.production-header h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #fce18c;
+    letter-spacing: 0.05em;
+}
+
+.production-funds {
+    font-weight: bold;
+    color: #e8e8e8;
+}
+
+.production-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.production-slot {
+    appearance: none;
+    background: #1c2030;
+    color: #e8e8e8;
+    border: 2px solid #2a3050;
+    border-radius: 4px;
+    padding: 0.7rem 0.4rem;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.12s, background 0.12s;
+}
+
+.production-slot.affordable:hover:not(:disabled) {
+    border-color: #fce18c;
+    background: #232842;
+}
+
+.production-slot.empty {
+    background: #0d1018;
+    color: #555;
+}
+
+.production-slot:disabled {
+    cursor: default;
+}
+
+.production-slot.built {
+    border-color: #fce18c;
+    background: #2a2410;
+    box-shadow: 0 0 0 3px rgba(252, 225, 140, 0.45) inset;
+}
+
+.production-slot.ai-preview {
+    border-color: #e02c2c;
+    background: #2a1010;
+    box-shadow: 0 0 0 3px rgba(224, 44, 44, 0.55) inset;
+    animation: ai-pulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes ai-pulse {
+    from { box-shadow: 0 0 0 3px rgba(224, 44, 44, 0.35) inset; }
+    to   { box-shadow: 0 0 0 5px rgba(224, 44, 44, 0.75) inset; }
+}
+
+.slot-name {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.slot-cost {
+    font-size: 0.8rem;
+    color: #a0a0c0;
+}
+
+.slot-cost-locked {
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.slot-empty-marker {
+    font-size: 1.4rem;
+    color: #444;
+}
+
+.production-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.production-hint {
+    color: #a0a0c0;
+    font-size: 0.85rem;
+}

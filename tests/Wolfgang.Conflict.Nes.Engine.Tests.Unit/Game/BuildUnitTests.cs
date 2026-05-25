@@ -90,4 +90,34 @@ public class BuildUnitTests
         Assert.True(fresh.HasAttacked);
         Assert.Equal(0, fresh.MovesRemaining);
     }
+
+    [Fact]
+    public async Task A_side_can_only_build_one_unit_per_turn()
+    {
+        // The manual restricts production to a single unit per turn across
+        // all of a side's factories.
+        var (engine, state) = await StartMission01WithFunds();
+
+        var afterFirst = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
+
+        Assert.True(afterFirst.HasBuiltThisTurn(Side.Blue));
+        Assert.Equal(BlueFactory, afterFirst.GetBuildHexThisTurn(Side.Blue));
+        // A second build attempt (even of free infantry) must be rejected.
+        Assert.Throws<InvalidOperationException>(
+            () => engine.BuildUnit(afterFirst, BlueFactory, TestCatalog.Infantry.Id));
+    }
+
+    [Fact]
+    public async Task EndTurn_clears_the_one_build_per_turn_flag()
+    {
+        var (engine, state) = await StartMission01WithFunds();
+
+        var afterBuild = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
+        var afterEndTurn = engine.EndTurn(afterBuild);
+
+        // After Blue ends its turn the flag is cleared so Red can build,
+        // and Blue gets a fresh build next turn as well.
+        Assert.False(afterEndTurn.HasBuiltThisTurn(Side.Blue));
+        Assert.False(afterEndTurn.HasBuiltThisTurn(Side.Red));
+    }
 }

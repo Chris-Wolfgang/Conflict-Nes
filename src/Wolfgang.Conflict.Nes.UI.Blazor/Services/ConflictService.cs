@@ -1,5 +1,6 @@
 using Wolfgang.Conflict.Nes.Engine.Game;
 using Wolfgang.Conflict.Nes.Engine.Hex;
+using Wolfgang.Conflict.Nes.Engine.Map;
 using Wolfgang.Conflict.Nes.Engine.Players;
 using Wolfgang.Conflict.Nes.Engine.Rules;
 using Wolfgang.Conflict.Nes.Engine.Strategy;
@@ -16,6 +17,9 @@ public sealed class ConflictService
 {
     /// <summary>Delay between successive AI actions so the player can follow the AI's turn.</summary>
     private const int AiActionDelayMs = 650;
+
+    /// <summary>How long the AI's production-menu preview lingers before closing.</summary>
+    private const int AiBuildPreviewMs = 1400;
 
     private readonly GameEngine _engine = new();
     private readonly IPlayerStrategy _aiStrategy = new GreedyAiStrategy();
@@ -38,6 +42,20 @@ public sealed class ConflictService
     /// <see cref="PendingAttackInfo.TargetBuildingCoord"/> is set.
     /// </summary>
     public PendingAttackInfo? PendingAttack { get; private set; }
+
+    /// <summary>
+    /// The factory hex whose production screen is open, or <see langword="null"/>
+    /// when no menu is up. The player can open any factory's menu to browse
+    /// even after they've already built this turn.
+    /// </summary>
+    public HexCoord? OpenedFactory { get; private set; }
+
+    /// <summary>
+    /// While the AI is showing its build choice, this carries the chosen
+    /// unit type id; the menu highlights it for <see cref="AiBuildPreviewMs"/>
+    /// and then closes.
+    /// </summary>
+    public string? AiBuildPreviewTypeId { get; private set; }
 
     /// <summary>True if a mission has been started.</summary>
     public bool IsStarted => CurrentState is not null;
@@ -74,7 +92,19 @@ public sealed class ConflictService
             return;
         }
 
-        var unitAtHex = CurrentState.GetUnitAt(hex);
+        // Clicking one of your own factories opens its production screen
+        // (browseable any time; one build per turn).
+        if (TryOpenFactoryMenu(hex))
+        {
+            return;
+        }
+
+        HandleUnitOrEmptyClick(hex);
+    }
+
+    private void HandleUnitOrEmptyClick(HexCoord hex)
+    {
+        var unitAtHex = CurrentState!.GetUnitAt(hex);
 
         if (SelectedUnitId is null)
         {
@@ -198,6 +228,60 @@ public sealed class ConflictService
         }
     }
 
+    private bool TryOpenFactoryMenu(HexCoord hex)
+    {
+        if (CurrentState is null)
+        {
+            return false;
+        }
+        if (!CurrentState.Map.Tiles.TryGetValue(hex, out var tile) || tile.Building is not { } building)
+        {
+            return false;
+        }
+        if (!ProductionRules.IsProductionBuilding(building))
+        {
+            return false;
+        }
+        if (CurrentState.GetBuildingOwner(hex) != HumanSide || !CurrentState.HasIntactBuilding(hex))
+        {
+            return false;
+        }
+        OpenedFactory = hex;
+        SelectedUnitId = null;
+        Notify();
+        return true;
+    }
+
+    /// <summary>Closes the production menu without buying anything.</summary>
+    public void CloseFactoryMenu()
+    {
+        if (OpenedFactory is not null)
+        {
+            OpenedFactory = null;
+            Notify();
+        }
+    }
+
+    /// <summary>
+    /// Builds <paramref name="typeId"/> at the currently-open factory.
+    /// No-op if the human has already built somewhere this turn or no menu
+    /// is open. After a successful build the menu stays open so the player
+    /// can see the box outline; they dismiss it with <see cref="CloseFactoryMenu"/>.
+    /// </summary>
+    public void BuildAtOpenedFactory(string typeId)
+    {
+        if (CurrentState is null || !IsHumanTurn || OpenedFactory is not { } factory)
+        {
+            return;
+        }
+        if (CurrentState.HasBuiltThisTurn(HumanSide))
+        {
+            return;
+        }
+        CurrentState = _engine.BuildUnit(CurrentState, factory, typeId);
+        Notify();
+    }
+
     /// <summary>Clears any current selection.</summary>
     public void ClearSelection()
     {
@@ -238,12 +322,30 @@ public sealed class ConflictService
                && actions++ < safetyCap)
         {
             var action = await _aiStrategy.ChooseNextActionAsync(s, s.NextToAct, cancellationToken).ConfigureAwait(false);
+
+            // For a Build action, pop the factory menu open with the chosen
+            // unit highlighted so the player can see what the AI is buying.
+            if (action.Kind == StrategyActionKind.Build)
+            {
+                OpenedFactory = action.Hex;
+                AiBuildPreviewTypeId = action.ProduceTypeId;
+                Notify();
+                await Task.Delay(AiBuildPreviewMs, cancellationToken).ConfigureAwait(false);
+            }
+
             CurrentState = ApplyAction(action, s);
+
+            if (action.Kind == StrategyActionKind.Build)
+            {
+                OpenedFactory = null;
+                AiBuildPreviewTypeId = null;
+            }
+
             Notify();
 
             // Pace the AI so the player can watch each move/attack/supply
             // play out one step at a time rather than all at once.
-            if (action.Kind != StrategyActionKind.EndTurn)
+            if (action.Kind != StrategyActionKind.EndTurn && action.Kind != StrategyActionKind.Build)
             {
                 await Task.Delay(AiActionDelayMs, cancellationToken).ConfigureAwait(false);
             }

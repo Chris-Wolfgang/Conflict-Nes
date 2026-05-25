@@ -293,7 +293,8 @@ public sealed class GameEngine
             funds: newFunds,
             winner: state.Winner,
             randomSeed: unchecked(state.RandomSeed * 1103515245 + 12345),
-            buildingHitPoints: newHits);
+            buildingHitPoints: newHits,
+            buildThisTurn: state.BuildThisTurn);
     }
 
     // Factories self-repair between attacks: a non-fatal strike heals back
@@ -365,6 +366,10 @@ public sealed class GameEngine
         }
 
         var side = state.NextToAct;
+        if (state.HasBuiltThisTurn(side))
+        {
+            throw new InvalidOperationException($"{side} has already built a unit this turn.");
+        }
         var type = ProductionRules.ValidateBuild(state, side, buildingCoord, typeId);
 
         var newFunds = CopyFunds(state.Funds);
@@ -382,6 +387,13 @@ public sealed class GameEngine
         var newUnits = CopyUnits(state.Units);
         newUnits[newId] = freshUnit;
 
+        var newBuildThisTurn = new Dictionary<Side, HexCoord>();
+        foreach (var kv in state.BuildThisTurn)
+        {
+            newBuildThisTurn[kv.Key] = kv.Value;
+        }
+        newBuildThisTurn[side] = buildingCoord;
+
         return new GameState(
             map: state.Map,
             catalog: state.Catalog,
@@ -393,7 +405,8 @@ public sealed class GameEngine
             funds: newFunds,
             winner: state.Winner,
             buildingHitPoints: state.BuildingHitPoints,
-            randomSeed: state.RandomSeed);
+            randomSeed: state.RandomSeed,
+            buildThisTurn: newBuildThisTurn);
     }
 
     /// <summary>
@@ -435,6 +448,11 @@ public sealed class GameEngine
         // Turn number increments when Blue is about to act again (a full round).
         var newTurnNumber = nextSide == Side.Blue ? state.TurnNumber + 1 : state.TurnNumber;
 
+        // The side starting its turn gets its production-this-turn flag
+        // cleared so it can build again. The ending side's flag is also
+        // dropped — it's only meaningful within a turn.
+        var newBuildThisTurn = new Dictionary<Side, HexCoord>();
+
         var next = new GameState(
             map: state.Map,
             catalog: state.Catalog,
@@ -446,7 +464,8 @@ public sealed class GameEngine
             funds: newFunds,
             winner: state.Winner,
             randomSeed: state.RandomSeed,
-            buildingHitPoints: state.BuildingHitPoints);
+            buildingHitPoints: state.BuildingHitPoints,
+            buildThisTurn: newBuildThisTurn);
 
         return CheckVictory(next);
     }
@@ -536,7 +555,8 @@ public sealed class GameEngine
             funds: state.Funds,
             winner: winner,
             buildingHitPoints: state.BuildingHitPoints,
-            randomSeed: state.RandomSeed);
+            randomSeed: state.RandomSeed,
+            buildThisTurn: state.BuildThisTurn);
     }
 
     private static UnitId NextUnitId(GameState state)
@@ -709,7 +729,8 @@ public sealed class GameEngine
             funds: state.Funds,
             winner: state.Winner,
             randomSeed: state.RandomSeed,
-            buildingHitPoints: state.BuildingHitPoints);
+            buildingHitPoints: state.BuildingHitPoints,
+            buildThisTurn: state.BuildThisTurn);
 
     private static GameState WithUnitsAndFunds(
         GameState state,
@@ -727,5 +748,6 @@ public sealed class GameEngine
             funds: newFunds,
             winner: state.Winner,
             randomSeed: advanceSeed ? unchecked(state.RandomSeed * 1103515245 + 12345) : state.RandomSeed,
-            buildingHitPoints: state.BuildingHitPoints);
+            buildingHitPoints: state.BuildingHitPoints,
+            buildThisTurn: state.BuildThisTurn);
 }

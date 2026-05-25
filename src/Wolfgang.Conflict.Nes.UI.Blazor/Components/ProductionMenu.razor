@@ -1,0 +1,112 @@
+@using Wolfgang.Conflict.Nes.Engine.Game
+@using Wolfgang.Conflict.Nes.Engine.Hex
+@using Wolfgang.Conflict.Nes.Engine.Map
+@using Wolfgang.Conflict.Nes.Engine.Players
+@using Wolfgang.Conflict.Nes.Engine.Rules
+@using Wolfgang.Conflict.Nes.Engine.Units
+
+@*
+    Production screen for a single factory or airbase. Shows six slots:
+    those the side can currently afford are filled with the unit's name +
+    cost, the rest are shown as empty placeholders the player must save up
+    for. The slot of the unit just built is outlined; if an AI build is
+    being previewed, that slot is outlined in red instead.
+*@
+
+@if (State is null || Factory is null)
+{
+    return;
+}
+
+@{
+    var side = State.GetBuildingOwner(Factory.Value) ?? State.NextToAct;
+    var tile = State.Map.Tiles[Factory.Value];
+    var buildingKind = tile.Building ?? BuildingKind.Factory;
+    var roster = ProductionRules.ProducibleAt(State.Catalog, buildingKind, side);
+    var funds = State.Funds.TryGetValue(side, out var fp) ? fp : 0;
+    var builtHere = State.GetBuildHexThisTurn(side);
+    var builtTypeId = string.Empty;
+    if (builtHere == Factory.Value)
+    {
+        // Find the unit just built — newest unit on this hex on this side.
+        var fresh = State.Units.Values
+            .Where(u => u.Coord == Factory.Value && u.Side == side)
+            .OrderByDescending(u => u.Id.Value)
+            .FirstOrDefault();
+        if (fresh is not null)
+        {
+            builtTypeId = fresh.Type.Id;
+        }
+    }
+    var canBuildMore = !State.HasBuiltThisTurn(side) && AiPreviewTypeId is null && side == HumanSide;
+}
+
+<div class="production-menu @(side == Side.Blue ? "blue" : "red")">
+    <div class="production-header">
+        <h2>@(buildingKind == BuildingKind.Airbase ? "Air Factory" : "Land Factory") &mdash; @side</h2>
+        <div class="production-funds">F.P. @funds</div>
+    </div>
+
+    <div class="production-grid">
+        @foreach (var def in roster)
+        {
+            var affordable = def.ProductionCost <= funds;
+            var isBuilt = string.Equals(def.Id, builtTypeId, StringComparison.Ordinal);
+            var isAiPreview = string.Equals(def.Id, AiPreviewTypeId, StringComparison.Ordinal);
+            var slotClass = "production-slot"
+                + (affordable ? " affordable" : " empty")
+                + (isBuilt ? " built" : string.Empty)
+                + (isAiPreview ? " ai-preview" : string.Empty);
+
+            <button class="@slotClass"
+                    type="button"
+                    disabled="@(!affordable || !canBuildMore || isBuilt)"
+                    @onclick="@(_ => OnBuild.InvokeAsync(def.Id))">
+                @if (affordable || isBuilt || isAiPreview)
+                {
+                    <div class="slot-name">@def.ShortName</div>
+                    <div class="slot-cost">@def.ProductionCost F.P.</div>
+                }
+                else
+                {
+                    <div class="slot-empty-marker">&mdash;</div>
+                    <div class="slot-cost-locked">@def.ProductionCost F.P.</div>
+                }
+            </button>
+        }
+    </div>
+
+    <div class="production-footer">
+        @if (AiPreviewTypeId is not null)
+        {
+            <div class="production-hint">Red is building&hellip;</div>
+        }
+        else if (State.HasBuiltThisTurn(side))
+        {
+            <div class="production-hint">Built this turn. Close when ready.</div>
+        }
+        else if (side == HumanSide)
+        {
+            <div class="production-hint">Choose a unit, or close to browse another factory.</div>
+        }
+        else
+        {
+            <div class="production-hint">Viewing enemy factory.</div>
+        }
+        <button class="action-button"
+                type="button"
+                disabled="@(AiPreviewTypeId is not null)"
+                @onclick="OnClose">
+            Close
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public GameState? State { get; set; }
+    [Parameter] public HexCoord? Factory { get; set; }
+    [Parameter] public Side HumanSide { get; set; } = Side.Blue;
+    [Parameter] public string? AiPreviewTypeId { get; set; }
+    [Parameter] public EventCallback<string> OnBuild { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+}
