@@ -27,8 +27,8 @@ public class UnitCatalogTests
 
     [Theory]
     [InlineData("m1a1", "M1A1 Abrams", UnitCategory.BattleTank, 5, 8, 14, 6000)]
-    [InlineData("f4e", "F-4E Phantom II", UnitCategory.Fighter, 10, 6, 6, 6300)]
-    [InlineData("us-infantry", "US Infantry", UnitCategory.Infantry, 4, 10, 8, 600)]
+    [InlineData("f4e", "F-4E Phantom II", UnitCategory.Fighter, 10, 6, 8, 5000)]
+    [InlineData("us-infantry", "US Infantry", UnitCategory.Infantry, 4, 10, 0, 0)]
     [InlineData("t80", "T-80", UnitCategory.BattleTank, 5, 8, 14, 6000)]
     public async Task Get_returns_expected_definition(
         string id, string name, UnitCategory category, int moving, int fuel, int shell, int cost)

@@ -126,7 +126,7 @@ public static class ProductionRules
         var result = new List<UnitTypeDefinition>(all.Count);
         foreach (var def in all)
         {
-            if (EffectiveBuildCost(def) <= funds)
+            if (def.ProductionCost <= funds)
             {
                 result.Add(def);
             }
@@ -157,27 +157,6 @@ public static class ProductionRules
             }
         }
         return false;
-    }
-
-    /// <summary>
-    /// Returns the F.P. cost actually charged to build <paramref name="type"/>.
-    /// Infantry is free per the original game's rule — every side can always
-    /// raise infantry. Every other unit costs its catalog
-    /// <see cref="UnitTypeDefinition.ProductionCost"/>.
-    /// </summary>
-    /// <remarks>
-    /// The catalog's <see cref="UnitTypeDefinition.ProductionCost"/> stays
-    /// non-zero for infantry: combat economy (kill-bounty, loser penalty)
-    /// still references that value. Only the production payment is waived.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
-    public static int EffectiveBuildCost(UnitTypeDefinition type)
-    {
-        if (type is null)
-        {
-            throw new ArgumentNullException(nameof(type));
-        }
-        return type.Category == UnitCategory.Infantry ? 0 : type.ProductionCost;
     }
 
     /// <summary>
@@ -246,10 +225,9 @@ public static class ProductionRules
 
         var type = ResolveAndValidateType(state, side, building, typeId);
 
-        var effectiveCost = EffectiveBuildCost(type);
-        if (state.Funds[side] < effectiveCost)
+        if (state.Funds[side] < type.ProductionCost)
         {
-            throw new InvalidOperationException($"{side} cannot afford {type.Name} (cost {effectiveCost}, funds {state.Funds[side]}).");
+            throw new InvalidOperationException($"{side} cannot afford {type.Name} (cost {type.ProductionCost}, funds {state.Funds[side]}).");
         }
 
         if (!CanSideProduce(state, side))

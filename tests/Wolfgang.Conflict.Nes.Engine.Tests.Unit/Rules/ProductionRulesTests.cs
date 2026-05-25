@@ -147,15 +147,12 @@ public class ProductionRulesTests
     }
 
     [Fact]
-    public void EffectiveBuildCost_is_zero_for_infantry_and_catalog_price_otherwise()
+    public void Infantry_costs_zero_FP_per_manual()
     {
-        var infantry = TestCatalog.Get("us-infantry");
-        var tank = TestCatalog.Get("m60a3");
-        var fighter = TestCatalog.Get("f4e");
-
-        Assert.Equal(0, ProductionRules.EffectiveBuildCost(infantry));
-        Assert.Equal(tank.ProductionCost, ProductionRules.EffectiveBuildCost(tank));
-        Assert.Equal(fighter.ProductionCost, ProductionRules.EffectiveBuildCost(fighter));
+        // Per the NES manual (page 25), infantry F.P. = 0. This makes
+        // infantry naturally always-available without any engine special case.
+        Assert.Equal(0, TestCatalog.Get("us-infantry").ProductionCost);
+        Assert.Equal(0, TestCatalog.Get("red-infantry").ProductionCost);
     }
 
     [Fact]
