@@ -56,20 +56,23 @@
             break;
 
         case BuildingKind.AirFactory:
-            @* Wide runway with stripes (no tail/control-tower mush) *@
-            <rect x="-16" y="-4" width="32" height="8" fill="#3a3a40" stroke="#000" stroke-width="1.2" />
-            <rect x="-14" y="-0.5" width="3" height="1" fill="#fff" />
-            <rect x="-9" y="-0.5" width="3" height="1" fill="#fff" />
-            <rect x="-4" y="-0.5" width="3" height="1" fill="#fff" />
-            <rect x="1" y="-0.5" width="3" height="1" fill="#fff" />
-            <rect x="6" y="-0.5" width="3" height="1" fill="#fff" />
-            <rect x="11" y="-0.5" width="3" height="1" fill="#fff" />
-            @* Control tower at the side, painted in side colour *@
-            <rect x="-14" y="-12" width="6" height="8" fill="@OwnerColor" stroke="#000" stroke-width="1.2" />
-            <rect x="-13" y="-11" width="4" height="2" fill="#fff8" />
-            @* Hangar at the other side *@
-            <rect x="8" y="-11" width="8" height="7" fill="@OwnerColor" stroke="#000" stroke-width="1.2" />
-            <polygon points="8,-11 12,-13 16,-11" fill="@OwnerDarkColor" stroke="#000" stroke-width="0.8" />
+            @* Large arched hangar in the side colour — same visual weight
+               as the Land Factory so the player reads it as a factory.
+               A short tarmac strip at the bottom plus a control-tower
+               window distinguish it from the chimney-style land factory. *@
+            <rect x="-14" y="-12" width="28" height="18" fill="@OwnerColor" stroke="#000" stroke-width="1.5" />
+            @* Arched (rounded) roof in the darker shade *@
+            <path d="M -14,-12 Q 0,-22 14,-12 L 14,-9 L -14,-9 Z"
+                  fill="@OwnerDarkColor" stroke="#000" stroke-width="1.2" />
+            @* Hangar doors *@
+            <rect x="-9" y="-3" width="6" height="9" fill="#0008" />
+            <rect x="3" y="-3" width="6" height="9" fill="#0008" />
+            <rect x="-3" y="-7" width="6" height="2" fill="#fff8" />
+            @* Tarmac strip below the hangar with two centre-line dashes *@
+            <rect x="-16" y="6" width="32" height="4" fill="#3a3a40" stroke="#000" stroke-width="1.0" />
+            <rect x="-9" y="7.5" width="4" height="1" fill="#fff" />
+            <rect x="-1" y="7.5" width="4" height="1" fill="#fff" />
+            <rect x="7" y="7.5" width="4" height="1" fill="#fff" />
             break;
 
         case BuildingKind.Port:
