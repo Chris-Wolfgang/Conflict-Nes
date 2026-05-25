@@ -24,8 +24,8 @@ public enum Terrain
     /// <summary>A bridge across a <see cref="River"/>; passable as <see cref="Road"/>.</summary>
     Bridge = 5,
 
-    /// <summary>Sand/gravel coastline; transition between <see cref="Sea"/> and land.</summary>
-    Beach = 6,
+    /// <summary>Shallow water near shore — passable to ground at extra cost (2 MP).</summary>
+    Shoal = 6,
 
     /// <summary>Open water; passable only by sea/air units.</summary>
     Sea = 7,

@@ -55,7 +55,7 @@
     {
       "q": 0,
       "r": 7,
-      "terrain": "Beach",
+      "terrain": "Shoal",
       "building": null,
       "owner": null
     },
@@ -132,7 +132,7 @@
     {
       "q": 1,
       "r": 8,
-      "terrain": "Beach",
+      "terrain": "Shoal",
       "building": null,
       "owner": null
     },
@@ -209,7 +209,7 @@
     {
       "q": 2,
       "r": 8,
-      "terrain": "Beach",
+      "terrain": "Shoal",
       "building": null,
       "owner": null
     },

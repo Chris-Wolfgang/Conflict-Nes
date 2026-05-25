@@ -21,7 +21,7 @@ public static class NesPalette
     public const string Road = "#c8a868";
     public const string Bridge = "#c08858";
     public const string River = "#3870b8";
-    public const string Beach = "#e8d0a0";
+    public const string Shoal = "#e8d0a0";
     public const string Sea = "#1c4c98";
     public const string Reef = "#143058";
 

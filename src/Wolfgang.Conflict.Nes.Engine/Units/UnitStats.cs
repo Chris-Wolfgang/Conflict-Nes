@@ -37,7 +37,7 @@ public static class UnitStats
     {
         Terrain.Plains => 1,
         Terrain.Road => 1,
-        Terrain.Beach => 2,
+        Terrain.Shoal => 2,
         Terrain.Bridge => 2,
         Terrain.Forest => 2,
         Terrain.Mountain => 3,

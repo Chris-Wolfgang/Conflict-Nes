@@ -64,7 +64,7 @@
                   stroke="@NesPalette.MountainDark" stroke-width="0.8" />
             break;
 
-        case Terrain.Beach:
+        case Terrain.Shoal:
             // Three little wave caps on a sandy backdrop.
             @foreach (var (dx, dy) in WaveCaps)
             {
@@ -141,7 +141,7 @@
         return $"{F(apexX)},{F(apexY)} {F(baseMidX)},{F(baseY)} {F(baseRightX)},{F(baseY)}";
     }
 
-    // Three small wave-cap positions on a Beach hex.
+    // Three small wave-cap positions on a Shoal hex.
     private static readonly (double Dx, double Dy)[] WaveCaps =
     [
         (-6, -2), (4, 1), (-2, 6),
