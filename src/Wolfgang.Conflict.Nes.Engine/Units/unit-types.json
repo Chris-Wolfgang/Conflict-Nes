@@ -449,9 +449,9 @@
       "specialWeapon": "Alamo AAM"
     },
     {
-      "id": "mig31",
-      "name": "MiG-31 Foxhound",
-      "shortName": "MiG-31",
+      "id": "mig33",
+      "name": "MiG-33",
+      "shortName": "MiG-33",
       "category": "Fighter",
       "side": "Red",
       "movementDomain": "Fighter",
