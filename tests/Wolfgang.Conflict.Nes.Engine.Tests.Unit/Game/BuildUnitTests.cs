@@ -35,7 +35,7 @@ public class BuildUnitTests
         var fresh = next.Units.Values.Single(u => u.Coord == BlueFactory);
         Assert.Equal(TestCatalog.Tank, fresh.Type);
         Assert.Equal(Side.Blue, fresh.Side);
-        Assert.Equal(10000 - 6000, next.Funds[Side.Blue]);
+        Assert.Equal(10000 - TestCatalog.Tank.ProductionCost, next.Funds[Side.Blue]);
     }
 
     [Fact]

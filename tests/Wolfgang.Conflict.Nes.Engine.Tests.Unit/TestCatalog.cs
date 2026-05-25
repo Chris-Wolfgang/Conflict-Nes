@@ -15,8 +15,8 @@ internal static class TestCatalog
     /// <summary>"The Liberator" — Blue infantry.</summary>
     public static UnitTypeDefinition Infantry => Catalog.Get("liberator");
 
-    /// <summary>M1A1 Abrams — Blue battle tank.</summary>
-    public static UnitTypeDefinition Tank => Catalog.Get("m1a1");
+    /// <summary>M60A3 — Blue battle tank (the factory-buildable MBT; M1A1 is HQ-only).</summary>
+    public static UnitTypeDefinition Tank => Catalog.Get("m60a3");
 
     /// <summary>AH-1S Huey Cobra — Blue helicopter.</summary>
     public static UnitTypeDefinition Helicopter => Catalog.Get("ah1s");

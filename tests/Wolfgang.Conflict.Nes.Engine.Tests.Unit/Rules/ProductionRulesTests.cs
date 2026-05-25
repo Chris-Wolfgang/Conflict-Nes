@@ -36,22 +36,65 @@ public class ProductionRulesTests
     }
 
     [Fact]
-    public void ProducibleAt_factory_for_blue_returns_blue_ground_units()
+    public void ProducibleAt_factory_for_blue_returns_curated_six()
     {
         var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
 
-        Assert.Contains(producible, d => string.Equals(d.Id, "m1a1", StringComparison.Ordinal));
-        Assert.DoesNotContain(producible, d => string.Equals(d.Id, "t80", StringComparison.Ordinal));
-        Assert.DoesNotContain(producible, d => d.Category == UnitCategory.Fighter);
+        // Curated roster: Liberator (infantry), Commando, M151 jeep, M60A3,
+        // M48 SAM, M247 AA-gun. The HQ M1A1 must NOT be buildable.
+        Assert.Equal(6, producible.Count);
+        var ids = new HashSet<string>(producible.Select(d => d.Id), StringComparer.Ordinal);
+        Assert.Contains("liberator", ids);
+        Assert.Contains("us-commando", ids);
+        Assert.Contains("m151", ids);
+        Assert.Contains("m60a3", ids);
+        Assert.Contains("m48", ids);
+        Assert.Contains("m247", ids);
+        Assert.DoesNotContain("m1a1", ids);
+        Assert.DoesNotContain("t80", ids);
     }
 
     [Fact]
-    public void ProducibleAt_airbase_for_red_returns_red_air_units()
+    public void ProducibleAt_airbase_for_red_returns_curated_six_air_units()
     {
         var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Red);
 
-        Assert.Contains(producible, d => string.Equals(d.Id, "mig23", StringComparison.Ordinal));
+        Assert.Equal(6, producible.Count);
+        var ids = new HashSet<string>(producible.Select(d => d.Id), StringComparer.Ordinal);
+        Assert.Contains("mi24", ids);
+        Assert.Contains("mi28", ids);
+        Assert.Contains("su25", ids);
+        Assert.Contains("su17", ids);
+        Assert.Contains("mig23", ids);
+        Assert.Contains("mig29", ids);
         Assert.All(producible, d => Assert.True(RelationsTableIsAir(d.Category)));
+    }
+
+    [Fact]
+    public void Rosters_are_complementary_between_sides()
+    {
+        // Every map-present unit must be in its side's factory roster, and
+        // every roster slot on one side must have a counterpart slot on the
+        // other (NATO/Soviet pairings).
+        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
+        var redLand  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Red);
+        var blueAir  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Blue);
+        var redAir   = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Red);
+
+        Assert.Equal(blueLand.Count, redLand.Count);
+        Assert.Equal(blueAir.Count, redAir.Count);
+
+        // Each land roster's first entry is the side's infantry.
+        Assert.Equal(UnitCategory.Infantry, blueLand[0].Category);
+        Assert.Equal(UnitCategory.Infantry, redLand[0].Category);
+
+        // Same category mix between matched factories.
+        Assert.Equal(
+            blueLand.Select(d => d.Category).OrderBy(c => c),
+            redLand.Select(d => d.Category).OrderBy(c => c));
+        Assert.Equal(
+            blueAir.Select(d => d.Category).OrderBy(c => c),
+            redAir.Select(d => d.Category).OrderBy(c => c));
     }
 
     private static bool RelationsTableIsAir(UnitCategory c)
