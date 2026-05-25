@@ -24,18 +24,40 @@ public class BuildUnitTests
     private static HexCoord BlueAirbase { get; } = new(1, 5);
 
     [Fact]
-    public async Task BuildUnit_at_factory_creates_a_tank_and_deducts_funds()
+    public async Task BuildUnit_queues_a_pending_order_and_deducts_funds_immediately()
     {
         var (engine, state) = await StartMission01WithFunds();
-        // Move Blue's helicopter off the airbase by leaving Helicopter where it is.
-        // The factory hex (1,6) is currently empty: nothing was placed there.
 
         var next = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
 
-        var fresh = next.Units.Values.Single(u => u.Coord == BlueFactory);
+        // Funds are debited right away (you're paying up front).
+        Assert.Equal(10000 - TestCatalog.Tank.ProductionCost, next.Funds[Side.Blue]);
+        // The unit is NOT yet on the map — it lives in PendingProduction.
+        Assert.DoesNotContain(next.Units.Values, u => u.Coord == BlueFactory);
+        Assert.True(next.PendingProduction.TryGetValue(Side.Blue, out var pending));
+        Assert.Equal(BlueFactory, pending!.FactoryCoord);
+        Assert.Equal(TestCatalog.Tank.Id, pending.TypeId);
+    }
+
+    [Fact]
+    public async Task BuildUnit_pending_order_materialises_at_start_of_next_blue_turn()
+    {
+        var (engine, state) = await StartMission01WithFunds();
+
+        var afterBuild = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
+        // Blue ends turn -> Red plays -> Red ends turn -> back to Blue.
+        var afterBlueEnd = engine.EndTurn(afterBuild);
+        var backToBlue = engine.EndTurn(afterBlueEnd);
+
+        var fresh = backToBlue.Units.Values.Single(u => u.Coord == BlueFactory);
         Assert.Equal(TestCatalog.Tank, fresh.Type);
         Assert.Equal(Side.Blue, fresh.Side);
-        Assert.Equal(10000 - TestCatalog.Tank.ProductionCost, next.Funds[Side.Blue]);
+        // The pending order is cleared once materialised.
+        Assert.False(backToBlue.PendingProduction.ContainsKey(Side.Blue));
+        // And the freshly-produced unit starts the turn with full movement.
+        Assert.False(fresh.HasMoved);
+        Assert.False(fresh.HasAttacked);
+        Assert.Equal(fresh.Type.MovementPoints, fresh.MovesRemaining);
     }
 
     [Fact]
@@ -91,16 +113,16 @@ public class BuildUnitTests
     }
 
     [Fact]
-    public async Task Newly_built_unit_cannot_move_or_attack_this_turn()
+    public async Task Newly_built_unit_is_not_on_the_map_until_next_turn()
     {
+        // Deferred materialisation makes the original "fresh unit can't
+        // act on the build turn" rule implicit — the unit simply doesn't
+        // exist on the board until the side's next turn starts.
         var (engine, state) = await StartMission01WithFunds();
 
         var next = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
-        var fresh = next.Units.Values.Single(u => u.Coord == BlueFactory);
 
-        Assert.True(fresh.HasMoved);
-        Assert.True(fresh.HasAttacked);
-        Assert.Equal(0, fresh.MovesRemaining);
+        Assert.DoesNotContain(next.Units.Values, u => u.Coord == BlueFactory);
     }
 
     [Fact]

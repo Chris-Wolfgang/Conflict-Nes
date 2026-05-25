@@ -169,7 +169,11 @@ public class ProductionRulesTests
         var after = engine.BuildUnit(broke, new HexCoord(1, 6), "us-infantry");
 
         Assert.Equal(0, after.Funds[Side.Blue]);
-        Assert.Contains(after.Units.Values, u => string.Equals(u.Type.Id, "us-infantry", StringComparison.Ordinal) && u.Coord == new HexCoord(1, 6));
+        // Infantry is queued like everything else — it materialises on
+        // the factory hex at the start of Blue's next turn.
+        Assert.True(after.PendingProduction.TryGetValue(Side.Blue, out var pending));
+        Assert.Equal("us-infantry", pending!.TypeId);
+        Assert.Equal(new HexCoord(1, 6), pending.FactoryCoord);
     }
 
     [Fact]

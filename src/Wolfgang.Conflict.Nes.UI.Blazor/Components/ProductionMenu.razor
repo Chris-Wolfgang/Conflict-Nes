@@ -26,18 +26,14 @@
     var buildingKind = tile.Building ?? BuildingKind.LandFactory;
     var roster = ProductionRules.ProducibleAt(State.Catalog, buildingKind, side);
     var funds = State.Funds.TryGetValue(side, out var fp) ? fp : 0;
-    var builtHere = State.GetBuildHexThisTurn(side);
+    // What the side ordered THIS turn (still pending materialisation on
+    // the next turn). We mark its slot with the built-outline so the
+    // player sees what they bought even though no unit appears on the
+    // hex until the next round.
     var builtTypeId = string.Empty;
-    if (builtHere == Factory.Value)
+    if (State.PendingProduction.TryGetValue(side, out var pending) && pending.FactoryCoord == Factory.Value)
     {
-        var fresh = State.Units.Values
-            .Where(u => u.Coord == Factory.Value && u.Side == side)
-            .OrderByDescending(u => u.Id.Value)
-            .FirstOrDefault();
-        if (fresh is not null)
-        {
-            builtTypeId = fresh.Type.Id;
-        }
+        builtTypeId = pending.TypeId;
     }
     var sideAlreadyBuilt = State.HasBuiltThisTurn(side);
     // The AI preview only counts as "active" when it really is the AI's

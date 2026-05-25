@@ -296,7 +296,8 @@ public sealed class GameEngine
             winner: state.Winner,
             randomSeed: unchecked(state.RandomSeed * 1103515245 + 12345),
             buildingHitPoints: newHits,
-            buildThisTurn: state.BuildThisTurn);
+            buildThisTurn: state.BuildThisTurn,
+            pendingProduction: state.PendingProduction);
     }
 
     // Factories self-repair between attacks: a non-fatal strike heals back
@@ -377,29 +378,18 @@ public sealed class GameEngine
         var newFunds = CopyFunds(state.Funds);
         newFunds[side] -= type.ProductionCost;
 
-        var newId = NextUnitId(state);
-        // Newly produced units have already "moved" this turn (manual: they
-        // cannot move or attack on the turn they were built).
-        var freshUnit = Unit.FullStrength(newId, side, type, buildingCoord) with
-        {
-            MovesRemaining = 0,
-            HasMoved = true,
-            HasAttacked = true,
-        };
-        var newUnits = CopyUnits(state.Units);
-        newUnits[newId] = freshUnit;
-
-        var newBuildThisTurn = new Dictionary<Side, HexCoord>();
-        foreach (var kv in state.BuildThisTurn)
-        {
-            newBuildThisTurn[kv.Key] = kv.Value;
-        }
+        // Per the original game, ordered units do not appear on the board
+        // immediately — they show up on the factory hex at the start of
+        // the ordering side's next turn (materialised in EndTurn).
+        var newBuildThisTurn = CopyBuildThisTurn(state.BuildThisTurn);
         newBuildThisTurn[side] = buildingCoord;
+        var newPending = CopyPending(state.PendingProduction);
+        newPending[side] = new PendingProductionOrder(buildingCoord, typeId);
 
         return new GameState(
             map: state.Map,
             catalog: state.Catalog,
-            units: newUnits,
+            units: state.Units,
             buildingOwners: state.BuildingOwners,
             nextToAct: state.NextToAct,
             turnNumber: state.TurnNumber,
@@ -408,7 +398,28 @@ public sealed class GameEngine
             winner: state.Winner,
             buildingHitPoints: state.BuildingHitPoints,
             randomSeed: state.RandomSeed,
-            buildThisTurn: newBuildThisTurn);
+            buildThisTurn: newBuildThisTurn,
+            pendingProduction: newPending);
+    }
+
+    private static Dictionary<Side, HexCoord> CopyBuildThisTurn(IReadOnlyDictionary<Side, HexCoord> source)
+    {
+        var copy = new Dictionary<Side, HexCoord>(source.Count);
+        foreach (var kv in source)
+        {
+            copy[kv.Key] = kv.Value;
+        }
+        return copy;
+    }
+
+    private static Dictionary<Side, PendingProductionOrder> CopyPending(IReadOnlyDictionary<Side, PendingProductionOrder> source)
+    {
+        var copy = new Dictionary<Side, PendingProductionOrder>(source.Count);
+        foreach (var kv in source)
+        {
+            copy[kv.Key] = kv.Value;
+        }
+        return copy;
     }
 
     /// <summary>
@@ -440,8 +451,14 @@ public sealed class GameEngine
         // 2. Drain one fuel from every unit on the ending side that moved.
         var fuelDrained = DrainFuelForMovers(state.Units, endingSide);
 
-        // 3. Refresh the next side's per-turn fields.
-        var refreshedUnits = RefreshUnitsForTurn(fuelDrained, nextSide);
+        // 2b. Materialise any production the incoming side ordered last
+        //     turn — the unit appears on its factory hex now, at the
+        //     START of that side's turn.
+        var (withPending, newPending) = MaterialisePendingFor(fuelDrained, state, nextSide);
+
+        // 3. Refresh the next side's per-turn fields (including the freshly
+        //    materialised unit so it gets full movement this turn).
+        var refreshedUnits = RefreshUnitsForTurn(withPending, nextSide);
 
         // 4. Accrue income for the next side from its City and Airbase holdings.
         var newFunds = CopyFunds(state.Funds);
@@ -454,6 +471,7 @@ public sealed class GameEngine
         // cleared so it can build again. The ending side's flag is also
         // dropped — it's only meaningful within a turn.
         var newBuildThisTurn = new Dictionary<Side, HexCoord>();
+        _ = newPending; // pendingProduction passed into the new GameState below.
 
         var next = new GameState(
             map: state.Map,
@@ -467,7 +485,8 @@ public sealed class GameEngine
             winner: state.Winner,
             randomSeed: state.RandomSeed,
             buildingHitPoints: state.BuildingHitPoints,
-            buildThisTurn: newBuildThisTurn);
+            buildThisTurn: newBuildThisTurn,
+            pendingProduction: newPending);
 
         return CheckVictory(next);
     }
@@ -558,21 +577,10 @@ public sealed class GameEngine
             winner: winner,
             buildingHitPoints: state.BuildingHitPoints,
             randomSeed: state.RandomSeed,
-            buildThisTurn: state.BuildThisTurn);
+            buildThisTurn: state.BuildThisTurn,
+            pendingProduction: state.PendingProduction);
     }
 
-    private static UnitId NextUnitId(GameState state)
-    {
-        var max = 0;
-        foreach (var id in state.Units.Keys)
-        {
-            if (id.Value > max)
-            {
-                max = id.Value;
-            }
-        }
-        return new UnitId(max + 1);
-    }
 
     private static Dictionary<HexCoord, Side> MergeOwners(
         IReadOnlyDictionary<HexCoord, Side> existing,
@@ -606,6 +614,46 @@ public sealed class GameEngine
             }
         }
         return drained;
+    }
+
+    private static (IReadOnlyDictionary<UnitId, Unit> Units, Dictionary<Side, PendingProductionOrder> Pending)
+        MaterialisePendingFor(IReadOnlyDictionary<UnitId, Unit> units, GameState state, Side incomingSide)
+    {
+        var pending = CopyPending(state.PendingProduction);
+        if (!pending.TryGetValue(incomingSide, out var order))
+        {
+            return (units, pending);
+        }
+
+        // Drop the order; if the factory has been destroyed, lost, or is
+        // standing under a unit we silently abandon the production.
+        // (The player paid for it last turn — gamble lost.)
+        pending.Remove(incomingSide);
+
+        if (!state.HasIntactBuilding(order.FactoryCoord)) { return (units, pending); }
+        if (state.GetBuildingOwner(order.FactoryCoord) != incomingSide) { return (units, pending); }
+        foreach (var existing in units.Values)
+        {
+            if (existing.Coord == order.FactoryCoord) { return (units, pending); }
+        }
+        if (!state.Catalog.Contains(order.TypeId)) { return (units, pending); }
+
+        var type = state.Catalog.Get(order.TypeId);
+        var newId = NextUnitId(units);
+        var fresh = Unit.FullStrength(newId, incomingSide, type, order.FactoryCoord);
+        var newUnits = CopyUnits(units);
+        newUnits[newId] = fresh;
+        return (newUnits, pending);
+    }
+
+    private static UnitId NextUnitId(IReadOnlyDictionary<UnitId, Unit> units)
+    {
+        var max = 0;
+        foreach (var id in units.Keys)
+        {
+            if (id.Value > max) { max = id.Value; }
+        }
+        return new UnitId(max + 1);
     }
 
     private static Dictionary<UnitId, Unit> RefreshUnitsForTurn(IReadOnlyDictionary<UnitId, Unit> units, Side sideStartingTurn)
@@ -732,7 +780,8 @@ public sealed class GameEngine
             winner: state.Winner,
             randomSeed: state.RandomSeed,
             buildingHitPoints: state.BuildingHitPoints,
-            buildThisTurn: state.BuildThisTurn);
+            buildThisTurn: state.BuildThisTurn,
+            pendingProduction: state.PendingProduction);
 
     private static GameState WithUnitsAndFunds(
         GameState state,
@@ -751,5 +800,6 @@ public sealed class GameEngine
             winner: state.Winner,
             randomSeed: advanceSeed ? unchecked(state.RandomSeed * 1103515245 + 12345) : state.RandomSeed,
             buildingHitPoints: state.BuildingHitPoints,
-            buildThisTurn: state.BuildThisTurn);
+            buildThisTurn: state.BuildThisTurn,
+            pendingProduction: state.PendingProduction);
 }

@@ -20,6 +20,7 @@ public sealed class GameState
     private readonly IReadOnlyDictionary<Side, int> _funds;
     private readonly IReadOnlyDictionary<HexCoord, int> _buildingHitPoints;
     private readonly IReadOnlyDictionary<Side, HexCoord> _buildThisTurn;
+    private readonly IReadOnlyDictionary<Side, PendingProductionOrder> _pendingProduction;
 
     /// <summary>The map for the current mission.</summary>
     public MapDefinition Map { get; }
@@ -69,6 +70,13 @@ public sealed class GameState
     /// </summary>
     public IReadOnlyDictionary<Side, HexCoord> BuildThisTurn => _buildThisTurn;
 
+    /// <summary>
+    /// Per-side production orders that have been queued but not yet
+    /// materialised on the map. A unit ordered this turn appears on the
+    /// factory hex at the start of the ordering side's NEXT turn.
+    /// </summary>
+    public IReadOnlyDictionary<Side, PendingProductionOrder> PendingProduction => _pendingProduction;
+
     /// <summary>Constructs a state snapshot. Most callers should go through <c>GameEngine.StartGame</c> instead.</summary>
     public GameState(
         MapDefinition map,
@@ -82,7 +90,8 @@ public sealed class GameState
         Side? winner,
         int randomSeed,
         IReadOnlyDictionary<HexCoord, int>? buildingHitPoints = null,
-        IReadOnlyDictionary<Side, HexCoord>? buildThisTurn = null)
+        IReadOnlyDictionary<Side, HexCoord>? buildThisTurn = null,
+        IReadOnlyDictionary<Side, PendingProductionOrder>? pendingProduction = null)
     {
         Map = map ?? throw new ArgumentNullException(nameof(map));
         Catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
@@ -91,6 +100,7 @@ public sealed class GameState
         _funds = funds ?? throw new ArgumentNullException(nameof(funds));
         _buildingHitPoints = buildingHitPoints ?? new Dictionary<HexCoord, int>();
         _buildThisTurn = buildThisTurn ?? new Dictionary<Side, HexCoord>();
+        _pendingProduction = pendingProduction ?? new Dictionary<Side, PendingProductionOrder>();
         NextToAct = nextToAct;
         TurnNumber = turnNumber;
         Phase = phase;
