@@ -248,6 +248,9 @@ public sealed class ConflictService
         }
         OpenedFactory = hex;
         SelectedUnitId = null;
+        // Defensive: any lingering AI build preview state is unrelated
+        // to the human opening their own factory, so wipe it.
+        AiBuildPreviewTypeId = null;
         Notify();
         return true;
     }
@@ -355,22 +358,31 @@ public sealed class ConflictService
         {
             var action = await _aiStrategy.ChooseNextActionAsync(s, s.NextToAct, cancellationToken).ConfigureAwait(false);
 
-            // For a Build action, pop the factory menu open with the chosen
-            // unit highlighted so the player can see what the AI is buying.
             if (action.Kind == StrategyActionKind.Build)
             {
-                OpenedFactory = action.Hex;
-                AiBuildPreviewTypeId = action.ProduceTypeId;
-                Notify();
-                await Task.Delay(AiBuildPreviewMs, cancellationToken).ConfigureAwait(false);
+                // Pop the factory menu open with the chosen unit highlighted
+                // so the player can see what the AI is buying. The try/finally
+                // guarantees we tear that preview down even if BuildUnit
+                // throws — otherwise the menu would stay locked on the next
+                // human turn with Cancel disabled and "Red is building..."
+                // stuck on screen.
+                try
+                {
+                    OpenedFactory = action.Hex;
+                    AiBuildPreviewTypeId = action.ProduceTypeId;
+                    Notify();
+                    await Task.Delay(AiBuildPreviewMs, cancellationToken).ConfigureAwait(false);
+                    CurrentState = ApplyAction(action, s);
+                }
+                finally
+                {
+                    OpenedFactory = null;
+                    AiBuildPreviewTypeId = null;
+                }
             }
-
-            CurrentState = ApplyAction(action, s);
-
-            if (action.Kind == StrategyActionKind.Build)
+            else
             {
-                OpenedFactory = null;
-                AiBuildPreviewTypeId = null;
+                CurrentState = ApplyAction(action, s);
             }
 
             Notify();
