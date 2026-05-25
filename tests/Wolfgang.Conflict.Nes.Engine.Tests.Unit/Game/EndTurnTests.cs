@@ -74,8 +74,9 @@ public class EndTurnTests
         // Red Airbase (= 100 F.P. per turn) and no Red-owned City at start.
         var after = engine.EndTurn(state);
 
-        Assert.Equal(100, after.Funds[Side.Red]);
-        Assert.Equal(0, after.Funds[Side.Blue]);
+        // Starting war-chest is 5000; Red's lone Air Factory adds 100 per turn.
+        Assert.Equal(5100, after.Funds[Side.Red]);
+        Assert.Equal(5000, after.Funds[Side.Blue]);
     }
 
     [Fact]

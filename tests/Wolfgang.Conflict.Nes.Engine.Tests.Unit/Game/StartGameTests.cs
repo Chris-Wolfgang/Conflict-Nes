@@ -89,14 +89,14 @@ public class StartGameTests
     }
 
     [Fact]
-    public async Task Both_sides_start_with_zero_funds()
+    public async Task Both_sides_start_with_5000_FP_war_chest()
     {
         var sut = new GameEngine();
 
         var state = sut.StartGame(await Mission01(), 1);
 
-        Assert.Equal(0, state.Funds[Side.Blue]);
-        Assert.Equal(0, state.Funds[Side.Red]);
+        Assert.Equal(5000, state.Funds[Side.Blue]);
+        Assert.Equal(5000, state.Funds[Side.Red]);
     }
 
     [Fact]

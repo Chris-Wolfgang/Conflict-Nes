@@ -19,7 +19,7 @@ public sealed class ConflictService
     private const int AiActionDelayMs = 650;
 
     /// <summary>How long the AI's production-menu preview lingers before closing.</summary>
-    private const int AiBuildPreviewMs = 1400;
+    private const int AiBuildPreviewMs = 3200;
 
     private readonly GameEngine _engine = new();
     private readonly IPlayerStrategy _aiStrategy = new GreedyAiStrategy();

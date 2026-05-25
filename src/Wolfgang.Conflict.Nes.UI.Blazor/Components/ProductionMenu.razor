@@ -56,6 +56,13 @@
         <div class="production-funds">F.P. @funds</div>
     </div>
 
+    @if (aiActive)
+    {
+        <div class="ai-build-banner">
+            &#9654; RED IS BUILDING THIS &#9664;
+        </div>
+    }
+
     @if (side == HumanSide)
     {
         <div class="factory-tabs">

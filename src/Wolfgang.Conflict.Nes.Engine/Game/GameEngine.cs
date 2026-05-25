@@ -31,10 +31,12 @@ public sealed class GameEngine
 
         var units = BuildStartingUnits(mission);
 
+        // Starting F.P. — both sides begin with a small war-chest so
+        // they can build something on turn one without grinding.
         var funds = new Dictionary<Side, int>
         {
-            [Side.Blue] = 0,
-            [Side.Red]  = 0,
+            [Side.Blue] = 5000,
+            [Side.Red]  = 5000,
         };
 
         return new GameState(
