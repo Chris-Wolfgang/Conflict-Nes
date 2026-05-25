@@ -246,6 +246,14 @@ public sealed class ConflictService
         {
             return false;
         }
+        // If a unit is standing on the factory hex (e.g. a freshly-built
+        // unit that hasn't moved yet, or one that walked back on top),
+        // the click belongs to that unit — the player must move it off
+        // before the factory becomes available again.
+        if (CurrentState.GetUnitAt(hex) is not null)
+        {
+            return false;
+        }
         OpenedFactory = hex;
         SelectedUnitId = null;
         // Defensive: any lingering AI build preview state is unrelated
@@ -282,6 +290,10 @@ public sealed class ConflictService
             return;
         }
         CurrentState = _engine.BuildUnit(CurrentState, factory, typeId);
+        // Close the menu once the build lands. The newly-built unit now
+        // sits on the factory hex and the player can pick it up via a
+        // normal hex click.
+        OpenedFactory = null;
         Notify();
     }
 
