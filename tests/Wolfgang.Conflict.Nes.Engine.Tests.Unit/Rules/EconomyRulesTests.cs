@@ -9,9 +9,9 @@ public class EconomyRulesTests
 {
     [Theory]
     [InlineData(BuildingKind.City, 100)]
-    [InlineData(BuildingKind.Airbase, 100)]
+    [InlineData(BuildingKind.AirFactory, 100)]
     [InlineData(BuildingKind.Hq, 0)]
-    [InlineData(BuildingKind.Factory, 0)]
+    [InlineData(BuildingKind.LandFactory, 0)]
     [InlineData(BuildingKind.Port, 0)]
     public void BuildingIncomePerTurn_only_city_and_airbase_generate(BuildingKind building, int expected)
     {

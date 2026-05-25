@@ -8,7 +8,7 @@ namespace Wolfgang.Conflict.Nes.Engine.Rules;
 
 /// <summary>
 /// Pure rules for the manual's Production Screen. Factories build ground
-/// units; airbases build air units; ports (future) build sea units. A side
+/// units; air factories build air units; ports (future) build sea units. A side
 /// may not produce after all of its existing units have moved this turn.
 /// </summary>
 public static class ProductionRules
@@ -18,7 +18,7 @@ public static class ProductionRules
     /// produce units at all.
     /// </summary>
     public static bool IsProductionBuilding(BuildingKind building)
-        => building is BuildingKind.Factory or BuildingKind.Airbase or BuildingKind.Port;
+        => building is BuildingKind.LandFactory or BuildingKind.AirFactory or BuildingKind.Port;
 
     /// <summary>
     /// Returns <see langword="true"/> if a unit category may be produced at a
@@ -26,15 +26,15 @@ public static class ProductionRules
     /// </summary>
     public static bool CanBuildCategoryAt(BuildingKind building, UnitCategory category) => building switch
     {
-        BuildingKind.Factory => category is UnitCategory.Infantry
+        BuildingKind.LandFactory => category is UnitCategory.Infantry
             or UnitCategory.Commando
             or UnitCategory.Jeep
             or UnitCategory.BattleTank
             or UnitCategory.BattleMissileLauncher
             or UnitCategory.FlakPanzer
             or UnitCategory.SupplyVehicle,
-        // Airbases ship in infantry (airlifted / paratrooper) in addition to aircraft.
-        BuildingKind.Airbase => category is UnitCategory.Infantry
+        // Air factories ship in infantry (airlifted / paratrooper) in addition to aircraft.
+        BuildingKind.AirFactory => category is UnitCategory.Infantry
             or UnitCategory.Attacker
             or UnitCategory.Helicopter
             or UnitCategory.Fighter
@@ -57,17 +57,17 @@ public static class ProductionRules
     private static readonly Dictionary<(BuildingKind Building, Side Side), string[]> Rosters = new()
     {
         // Land factories: infantry first, then commando, jeep, MBT, SAM, AA-gun.
-        [(BuildingKind.Factory, Side.Blue)] =
+        [(BuildingKind.LandFactory, Side.Blue)] =
             ["us-infantry", "us-commando", "m151", "m60a3", "m48", "m247"],
 
-        [(BuildingKind.Factory, Side.Red)] =
+        [(BuildingKind.LandFactory, Side.Red)] =
             ["red-infantry", "red-commando", "brdm2", "t62", "sa8", "zsu23"],
 
         // Air factories: infantry first (paratroopers / airlifted), then five aircraft.
-        [(BuildingKind.Airbase, Side.Blue)] =
+        [(BuildingKind.AirFactory, Side.Blue)] =
             ["us-infantry", "ah1s", "ah64", "a10", "f4e", "f16c"],
 
-        [(BuildingKind.Airbase, Side.Red)] =
+        [(BuildingKind.AirFactory, Side.Red)] =
             ["red-infantry", "mi24", "mi28", "su25", "mig23", "mig29"],
     };
 

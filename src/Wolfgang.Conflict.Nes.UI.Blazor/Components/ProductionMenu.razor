@@ -21,7 +21,7 @@
 @{
     var side = State.GetBuildingOwner(Factory.Value) ?? State.NextToAct;
     var tile = State.Map.Tiles[Factory.Value];
-    var buildingKind = tile.Building ?? BuildingKind.Factory;
+    var buildingKind = tile.Building ?? BuildingKind.LandFactory;
     var roster = ProductionRules.ProducibleAt(State.Catalog, buildingKind, side);
     var funds = State.Funds.TryGetValue(side, out var fp) ? fp : 0;
     var builtHere = State.GetBuildHexThisTurn(side);
@@ -43,7 +43,7 @@
 
 <div class="production-menu @(side == Side.Blue ? "blue" : "red")">
     <div class="production-header">
-        <h2>@(buildingKind == BuildingKind.Airbase ? "Air Factory" : "Land Factory") &mdash; @side</h2>
+        <h2>@(buildingKind == BuildingKind.AirFactory ? "Air Factory" : "Land Factory") &mdash; @side</h2>
         <div class="production-funds">F.P. @funds</div>
     </div>
 

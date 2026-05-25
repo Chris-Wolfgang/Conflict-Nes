@@ -23,12 +23,12 @@ public class ProductionRulesTests
     }
 
     [Theory]
-    [InlineData(BuildingKind.Factory, UnitCategory.BattleTank, true)]
-    [InlineData(BuildingKind.Factory, UnitCategory.Infantry, true)]
-    [InlineData(BuildingKind.Factory, UnitCategory.Fighter, false)]
-    [InlineData(BuildingKind.Airbase, UnitCategory.Fighter, true)]
-    [InlineData(BuildingKind.Airbase, UnitCategory.Helicopter, true)]
-    [InlineData(BuildingKind.Airbase, UnitCategory.BattleTank, false)]
+    [InlineData(BuildingKind.LandFactory, UnitCategory.BattleTank, true)]
+    [InlineData(BuildingKind.LandFactory, UnitCategory.Infantry, true)]
+    [InlineData(BuildingKind.LandFactory, UnitCategory.Fighter, false)]
+    [InlineData(BuildingKind.AirFactory, UnitCategory.Fighter, true)]
+    [InlineData(BuildingKind.AirFactory, UnitCategory.Helicopter, true)]
+    [InlineData(BuildingKind.AirFactory, UnitCategory.BattleTank, false)]
     [InlineData(BuildingKind.City, UnitCategory.Infantry, false)]
     public void CanBuildCategoryAt_matches_design(BuildingKind building, UnitCategory category, bool expected)
     {
@@ -38,7 +38,7 @@ public class ProductionRulesTests
     [Fact]
     public void ProducibleAt_factory_for_blue_returns_curated_six()
     {
-        var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
+        var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Blue);
 
         // Curated roster: Liberator (infantry), Commando, M151 jeep, M60A3,
         // M48 SAM, M247 AA-gun. The HQ M1A1 must NOT be buildable.
@@ -57,7 +57,7 @@ public class ProductionRulesTests
     [Fact]
     public void ProducibleAt_airbase_for_red_returns_infantry_plus_five_air()
     {
-        var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Red);
+        var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.AirFactory, Side.Red);
 
         Assert.Equal(6, producible.Count);
         // Infantry leads the airbase roster (airlift / paratroopers).
@@ -73,10 +73,10 @@ public class ProductionRulesTests
     [Fact]
     public void Both_factories_lead_with_infantry()
     {
-        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
-        var redLand  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Red);
-        var blueAir  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Blue);
-        var redAir   = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Red);
+        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Blue);
+        var redLand  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Red);
+        var blueAir  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.AirFactory, Side.Blue);
+        var redAir   = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.AirFactory, Side.Red);
 
         Assert.Equal(UnitCategory.Infantry, blueLand[0].Category);
         Assert.Equal(UnitCategory.Infantry, redLand[0].Category);
@@ -90,10 +90,10 @@ public class ProductionRulesTests
         // Every map-present unit must be in its side's factory roster, and
         // every roster slot on one side must have a counterpart slot on the
         // other (NATO/Soviet pairings).
-        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
-        var redLand  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Red);
-        var blueAir  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Blue);
-        var redAir   = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Airbase, Side.Red);
+        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Blue);
+        var redLand  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Red);
+        var blueAir  = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.AirFactory, Side.Blue);
+        var redAir   = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.AirFactory, Side.Red);
 
         Assert.Equal(blueLand.Count, redLand.Count);
         Assert.Equal(blueAir.Count, redAir.Count);
@@ -114,7 +114,7 @@ public class ProductionRulesTests
     [Fact]
     public void ProducibleAt_returns_roster_sorted_by_price_ascending()
     {
-        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
+        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Blue);
 
         for (var i = 1; i < blueLand.Count; i++)
         {
@@ -131,14 +131,14 @@ public class ProductionRulesTests
         var start = engine.StartGame(mission, randomSeed: 1);
 
         // Force Blue's funds to a level that affords only the cheapest items.
-        var cheapest = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue)[0];
+        var cheapest = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Blue)[0];
         var funds = cheapest.ProductionCost;
         var state = new GameState(start.Map, start.Catalog, start.Units, start.BuildingOwners,
             start.NextToAct, start.TurnNumber, start.Phase,
             new Dictionary<Side, int> { [Side.Blue] = funds, [Side.Red] = 0 },
             start.Winner, start.RandomSeed);
 
-        var affordable = ProductionRules.AffordableAt(state, BuildingKind.Factory, Side.Blue);
+        var affordable = ProductionRules.AffordableAt(state, BuildingKind.LandFactory, Side.Blue);
 
         Assert.NotEmpty(affordable);
         Assert.All(affordable, d => Assert.True(d.ProductionCost <= funds));
@@ -186,8 +186,8 @@ public class ProductionRulesTests
             new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
             start.Winner, start.RandomSeed);
 
-        var land = ProductionRules.AffordableAt(broke, BuildingKind.Factory, Side.Blue);
-        var air  = ProductionRules.AffordableAt(broke, BuildingKind.Airbase, Side.Blue);
+        var land = ProductionRules.AffordableAt(broke, BuildingKind.LandFactory, Side.Blue);
+        var air  = ProductionRules.AffordableAt(broke, BuildingKind.AirFactory, Side.Blue);
 
         Assert.Contains(land, d => d.Category == UnitCategory.Infantry);
         Assert.Contains(air,  d => d.Category == UnitCategory.Infantry);

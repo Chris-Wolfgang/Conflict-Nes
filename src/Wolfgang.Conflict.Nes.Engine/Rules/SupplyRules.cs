@@ -110,7 +110,7 @@ public static class SupplyRules
         return unit.Type.MovementDomain switch
         {
             MovementDomain.Foot or MovementDomain.Tread => building == BuildingKind.City,
-            MovementDomain.Helicopter or MovementDomain.Fighter => building == BuildingKind.Airbase,
+            MovementDomain.Helicopter or MovementDomain.Fighter => building == BuildingKind.AirFactory,
             _ => false,
         };
     }

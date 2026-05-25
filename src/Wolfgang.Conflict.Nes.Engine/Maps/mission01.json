@@ -112,14 +112,14 @@
       "q": 1,
       "r": 5,
       "terrain": "Plains",
-      "building": "Airbase",
+      "building": "AirFactory",
       "owner": "Blue"
     },
     {
       "q": 1,
       "r": 6,
       "terrain": "Plains",
-      "building": "Factory",
+      "building": "LandFactory",
       "owner": "Blue"
     },
     {
@@ -504,7 +504,7 @@
       "q": 7,
       "r": -2,
       "terrain": "Plains",
-      "building": "Airbase",
+      "building": "AirFactory",
       "owner": "Red"
     },
     {
@@ -637,7 +637,7 @@
       "q": 9,
       "r": -4,
       "terrain": "Plains",
-      "building": "Factory",
+      "building": "LandFactory",
       "owner": "Red"
     },
     {

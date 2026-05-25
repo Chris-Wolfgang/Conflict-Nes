@@ -128,7 +128,7 @@ public static class MovementRules
         // Factories are bound to the commander and cannot be entered by any
         // unit. (Cities, airbases and ports are still traversable — they're
         // the supply / capture buildings.)
-        if (tile.Building == Map.BuildingKind.Factory)
+        if (tile.Building == Map.BuildingKind.LandFactory)
         {
             return null;
         }

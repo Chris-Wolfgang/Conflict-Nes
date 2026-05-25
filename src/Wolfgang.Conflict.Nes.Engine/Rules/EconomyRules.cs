@@ -15,7 +15,7 @@ public static class EconomyRules
     public static int BuildingIncomePerTurn(BuildingKind building) => building switch
     {
         BuildingKind.City => 100,
-        BuildingKind.Airbase => 100,
+        BuildingKind.AirFactory => 100,
         _ => 0,
     };
 

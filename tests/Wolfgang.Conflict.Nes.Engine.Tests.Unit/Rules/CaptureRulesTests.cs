@@ -12,10 +12,10 @@ public class CaptureRulesTests
 {
     [Theory]
     [InlineData(BuildingKind.City, true)]
-    [InlineData(BuildingKind.Airbase, true)]
+    [InlineData(BuildingKind.AirFactory, true)]
     [InlineData(BuildingKind.Port, true)]
     [InlineData(BuildingKind.Hq, false)]
-    [InlineData(BuildingKind.Factory, false)]
+    [InlineData(BuildingKind.LandFactory, false)]
     public void IsCapturable_matches_manual_rules(BuildingKind building, bool expected)
     {
         Assert.Equal(expected, CaptureRules.IsCapturable(building));

@@ -48,10 +48,10 @@ public static class UnitStats
 
     private static int? BuildingCost(MovementDomain domain, BuildingKind building) => building switch
     {
-        BuildingKind.Factory => null,
+        BuildingKind.LandFactory => null,
         BuildingKind.City => 1,
         BuildingKind.Hq => 1,
-        BuildingKind.Airbase => 1,
+        BuildingKind.AirFactory => 1,
         BuildingKind.Port => domain is MovementDomain.Helicopter or MovementDomain.Fighter ? 1 : null,
         _ => null,
     };
@@ -64,9 +64,9 @@ public static class UnitStats
     {
         BuildingKind.City => 2,
         BuildingKind.Hq => 3,
-        BuildingKind.Airbase => 0,
+        BuildingKind.AirFactory => 0,
         BuildingKind.Port => 0,
-        BuildingKind.Factory => 0,
+        BuildingKind.LandFactory => 0,
         null => terrain switch
         {
             Terrain.Forest => 3,

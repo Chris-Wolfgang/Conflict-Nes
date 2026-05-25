@@ -53,13 +53,13 @@ public class UnitStatsTests
     [InlineData(MovementDomain.Fighter)]
     public void TerrainCost_factory_is_impassable_to_all(MovementDomain domain)
     {
-        Assert.Null(UnitStats.TerrainCost(domain, Terrain.Plains, BuildingKind.Factory));
+        Assert.Null(UnitStats.TerrainCost(domain, Terrain.Plains, BuildingKind.LandFactory));
     }
 
     [Theory]
     [InlineData(MovementDomain.Foot,    BuildingKind.City)]
     [InlineData(MovementDomain.Tread,   BuildingKind.Hq)]
-    [InlineData(MovementDomain.Fighter, BuildingKind.Airbase)]
+    [InlineData(MovementDomain.Fighter, BuildingKind.AirFactory)]
     public void TerrainCost_buildings_passable_at_cost_one(MovementDomain domain, BuildingKind building)
     {
         Assert.Equal(1, UnitStats.TerrainCost(domain, Terrain.Plains, building));
@@ -79,7 +79,7 @@ public class UnitStatsTests
     [Theory]
     [InlineData(BuildingKind.City,    2)]
     [InlineData(BuildingKind.Hq,      3)]
-    [InlineData(BuildingKind.Airbase, 0)]
+    [InlineData(BuildingKind.AirFactory, 0)]
     [InlineData(BuildingKind.Port,    0)]
     public void DefenseBonus_buildings_match_manual(BuildingKind building, int expected)
     {

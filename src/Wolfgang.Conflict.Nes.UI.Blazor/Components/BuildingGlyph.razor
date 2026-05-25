@@ -6,11 +6,11 @@
     Original NES-feel building glyphs. Each kind has a distinct silhouette so
     the player can tell them apart at a glance without copying NES sprites.
 
-    City    : two stacked apartment blocks with windows (densely populated).
-    HQ      : flag-topped fortress.
-    Airbase : runway with stripes and a small control tower.
-    Port    : dock with pylon.
-    Factory : long building with a smoking chimney.
+    City        : two stacked apartment blocks with windows (densely populated).
+    HQ          : flag-topped fortress.
+    AirFactory  : runway with stripes, a small control tower, and a hangar.
+    Port        : dock with pylon.
+    LandFactory : long building with a smoking chimney.
 *@
 
 <g transform="translate(@(Cx.ToString("F2", Inv)),@(Cy.ToString("F2", Inv)))">
@@ -55,7 +55,7 @@
             <rect x="-4" y="0" width="8" height="10" fill="#000" />
             break;
 
-        case BuildingKind.Airbase:
+        case BuildingKind.AirFactory:
             @* Wide runway with stripes (no tail/control-tower mush) *@
             <rect x="-16" y="-4" width="32" height="8" fill="#3a3a40" stroke="#000" stroke-width="1.2" />
             <rect x="-14" y="-0.5" width="3" height="1" fill="#fff" />
@@ -77,7 +77,7 @@
             <rect x="-2" y="-12" width="4" height="14" fill="@OwnerDarkColor" stroke="#000" stroke-width="1" />
             break;
 
-        case BuildingKind.Factory:
+        case BuildingKind.LandFactory:
             <rect x="-13" y="-8" width="26" height="18" fill="@OwnerColor" stroke="#000" stroke-width="1.5" />
             <rect x="6" y="-15" width="5" height="10" fill="@OwnerDarkColor" stroke="#000" stroke-width="1" />
             <circle cx="8.5" cy="-17" r="2" fill="#888" opacity="0.7" />

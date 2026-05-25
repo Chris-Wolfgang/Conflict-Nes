@@ -49,7 +49,7 @@ public class SupplyRulesTests
     {
         var tiles = MapDefinition.EnumerateCoords(3, 1)
             .Select(c => c == new HexCoord(1, 0)
-                ? new Tile(c, Terrain.Plains, Building: BuildingKind.Airbase, Owner: Side.Blue)
+                ? new Tile(c, Terrain.Plains, Building: BuildingKind.AirFactory, Owner: Side.Blue)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
         var fighter = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Fighter, new HexCoord(1, 0));
         var state = BuildState(tiles, 3, 1, fighter);
@@ -62,7 +62,7 @@ public class SupplyRulesTests
     {
         var tiles = MapDefinition.EnumerateCoords(3, 1)
             .Select(c => c == new HexCoord(1, 0)
-                ? new Tile(c, Terrain.Plains, Building: BuildingKind.Airbase, Owner: Side.Blue)
+                ? new Tile(c, Terrain.Plains, Building: BuildingKind.AirFactory, Owner: Side.Blue)
                 : new Tile(c, Terrain.Plains, Building: null, Owner: null));
         var tank = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(1, 0));
         var state = BuildState(tiles, 3, 1, tank);

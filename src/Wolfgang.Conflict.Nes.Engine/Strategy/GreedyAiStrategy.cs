@@ -101,8 +101,8 @@ public sealed class GreedyAiStrategy : IPlayerStrategy
         // Alternate by turn number: odd turns -> air, even turns -> land.
         // Fall back to the other kind if the preferred factory is gone or
         // already occupied so the AI still produces something on its turn.
-        var primary = (state.TurnNumber % 2) == 1 ? BuildingKind.Airbase : BuildingKind.Factory;
-        var secondary = primary == BuildingKind.Airbase ? BuildingKind.Factory : BuildingKind.Airbase;
+        var primary = (state.TurnNumber % 2) == 1 ? BuildingKind.AirFactory : BuildingKind.LandFactory;
+        var secondary = primary == BuildingKind.AirFactory ? BuildingKind.LandFactory : BuildingKind.AirFactory;
 
         return TryBuildAt(state, side, primary, out action)
             || TryBuildAt(state, side, secondary, out action);

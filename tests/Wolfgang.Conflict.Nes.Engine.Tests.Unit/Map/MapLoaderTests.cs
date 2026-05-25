@@ -78,7 +78,7 @@ public class MapLoaderTests
         // its commander guards.
         var map = await MapLoader.LoadEmbeddedAsync("Wolfgang.Conflict.Nes.Engine.Maps.mission01.json");
 
-        var factories = map.Tiles.Values.Where(t => t.Building == BuildingKind.Factory).ToList();
+        var factories = map.Tiles.Values.Where(t => t.Building == BuildingKind.LandFactory).ToList();
 
         Assert.Equal(2, factories.Count);
         Assert.Contains(factories, t => t.Owner == Side.Blue);

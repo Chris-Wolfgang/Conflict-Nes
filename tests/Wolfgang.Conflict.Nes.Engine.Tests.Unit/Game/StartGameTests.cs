@@ -107,10 +107,10 @@ public class StartGameTests
 
         var state = sut.StartGame(mission, 1);
 
-        var blueFactory = mission.Map.Tiles.Values.Single(t => t.Building == BuildingKind.Factory && t.Owner == Side.Blue);
+        var blueFactory = mission.Map.Tiles.Values.Single(t => t.Building == BuildingKind.LandFactory && t.Owner == Side.Blue);
         Assert.Equal(Side.Blue, state.GetBuildingOwner(blueFactory.Coord));
 
-        var redFactory = mission.Map.Tiles.Values.Single(t => t.Building == BuildingKind.Factory && t.Owner == Side.Red);
+        var redFactory = mission.Map.Tiles.Values.Single(t => t.Building == BuildingKind.LandFactory && t.Owner == Side.Red);
         Assert.Equal(Side.Red, state.GetBuildingOwner(redFactory.Coord));
     }
 

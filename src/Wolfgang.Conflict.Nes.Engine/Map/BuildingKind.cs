@@ -7,18 +7,18 @@ namespace Wolfgang.Conflict.Nes.Engine.Map;
 /// </summary>
 public enum BuildingKind
 {
-    /// <summary>Generic city; provides income and produces ground units.</summary>
+    /// <summary>Generic city; provides income, can be captured, refuels/repairs ground units.</summary>
     City = 0,
 
     /// <summary>Headquarters; loss of the HQ ends the game for its owner.</summary>
     Hq = 1,
 
-    /// <summary>Airbase; produces and repairs air units.</summary>
-    Airbase = 2,
+    /// <summary>Air Factory; produces and repairs air units.</summary>
+    AirFactory = 2,
 
     /// <summary>Port; produces and repairs sea units.</summary>
     Port = 3,
 
-    /// <summary>Factory; produces armoured ground units.</summary>
-    Factory = 4,
+    /// <summary>Land Factory; produces armoured ground units.</summary>
+    LandFactory = 4,
 }
