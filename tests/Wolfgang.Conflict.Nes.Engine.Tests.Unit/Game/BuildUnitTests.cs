@@ -39,11 +39,23 @@ public class BuildUnitTests
     }
 
     [Fact]
-    public async Task BuildUnit_at_airbase_is_blocked_if_helicopter_still_there()
+    public async Task BuildUnit_at_airbase_is_blocked_if_a_unit_is_standing_on_it()
     {
         var (engine, state) = await StartMission01WithFunds();
-        // Blue Helicopter starts on the airbase (1, 5).
-        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueAirbase, TestCatalog.Fighter.Id));
+        // The starting placements no longer park a unit on the Blue Airbase
+        // (so production isn't permanently blocked turn one). Manually park
+        // the AH-1S there to verify the occupancy rule still bites.
+        var ah1s = state.Units.Values.First(u => string.Equals(u.Type.Id, "ah1s", StringComparison.Ordinal) && u.Side == Side.Blue);
+        var newUnits = new Dictionary<UnitId, Unit>();
+        foreach (var kv in state.Units)
+        {
+            newUnits[kv.Key] = kv.Value;
+        }
+        newUnits[ah1s.Id] = ah1s with { Coord = BlueAirbase };
+        var blocked = new GameState(state.Map, state.Catalog, newUnits, state.BuildingOwners,
+            state.NextToAct, state.TurnNumber, state.Phase, state.Funds, state.Winner, state.RandomSeed);
+
+        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(blocked, BlueAirbase, TestCatalog.Fighter.Id));
     }
 
     [Fact]

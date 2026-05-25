@@ -36,7 +36,7 @@ public static class MissionLoader
             new(Side.Blue, "m60a3",       new HexCoord(2, 7), IsCommander: false),
             new(Side.Blue, "m151",        new HexCoord(0, 6), IsCommander: false),
             new(Side.Blue, "m48",         new HexCoord(2, 8), IsCommander: false),
-            new(Side.Blue, "ah1s",        new HexCoord(1, 5), IsCommander: false),
+            new(Side.Blue, "ah1s",        new HexCoord(0, 5), IsCommander: false),
             new(Side.Blue, "a10",         new HexCoord(2, 5), IsCommander: false),
             new(Side.Blue, "f4e",         new HexCoord(2, 4), IsCommander: false),
 
@@ -48,7 +48,7 @@ public static class MissionLoader
             new(Side.Red, "t62",          new HexCoord(10, -5), IsCommander: false),
             new(Side.Red, "brdm2",        new HexCoord(11, -4), IsCommander: false),
             new(Side.Red, "zsu23",        new HexCoord(11, -3), IsCommander: false),
-            new(Side.Red, "mi24",         new HexCoord(7,  -2), IsCommander: false),
+            new(Side.Red, "mi24",         new HexCoord(6,  -1), IsCommander: false),
             new(Side.Red, "su25",         new HexCoord(8,  -2), IsCommander: false),
             new(Side.Red, "mig23",        new HexCoord(8,  -3), IsCommander: false),
         };

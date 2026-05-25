@@ -87,6 +87,53 @@ public class GreedyAiStrategyTests
     }
 
     [Fact]
+    public async Task AI_first_turn_builds_at_airbase_with_most_expensive_affordable_unit()
+    {
+        // Difficulty 1 doctrine: turn 1 = air, turn 2 = land, alternating.
+        // The greedy AI also takes the priciest unit it can pay for.
+        var mission = await MissionLoader.LoadMission01Async();
+        var engine = new GameEngine();
+        var start = engine.StartGame(mission, randomSeed: 1);
+        // Skip Blue's turn to land on Red's turn 1, then give Red enough
+        // F.P. to afford any of its air roster (top costs 7800).
+        var afterBlueEnd = engine.EndTurn(start);
+        var richRed = WithFundsAndTurn(afterBlueEnd, redFunds: 10_000, turnNumber: 1);
+
+        var action = await new GreedyAiStrategy().ChooseNextActionAsync(richRed, Side.Red);
+
+        Assert.Equal(StrategyActionKind.Build, action.Kind);
+        Assert.Equal(new HexCoord(7, -2), action.Hex); // Red Airbase
+        // Most expensive Red air roster: MiG-29 Fulcrum at 6200 F.P.
+        // (MiG-33 / Su-27 are catalog units but not in the curated 6.)
+        Assert.Equal("mig29", action.ProduceTypeId);
+    }
+
+    [Fact]
+    public async Task AI_second_turn_builds_at_land_factory()
+    {
+        var mission = await MissionLoader.LoadMission01Async();
+        var engine = new GameEngine();
+        var start = engine.StartGame(mission, randomSeed: 1);
+        var afterBlueEnd = engine.EndTurn(start);
+        // Move the Red commander off the factory neighbour so the factory
+        // hex (9,-4) stays empty for production. Then advance to turn 2.
+        var turn2 = WithFundsAndTurn(afterBlueEnd, redFunds: 10_000, turnNumber: 2);
+
+        var action = await new GreedyAiStrategy().ChooseNextActionAsync(turn2, Side.Red);
+
+        Assert.Equal(StrategyActionKind.Build, action.Kind);
+        Assert.Equal(new HexCoord(9, -4), action.Hex); // Red Factory
+        // Most expensive Red land roster: SA-8 SAM at 4600 F.P. (T-80 is HQ-only).
+        Assert.Equal("sa8", action.ProduceTypeId);
+    }
+
+    private static GameState WithFundsAndTurn(GameState s, int redFunds, int turnNumber) =>
+        new(s.Map, s.Catalog, s.Units, s.BuildingOwners,
+            s.NextToAct, turnNumber, s.Phase,
+            new Dictionary<Side, int> { [Side.Blue] = s.Funds[Side.Blue], [Side.Red] = redFunds },
+            s.Winner, s.RandomSeed, s.BuildingHitPoints, s.BuildThisTurn);
+
+    [Fact]
     public async Task Returns_EndTurn_when_no_unit_has_any_action()
     {
         var atk = Unit.FullStrength(new UnitId(1), Side.Blue, TestCatalog.Tank, new HexCoord(0, 0))
