@@ -269,9 +269,7 @@ public sealed class GameEngine
         var damage = ComputeBuildingDamage(attacker, rng);
         var currentHp = state.GetBuildingHitPoints(buildingCoord);
         var newHp = Math.Max(0, currentHp - damage);
-
-        var newHits = CopyBuildingHits(state.BuildingHitPoints);
-        newHits[buildingCoord] = newHp;
+        var newHits = UpdateBuildingHits(state.BuildingHitPoints, buildingCoord, newHp);
 
         var newUnits = CopyUnits(state.Units);
         newUnits[attackerId] = attacker with
@@ -296,6 +294,26 @@ public sealed class GameEngine
             winner: state.Winner,
             randomSeed: unchecked(state.RandomSeed * 1103515245 + 12345),
             buildingHitPoints: newHits);
+    }
+
+    // Factories self-repair between attacks: a non-fatal strike heals back
+    // to full HP before the next swing (even on the same turn). Only a
+    // one-shot kill (newHp == 0) actually persists damage.
+    private static Dictionary<HexCoord, int> UpdateBuildingHits(
+        IReadOnlyDictionary<HexCoord, int> source,
+        HexCoord coord,
+        int newHp)
+    {
+        var copy = CopyBuildingHits(source);
+        if (newHp == 0)
+        {
+            copy[coord] = 0;
+        }
+        else
+        {
+            copy.Remove(coord);
+        }
+        return copy;
     }
 
     private static Dictionary<HexCoord, int> CopyBuildingHits(IReadOnlyDictionary<HexCoord, int> source)
