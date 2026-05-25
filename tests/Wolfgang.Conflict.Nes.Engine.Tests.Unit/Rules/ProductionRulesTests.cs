@@ -111,6 +111,57 @@ public class ProductionRulesTests
             redAir.Select(d => d.Category).OrderBy(c => c));
     }
 
+    [Fact]
+    public void ProducibleAt_returns_roster_sorted_by_price_ascending()
+    {
+        var blueLand = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue);
+
+        for (var i = 1; i < blueLand.Count; i++)
+        {
+            Assert.True(blueLand[i - 1].ProductionCost <= blueLand[i].ProductionCost,
+                $"Roster not sorted at index {i}: {blueLand[i - 1].Id}={blueLand[i - 1].ProductionCost} > {blueLand[i].Id}={blueLand[i].ProductionCost}");
+        }
+    }
+
+    [Fact]
+    public async Task AffordableAt_filters_out_anything_the_side_cant_pay_for()
+    {
+        var mission = await MissionLoader.LoadMission01Async();
+        var engine = new GameEngine();
+        var start = engine.StartGame(mission, randomSeed: 1);
+
+        // Force Blue's funds to a level that affords only the cheapest items.
+        var cheapest = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.Factory, Side.Blue)[0];
+        var funds = cheapest.ProductionCost;
+        var state = new GameState(start.Map, start.Catalog, start.Units, start.BuildingOwners,
+            start.NextToAct, start.TurnNumber, start.Phase,
+            new Dictionary<Side, int> { [Side.Blue] = funds, [Side.Red] = 0 },
+            start.Winner, start.RandomSeed);
+
+        var affordable = ProductionRules.AffordableAt(state, BuildingKind.Factory, Side.Blue);
+
+        Assert.NotEmpty(affordable);
+        Assert.All(affordable, d => Assert.True(d.ProductionCost <= funds));
+        // Cheapest item itself must be present.
+        Assert.Contains(affordable, d => string.Equals(d.Id, cheapest.Id, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task AffordableAt_returns_empty_when_side_is_broke()
+    {
+        var mission = await MissionLoader.LoadMission01Async();
+        var engine = new GameEngine();
+        var start = engine.StartGame(mission, randomSeed: 1);
+        var broke = new GameState(start.Map, start.Catalog, start.Units, start.BuildingOwners,
+            start.NextToAct, start.TurnNumber, start.Phase,
+            new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
+            start.Winner, start.RandomSeed);
+
+        var affordable = ProductionRules.AffordableAt(broke, BuildingKind.Factory, Side.Blue);
+
+        Assert.Empty(affordable);
+    }
+
     private static bool RelationsTableIsAir(UnitCategory c)
         => Engine.Combat.RelationsTable.IsAir(c);
 

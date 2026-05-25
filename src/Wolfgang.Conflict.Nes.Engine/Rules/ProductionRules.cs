@@ -72,14 +72,14 @@ public static class ProductionRules
     };
 
     /// <summary>
-    /// Returns the catalog unit types <paramref name="side"/> may produce at a
-    /// building of kind <paramref name="building"/>. Order matches the
-    /// production menu's intended display order.
+    /// Returns the curated production roster for <paramref name="side"/> at
+    /// the given factory kind, sorted by <see cref="UnitTypeDefinition.ProductionCost"/>
+    /// ascending (cheapest first).
     /// </summary>
     /// <param name="catalog">The unit catalog.</param>
     /// <param name="building">The production building kind.</param>
     /// <param name="side">The side requesting production.</param>
-    /// <returns>The buildable unit type definitions.</returns>
+    /// <returns>The buildable unit type definitions, cheapest first.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="catalog"/> is null.</exception>
     public static IReadOnlyList<UnitTypeDefinition> ProducibleAt(UnitCatalog catalog, BuildingKind building, Side side)
     {
@@ -99,6 +99,35 @@ public static class ProductionRules
             if (catalog.Contains(id))
             {
                 result.Add(catalog.Get(id));
+            }
+        }
+        result.Sort((a, b) => a.ProductionCost.CompareTo(b.ProductionCost));
+        return result;
+    }
+
+    /// <summary>
+    /// Returns the curated production roster filtered down to what
+    /// <paramref name="side"/> can currently afford given its F.P. in
+    /// <paramref name="state"/>, sorted cheapest first. This is the list a
+    /// production menu should display.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
+    public static IReadOnlyList<UnitTypeDefinition> AffordableAt(GameState state, BuildingKind building, Side side)
+    {
+        if (state is null)
+        {
+            throw new ArgumentNullException(nameof(state));
+        }
+
+        var funds = state.Funds.TryGetValue(side, out var fp) ? fp : 0;
+        var all = ProducibleAt(state.Catalog, building, side);
+
+        var result = new List<UnitTypeDefinition>(all.Count);
+        foreach (var def in all)
+        {
+            if (def.ProductionCost <= funds)
+            {
+                result.Add(def);
             }
         }
         return result;
