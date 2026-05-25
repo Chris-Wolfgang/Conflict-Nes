@@ -15,13 +15,10 @@ public enum Terrain
     /// <summary>Impassable to ground units; flyers ignore.</summary>
     Mountain = 2,
 
-    /// <summary>Paved road; cheapest movement for ground units.</summary>
-    Road = 3,
-
     /// <summary>Flowing water; passable only at a <see cref="Bridge"/>.</summary>
     River = 4,
 
-    /// <summary>A bridge across a <see cref="River"/>; passable as <see cref="Road"/>.</summary>
+    /// <summary>A steel bridge across a <see cref="River"/>; passable to ground at cost 2.</summary>
     Bridge = 5,
 
     /// <summary>Shallow water near shore — passable to ground at extra cost (2 MP).</summary>

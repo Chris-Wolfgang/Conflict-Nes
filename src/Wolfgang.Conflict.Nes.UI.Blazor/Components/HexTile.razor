@@ -32,18 +32,6 @@
             }
             break;
 
-        case Terrain.Road:
-            // Brown ribbon across the hex with a dashed centre line.
-            <rect x="@F(Cx - 14)" y="@F(Cy - 4)" width="28" height="8"
-                  fill="@NesPalette.Road" stroke="@NesPalette.MountainDark" stroke-width="0.6" />
-            <line x1="@F(Cx - 11)" y1="@F(Cy)" x2="@F(Cx - 5)" y2="@F(Cy)"
-                  stroke="@NesPalette.Text" stroke-width="0.8" />
-            <line x1="@F(Cx - 1)" y1="@F(Cy)" x2="@F(Cx + 5)" y2="@F(Cy)"
-                  stroke="@NesPalette.Text" stroke-width="0.8" />
-            <line x1="@F(Cx + 9)" y1="@F(Cy)" x2="@F(Cx + 13)" y2="@F(Cy)"
-                  stroke="@NesPalette.Text" stroke-width="0.8" />
-            break;
-
         case Terrain.River:
             // Two darker wavy lines suggest current.
             <path d="@RiverPath(Cy - 3)" stroke="@NesPalette.Reef" stroke-width="1.4"

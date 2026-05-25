@@ -36,7 +36,6 @@ public static class UnitStats
     private static int? GroundCost(Terrain terrain) => terrain switch
     {
         Terrain.Plains => 1,
-        Terrain.Road => 1,
         Terrain.Shoal => 2,
         Terrain.Bridge => 2,
         Terrain.Forest => 2,
@@ -73,6 +72,7 @@ public static class UnitStats
             Terrain.Forest => 3,
             Terrain.Mountain => 3,
             Terrain.Bridge => 2,
+            Terrain.Shoal => 0,
             _ => 0,
         },
         _ => 0,

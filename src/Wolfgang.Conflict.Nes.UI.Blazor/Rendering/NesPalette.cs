@@ -18,7 +18,6 @@ public static class NesPalette
     public const string Mountain = "#b06838";
     public const string MountainDark = "#6e3a1c";
     public const string MountainLight = "#cc8a52";
-    public const string Road = "#c8a868";
     // Steel girder bridge — cool grey deck with darker rivets/shadow.
     public const string Bridge = "#9aa4b0";
     public const string BridgeDark = "#4c5663";

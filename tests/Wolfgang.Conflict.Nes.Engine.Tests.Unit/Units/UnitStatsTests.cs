@@ -14,7 +14,6 @@ public class UnitStatsTests
 
     [Theory]
     [InlineData(MovementDomain.Foot,  Terrain.Plains,   1)]
-    [InlineData(MovementDomain.Foot,  Terrain.Road,     1)]
     [InlineData(MovementDomain.Foot,  Terrain.Shoal,    2)]
     [InlineData(MovementDomain.Foot,  Terrain.Forest,   2)]
     [InlineData(MovementDomain.Foot,  Terrain.Mountain, 3)]
@@ -68,7 +67,6 @@ public class UnitStatsTests
 
     [Theory]
     [InlineData(Terrain.Plains,   0)]
-    [InlineData(Terrain.Road,     0)]
     [InlineData(Terrain.Shoal,    0)]
     [InlineData(Terrain.Forest,   3)]
     [InlineData(Terrain.Mountain, 3)]

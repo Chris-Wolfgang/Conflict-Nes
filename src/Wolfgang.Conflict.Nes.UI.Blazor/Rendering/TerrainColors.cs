@@ -11,7 +11,6 @@ public static class TerrainColors
         Terrain.Plains => NesPalette.Plains,
         Terrain.Forest => NesPalette.Forest,
         Terrain.Mountain => NesPalette.Mountain,
-        Terrain.Road => NesPalette.Road,
         Terrain.River => NesPalette.River,
         Terrain.Bridge => NesPalette.Bridge,
         Terrain.Shoal => NesPalette.Shoal,
