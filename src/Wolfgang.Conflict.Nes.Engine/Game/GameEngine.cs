@@ -368,7 +368,7 @@ public sealed class GameEngine
         var type = ProductionRules.ValidateBuild(state, side, buildingCoord, typeId);
 
         var newFunds = CopyFunds(state.Funds);
-        newFunds[side] -= type.ProductionCost;
+        newFunds[side] -= ProductionRules.EffectiveBuildCost(type);
 
         var newId = NextUnitId(state);
         // Newly produced units have already "moved" this turn (manual: they

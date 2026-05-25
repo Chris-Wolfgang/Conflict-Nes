@@ -147,6 +147,35 @@ public class ProductionRulesTests
     }
 
     [Fact]
+    public void EffectiveBuildCost_is_zero_for_infantry_and_catalog_price_otherwise()
+    {
+        var infantry = TestCatalog.Get("us-infantry");
+        var tank = TestCatalog.Get("m60a3");
+        var fighter = TestCatalog.Get("f4e");
+
+        Assert.Equal(0, ProductionRules.EffectiveBuildCost(infantry));
+        Assert.Equal(tank.ProductionCost, ProductionRules.EffectiveBuildCost(tank));
+        Assert.Equal(fighter.ProductionCost, ProductionRules.EffectiveBuildCost(fighter));
+    }
+
+    [Fact]
+    public async Task BuildUnit_infantry_costs_zero_FP_and_succeeds_when_broke()
+    {
+        var mission = await MissionLoader.LoadMission01Async();
+        var engine = new GameEngine();
+        var start = engine.StartGame(mission, randomSeed: 1);
+        var broke = new GameState(start.Map, start.Catalog, start.Units, start.BuildingOwners,
+            start.NextToAct, start.TurnNumber, start.Phase,
+            new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
+            start.Winner, start.RandomSeed);
+
+        var after = engine.BuildUnit(broke, new HexCoord(1, 6), "us-infantry");
+
+        Assert.Equal(0, after.Funds[Side.Blue]);
+        Assert.Contains(after.Units.Values, u => string.Equals(u.Type.Id, "us-infantry", StringComparison.Ordinal) && u.Coord == new HexCoord(1, 6));
+    }
+
+    [Fact]
     public async Task AffordableAt_always_includes_infantry_even_when_broke()
     {
         // A side with 0 F.P. can still raise infantry — this is a special
