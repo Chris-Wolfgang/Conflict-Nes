@@ -195,7 +195,7 @@
     {
       "q": 2,
       "r": 6,
-      "terrain": "Road",
+      "terrain": "Plains",
       "building": null,
       "owner": null
     },
@@ -265,7 +265,7 @@
     {
       "q": 3,
       "r": 6,
-      "terrain": "Road",
+      "terrain": "Plains",
       "building": null,
       "owner": null
     },
@@ -342,7 +342,7 @@
     {
       "q": 4,
       "r": 6,
-      "terrain": "Road",
+      "terrain": "Plains",
       "building": null,
       "owner": null
     },
@@ -489,7 +489,7 @@
     {
       "q": 6,
       "r": 6,
-      "terrain": "Road",
+      "terrain": "Plains",
       "building": null,
       "owner": null
     },

@@ -53,15 +53,31 @@
             break;
 
         case Terrain.Bridge:
-            // River under, with a road span and railings.
+            // Steel girder bridge: water below, grey deck with railings, X-trusses.
             <path d="@RiverPath(Cy + 7)" stroke="@NesPalette.Reef" stroke-width="1.2"
                   fill="none" stroke-linecap="round" />
             <rect x="@F(Cx - 14)" y="@F(Cy - 5)" width="28" height="10"
-                  fill="@NesPalette.Road" stroke="@NesPalette.MountainDark" stroke-width="0.6" />
+                  fill="@NesPalette.Bridge" stroke="@NesPalette.BridgeDark" stroke-width="0.6" />
             <line x1="@F(Cx - 14)" y1="@F(Cy - 6)" x2="@F(Cx + 14)" y2="@F(Cy - 6)"
-                  stroke="@NesPalette.MountainDark" stroke-width="0.8" />
+                  stroke="@NesPalette.BridgeDark" stroke-width="1.0" />
             <line x1="@F(Cx - 14)" y1="@F(Cy + 6)" x2="@F(Cx + 14)" y2="@F(Cy + 6)"
-                  stroke="@NesPalette.MountainDark" stroke-width="0.8" />
+                  stroke="@NesPalette.BridgeDark" stroke-width="1.0" />
+            @* Steel X-truss panels along the deck *@
+            <line x1="@F(Cx - 13)" y1="@F(Cy - 4)" x2="@F(Cx - 5)" y2="@F(Cy + 4)"
+                  stroke="@NesPalette.BridgeDark" stroke-width="0.6" />
+            <line x1="@F(Cx - 13)" y1="@F(Cy + 4)" x2="@F(Cx - 5)" y2="@F(Cy - 4)"
+                  stroke="@NesPalette.BridgeDark" stroke-width="0.6" />
+            <line x1="@F(Cx - 4)" y1="@F(Cy - 4)" x2="@F(Cx + 4)" y2="@F(Cy + 4)"
+                  stroke="@NesPalette.BridgeDark" stroke-width="0.6" />
+            <line x1="@F(Cx - 4)" y1="@F(Cy + 4)" x2="@F(Cx + 4)" y2="@F(Cy - 4)"
+                  stroke="@NesPalette.BridgeDark" stroke-width="0.6" />
+            <line x1="@F(Cx + 5)" y1="@F(Cy - 4)" x2="@F(Cx + 13)" y2="@F(Cy + 4)"
+                  stroke="@NesPalette.BridgeDark" stroke-width="0.6" />
+            <line x1="@F(Cx + 5)" y1="@F(Cy + 4)" x2="@F(Cx + 13)" y2="@F(Cy - 4)"
+                  stroke="@NesPalette.BridgeDark" stroke-width="0.6" />
+            @* Highlight stripe along the deck for a metallic sheen *@
+            <line x1="@F(Cx - 13)" y1="@F(Cy - 3)" x2="@F(Cx + 13)" y2="@F(Cy - 3)"
+                  stroke="@NesPalette.BridgeLight" stroke-width="0.6" />
             break;
 
         case Terrain.Shoal:
