@@ -470,3 +470,41 @@ h1 {
     color: #fff;
     font-size: 1.05rem;
 }
+
+.event-log {
+    margin-top: 1rem;
+    background: #0d1018;
+    border: 1px solid #2a3050;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    max-width: 1200px;
+}
+
+.event-log-header {
+    display: flex;
+    justify-content: space-between;
+    color: #a0a0c0;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+}
+
+.event-log-count {
+    color: #fce18c;
+}
+
+.event-log-scroll {
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #d0d0e0;
+}
+
+.event-log-line {
+    padding: 0.1rem 0;
+    border-bottom: 1px dotted #1c2030;
+    white-space: pre-wrap;
+}

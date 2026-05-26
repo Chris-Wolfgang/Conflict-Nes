@@ -100,6 +100,7 @@
                     <ul class="unit-stats">
                         <li>Side: <strong class="@(u.Side == Side.Blue ? "blue" : "red")">@u.Side</strong></li>
                         <li>Class: @u.Category</li>
+                        <li>HEX: (@u.Coord.Q, @u.Coord.R)</li>
                         <li>LIFE: @u.HitPoints / @UnitStats.MaxHitPoints</li>
                         <li class="@(lowFuel ? "low" : null)">
                             FUEL: @u.Fuel / @u.Type.MaxFuel turns
@@ -144,6 +145,19 @@
                 }
             </aside>
         </div>
+
+        <section class="event-log">
+            <header class="event-log-header">
+                <span>Event Log</span>
+                <span class="event-log-count">@Service.EventLog.Count entries</span>
+            </header>
+            <div class="event-log-scroll">
+                @for (var i = Service.EventLog.Count - 1; i >= 0; i--)
+                {
+                    <div class="event-log-line">@Service.EventLog[i]</div>
+                }
+            </div>
+        </section>
     }
 </div>
 

@@ -24,6 +24,23 @@ public sealed class ConflictService
     private readonly GameEngine _engine = new();
     private readonly IPlayerStrategy _aiStrategy = new GreedyAiStrategy();
 
+    /// <summary>Rolling event log; newest entries appended at the end.</summary>
+    private readonly List<string> _eventLog = new();
+
+    /// <summary>Read-only view of the in-game event log.</summary>
+    public IReadOnlyList<string> EventLog => _eventLog;
+
+    private void Log(string entry)
+    {
+        var prefix = CurrentState is { } s ? $"T{s.TurnNumber}:{s.NextToAct}" : "T?:?";
+        _eventLog.Add($"[{prefix}] {entry}");
+        // Cap log to avoid memory creep over very long sessions.
+        if (_eventLog.Count > 500)
+        {
+            _eventLog.RemoveAt(0);
+        }
+    }
+
     /// <summary>Which side is human-controlled in this UI session.</summary>
     public Side HumanSide { get; } = Side.Blue;
 
@@ -70,6 +87,8 @@ public sealed class ConflictService
         var rngSeed = seed ?? unchecked((int)DateTime.UtcNow.Ticks);
         CurrentState = _engine.StartGame(mission, rngSeed);
         SelectedUnitId = null;
+        _eventLog.Clear();
+        Log($"Mission 01 started (seed {rngSeed}). Blue F.P. {CurrentState.Funds[Side.Blue]}, Red F.P. {CurrentState.Funds[Side.Red]}.");
         Notify();
     }
 
@@ -161,8 +180,10 @@ public sealed class ConflictService
         var moves = _engine.GetLegalMoves(CurrentState!, selected.Id);
         if (moves.Contains(hex))
         {
+            var from = selected.Coord;
             CurrentState = _engine.MoveUnit(CurrentState!, selected.Id, hex);
             SelectedUnitId = CurrentState.Units.ContainsKey(selected.Id) ? selected.Id : null;
+            Log($"{selected.Type.ShortName} #{selected.Id.Value} moved ({from.Q},{from.R}) -> ({hex.Q},{hex.R})");
             Notify();
         }
     }
@@ -192,7 +213,9 @@ public sealed class ConflictService
         {
             return;
         }
+        var unit = CurrentState.Units[SelectedUnitId.Value];
         CurrentState = _engine.SupplyUnit(CurrentState, SelectedUnitId.Value);
+        Log($"{unit.Type.ShortName} #{unit.Id.Value} supplied at ({unit.Coord.Q},{unit.Coord.R})");
         Notify();
     }
 
@@ -204,13 +227,23 @@ public sealed class ConflictService
             return;
         }
 
+        var attacker = CurrentState.Units[pending.AttackerId];
         if (pending.TargetUnitId is { } targetUnit)
         {
+            var defender = CurrentState.Units[targetUnit];
             CurrentState = _engine.AttackUnit(CurrentState, pending.AttackerId, targetUnit);
+            var attackerSurvived = CurrentState.Units.ContainsKey(pending.AttackerId);
+            var defenderSurvived = CurrentState.Units.ContainsKey(targetUnit);
+            Log($"{attacker.Type.ShortName} #{attacker.Id.Value} -> {defender.Type.ShortName} #{defender.Id.Value} : "
+                + $"atk {(attackerSurvived ? CurrentState.Units[pending.AttackerId].HitPoints + "/" + UnitStats.MaxHitPoints : "DESTROYED")}, "
+                + $"def {(defenderSurvived ? CurrentState.Units[targetUnit].HitPoints + "/" + UnitStats.MaxHitPoints : "DESTROYED")}");
         }
         else if (pending.TargetBuildingCoord is { } buildingCoord)
         {
+            var hpBefore = CurrentState.GetBuildingHitPoints(buildingCoord);
             CurrentState = _engine.AttackBuilding(CurrentState, pending.AttackerId, buildingCoord);
+            var hpAfter = CurrentState.GetBuildingHitPoints(buildingCoord);
+            Log($"{attacker.Type.ShortName} #{attacker.Id.Value} -> building ({buildingCoord.Q},{buildingCoord.R}) : HP {hpBefore} -> {hpAfter}{(hpAfter == 0 ? " DESTROYED" : string.Empty)}");
         }
 
         PendingAttack = null;
@@ -292,12 +325,14 @@ public sealed class ConflictService
         try
         {
             CurrentState = _engine.BuildUnit(CurrentState, factory, typeId);
+            Log($"Build queued: {typeId} at ({factory.Q},{factory.R}) — appears next {HumanSide} turn.");
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
             // UI is meant to gate this (occupied factory, etc.) — swallow
             // any race that slipped past so the page doesn't crash with
             // Blazor's red error bar.
+            Log($"Build rejected: {ex.Message}");
             return;
         }
         // Close the menu once the build lands. The newly-built unit now
@@ -330,7 +365,9 @@ public sealed class ConflictService
             return;
         }
 
+        var endingSide = CurrentState.NextToAct;
         CurrentState = _engine.EndTurn(CurrentState);
+        Log($"{endingSide} ended turn. Now {CurrentState.NextToAct}'s turn. F.P. Blue {CurrentState.Funds[Side.Blue]}, Red {CurrentState.Funds[Side.Red]}.");
         SelectedUnitId = null;
         // Close any production menu so it doesn't carry into the AI's turn
         // showing the wrong side's label.
@@ -395,6 +432,7 @@ public sealed class ConflictService
                     Notify();
                     await Task.Delay(AiBuildPreviewMs, cancellationToken).ConfigureAwait(false);
                     CurrentState = ApplyAction(action, s);
+                    Log($"AI build queued: {action.ProduceTypeId} at ({action.Hex.Q},{action.Hex.R})");
                 }
                 finally
                 {
@@ -404,6 +442,7 @@ public sealed class ConflictService
             }
             else
             {
+                LogAiAction(action, s);
                 CurrentState = ApplyAction(action, s);
             }
 
@@ -427,6 +466,35 @@ public sealed class ConflictService
         StrategyActionKind.Build   => _engine.BuildUnit(state, action.Hex, action.ProduceTypeId),
         _ => state,
     };
+
+    private void LogAiAction(StrategyAction action, GameState before)
+    {
+        switch (action.Kind)
+        {
+            case StrategyActionKind.Move:
+                if (before.Units.TryGetValue(action.UnitId, out var moveUnit))
+                {
+                    Log($"AI {moveUnit.Type.ShortName} #{moveUnit.Id.Value} moves ({moveUnit.Coord.Q},{moveUnit.Coord.R}) -> ({action.Hex.Q},{action.Hex.R})");
+                }
+                break;
+            case StrategyActionKind.Attack:
+                if (before.Units.TryGetValue(action.UnitId, out var atk)
+                    && before.Units.TryGetValue(action.TargetId, out var def))
+                {
+                    Log($"AI {atk.Type.ShortName} #{atk.Id.Value} attacks {def.Type.ShortName} #{def.Id.Value}");
+                }
+                break;
+            case StrategyActionKind.Supply:
+                if (before.Units.TryGetValue(action.UnitId, out var sup))
+                {
+                    Log($"AI {sup.Type.ShortName} #{sup.Id.Value} supplied");
+                }
+                break;
+            case StrategyActionKind.EndTurn:
+                Log($"AI {before.NextToAct} ends turn.");
+                break;
+        }
+    }
 
     private void Notify() => StateChanged?.Invoke(this, EventArgs.Empty);
 }
