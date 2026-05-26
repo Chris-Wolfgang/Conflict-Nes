@@ -373,10 +373,12 @@ public sealed class GameEngine
         {
             throw new InvalidOperationException($"{side} has already built a unit this turn.");
         }
-        var type = ProductionRules.ValidateBuild(state, side, buildingCoord, typeId);
+        _ = ProductionRules.ValidateBuild(state, side, buildingCoord, typeId);
 
-        var newFunds = CopyFunds(state.Funds);
-        newFunds[side] -= type.ProductionCost;
+        // Building is FREE. A unit's ProductionCost is its F.P. *value*
+        // (used for the half-value loser penalty and the kill-bounty math),
+        // not the price to produce it. Production throughput is capped by
+        // the "one build per turn per side" rule instead of by funds.
 
         // Per the original game, ordered units do not appear on the board
         // immediately — they show up on the factory hex at the start of
@@ -394,7 +396,7 @@ public sealed class GameEngine
             nextToAct: state.NextToAct,
             turnNumber: state.TurnNumber,
             phase: state.Phase,
-            funds: newFunds,
+            funds: state.Funds,
             winner: state.Winner,
             buildingHitPoints: state.BuildingHitPoints,
             randomSeed: state.RandomSeed,

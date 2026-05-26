@@ -106,11 +106,10 @@ public static class ProductionRules
     }
 
     /// <summary>
-    /// Returns the curated production roster filtered down to what
-    /// <paramref name="side"/> can currently afford given its F.P. in
-    /// <paramref name="state"/>, sorted cheapest first. Infantry is always
-    /// included regardless of funds — every side can always raise infantry.
-    /// This is the list a production menu should display.
+    /// Returns the production roster the player can build right now.
+    /// Building is free per the original game, so this is just the
+    /// curated <see cref="ProducibleAt"/> list — kept as a separate
+    /// method so UI / strategy code reads its intent clearly.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
     public static IReadOnlyList<UnitTypeDefinition> AffordableAt(GameState state, BuildingKind building, Side side)
@@ -119,19 +118,7 @@ public static class ProductionRules
         {
             throw new ArgumentNullException(nameof(state));
         }
-
-        var funds = state.Funds.TryGetValue(side, out var fp) ? fp : 0;
-        var all = ProducibleAt(state.Catalog, building, side);
-
-        var result = new List<UnitTypeDefinition>(all.Count);
-        foreach (var def in all)
-        {
-            if (def.ProductionCost <= funds)
-            {
-                result.Add(def);
-            }
-        }
-        return result;
+        return ProducibleAt(state.Catalog, building, side);
     }
 
     /// <summary>
@@ -225,10 +212,8 @@ public static class ProductionRules
 
         var type = ResolveAndValidateType(state, side, building, typeId);
 
-        if (state.Funds[side] < type.ProductionCost)
-        {
-            throw new InvalidOperationException($"{side} cannot afford {type.Name} (cost {type.ProductionCost}, funds {state.Funds[side]}).");
-        }
+        // Production is free per the original game — F.P. ProductionCost
+        // is the destroy-penalty value, not a build price.
 
         if (!CanSideProduce(state, side))
         {

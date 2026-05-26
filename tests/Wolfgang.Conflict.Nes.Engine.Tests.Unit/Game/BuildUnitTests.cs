@@ -24,14 +24,15 @@ public class BuildUnitTests
     private static HexCoord BlueAirbase { get; } = new(1, 5);
 
     [Fact]
-    public async Task BuildUnit_queues_a_pending_order_and_deducts_funds_immediately()
+    public async Task BuildUnit_queues_a_pending_order_without_deducting_funds()
     {
+        // Building is free per the original game. F.P. ProductionCost is
+        // the loser-penalty value, not a price tag.
         var (engine, state) = await StartMission01WithFunds();
 
         var next = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
 
-        // Funds are debited right away (you're paying up front).
-        Assert.Equal(10000 - TestCatalog.Tank.ProductionCost, next.Funds[Side.Blue]);
+        Assert.Equal(10000, next.Funds[Side.Blue]);
         // The unit is NOT yet on the map — it lives in PendingProduction.
         Assert.DoesNotContain(next.Units.Values, u => u.Coord == BlueFactory);
         Assert.True(next.PendingProduction.TryGetValue(Side.Blue, out var pending));
@@ -89,10 +90,15 @@ public class BuildUnitTests
     }
 
     [Fact]
-    public async Task BuildUnit_without_enough_funds_throws()
+    public async Task BuildUnit_with_zero_funds_still_succeeds()
     {
-        var (engine, state) = await StartMission01WithFunds(blueFunds: 100);
-        Assert.Throws<InvalidOperationException>(() => engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id));
+        // Building is free; funds are irrelevant to whether a build is legal.
+        var (engine, state) = await StartMission01WithFunds(blueFunds: 0);
+
+        var next = engine.BuildUnit(state, BlueFactory, TestCatalog.Tank.Id);
+
+        Assert.Equal(0, next.Funds[Side.Blue]);
+        Assert.True(next.PendingProduction.ContainsKey(Side.Blue));
     }
 
     [Fact]
