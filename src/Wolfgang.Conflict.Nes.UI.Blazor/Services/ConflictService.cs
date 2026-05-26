@@ -353,8 +353,10 @@ public sealed class ConflictService
         }
         try
         {
+            var fpBefore = CurrentState.Funds[HumanSide];
             CurrentState = _engine.BuildUnit(CurrentState, factory, typeId);
-            Log($"Build queued: {typeId} at ({factory.Q},{factory.R}) — appears next {HumanSide} turn.");
+            var fpAfter = CurrentState.Funds[HumanSide];
+            Log($"Build queued: {typeId} at ({factory.Q},{factory.R}) — F.P. {fpBefore} -> {fpAfter}. Unit appears next {HumanSide} turn.");
         }
         catch (InvalidOperationException ex)
         {
