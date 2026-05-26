@@ -1,3 +1,4 @@
+using Microsoft.JSInterop;
 using Wolfgang.Conflict.Nes.Engine.Game;
 using Wolfgang.Conflict.Nes.Engine.Hex;
 using Wolfgang.Conflict.Nes.Engine.Map;
@@ -23,12 +24,29 @@ public sealed class ConflictService
 
     private readonly GameEngine _engine = new();
     private readonly IPlayerStrategy _aiStrategy = new GreedyAiStrategy();
+    private readonly IJSRuntime _js;
+
+    public ConflictService(IJSRuntime js)
+    {
+        _js = js;
+    }
 
     /// <summary>Rolling event log; newest entries appended at the end.</summary>
     private readonly List<string> _eventLog = new();
 
     /// <summary>Read-only view of the in-game event log.</summary>
     public IReadOnlyList<string> EventLog => _eventLog;
+
+    /// <summary>
+    /// Pushes the current event log to the user's browser download folder
+    /// as a plain-text file. Filename is fixed so Claude can read the
+    /// same path each time the player saves.
+    /// </summary>
+    public async Task SaveLogAsync()
+    {
+        var text = string.Join("\n", _eventLog);
+        await _js.InvokeVoidAsync("conflictDownloadText", "conflict-log.txt", text);
+    }
 
     private void Log(string entry)
     {

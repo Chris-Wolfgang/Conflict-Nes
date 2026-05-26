@@ -18,6 +18,22 @@
         <a class="dismiss">&#x1F5D9;</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        // Triggers a same-tab download of the given text content under
+        // the given filename. The browser places it in the user's default
+        // Downloads folder (no Save-As dialog for plain text downloads).
+        window.conflictDownloadText = (filename, text) => {
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+    </script>
 </body>
 
 </html>

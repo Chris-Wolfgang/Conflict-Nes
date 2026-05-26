@@ -150,6 +150,9 @@
             <header class="event-log-header">
                 <span>Event Log</span>
                 <span class="event-log-count">@Service.EventLog.Count entries</span>
+                <button class="event-log-save" type="button" @onclick="SaveLogAsync">
+                    Save log to file
+                </button>
             </header>
             <div class="event-log-scroll">
                 @for (var i = Service.EventLog.Count - 1; i >= 0; i--)
@@ -176,6 +179,8 @@
     private async Task EndTurnAsync() => await Service.EndTurnAsync();
 
     private void BuildSelected(string typeId) => Service.BuildAtOpenedFactory(typeId);
+
+    private async Task SaveLogAsync() => await Service.SaveLogAsync();
 
     private static string OutlookText(Engine.Units.MatchupTier tier) => tier switch
     {
