@@ -231,12 +231,23 @@ public sealed class ConflictService
         if (pending.TargetUnitId is { } targetUnit)
         {
             var defender = CurrentState.Units[targetUnit];
+            var blueBefore = CurrentState.Funds[Side.Blue];
+            var redBefore = CurrentState.Funds[Side.Red];
             CurrentState = _engine.AttackUnit(CurrentState, pending.AttackerId, targetUnit);
             var attackerSurvived = CurrentState.Units.ContainsKey(pending.AttackerId);
             var defenderSurvived = CurrentState.Units.ContainsKey(targetUnit);
-            Log($"{attacker.Type.ShortName} #{attacker.Id.Value} -> {defender.Type.ShortName} #{defender.Id.Value} : "
+            var line = $"{attacker.Type.ShortName} #{attacker.Id.Value} -> {defender.Type.ShortName} #{defender.Id.Value} : "
                 + $"atk {(attackerSurvived ? CurrentState.Units[pending.AttackerId].HitPoints + "/" + UnitStats.MaxHitPoints : "DESTROYED")}, "
-                + $"def {(defenderSurvived ? CurrentState.Units[targetUnit].HitPoints + "/" + UnitStats.MaxHitPoints : "DESTROYED")}");
+                + $"def {(defenderSurvived ? CurrentState.Units[targetUnit].HitPoints + "/" + UnitStats.MaxHitPoints : "DESTROYED")}";
+            // If anyone died, surface the F.P. swing so the loser sees
+            // the half-value penalty land and the winner sees the bounty.
+            var blueDelta = CurrentState.Funds[Side.Blue] - blueBefore;
+            var redDelta = CurrentState.Funds[Side.Red] - redBefore;
+            if (blueDelta != 0 || redDelta != 0)
+            {
+                line += $" | F.P. Blue {Signed(blueDelta)}, Red {Signed(redDelta)}";
+            }
+            Log(line);
         }
         else if (pending.TargetBuildingCoord is { } buildingCoord)
         {
@@ -443,7 +454,18 @@ public sealed class ConflictService
             else
             {
                 LogAiAction(action, s);
+                var blueBefore = s.Funds[Side.Blue];
+                var redBefore = s.Funds[Side.Red];
                 CurrentState = ApplyAction(action, s);
+                if (action.Kind == StrategyActionKind.Attack)
+                {
+                    var blueDelta = CurrentState.Funds[Side.Blue] - blueBefore;
+                    var redDelta = CurrentState.Funds[Side.Red] - redBefore;
+                    if (blueDelta != 0 || redDelta != 0)
+                    {
+                        Log($"  F.P. swing: Blue {Signed(blueDelta)}, Red {Signed(redDelta)}");
+                    }
+                }
             }
 
             Notify();
@@ -466,6 +488,8 @@ public sealed class ConflictService
         StrategyActionKind.Build   => _engine.BuildUnit(state, action.Hex, action.ProduceTypeId),
         _ => state,
     };
+
+    private static string Signed(int n) => n >= 0 ? "+" + n : n.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     private void LogAiAction(StrategyAction action, GameState before)
     {
