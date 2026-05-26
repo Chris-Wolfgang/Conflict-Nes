@@ -79,20 +79,32 @@
     <div class="production-grid">
         @foreach (var def in roster)
         {
+            // F.P. doesn't get spent on a build, but it does gate what
+            // the player can see in the menu — you have to "earn" the
+            // wealth threshold before that unit unlocks.
+            var affordable = def.ProductionCost <= funds;
             var isBuilt = string.Equals(def.Id, builtTypeId, StringComparison.Ordinal);
             var isAiPreview = string.Equals(def.Id, AiPreviewTypeId, StringComparison.Ordinal);
             var isSelected = string.Equals(def.Id, _selectedTypeId, StringComparison.Ordinal);
-            var slotClass = "production-slot affordable"
+            var slotClass = "production-slot"
+                + (affordable ? " affordable" : " empty")
                 + (isBuilt ? " built" : string.Empty)
                 + (isAiPreview ? " ai-preview" : string.Empty)
                 + (isSelected ? " selected" : string.Empty);
 
             <button class="@slotClass"
                     type="button"
-                    disabled="@(isBuilt || aiActive || sideAlreadyBuilt || side != HumanSide)"
+                    disabled="@(!affordable || isBuilt || aiActive || sideAlreadyBuilt || side != HumanSide)"
                     @onclick="@(_ => SelectSlot(def.Id))">
-                <div class="slot-name">@def.ShortName</div>
-                <div class="slot-cost">@def.ProductionCost F.P.</div>
+                @if (affordable || isBuilt || isAiPreview)
+                {
+                    <div class="slot-name">@def.ShortName</div>
+                    <div class="slot-cost">@def.ProductionCost F.P.</div>
+                }
+                else
+                {
+                    <div class="slot-empty-marker">&mdash;</div>
+                }
             </button>
         }
     </div>

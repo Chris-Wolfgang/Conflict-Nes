@@ -124,22 +124,27 @@ public class ProductionRulesTests
     }
 
     [Fact]
-    public async Task AffordableAt_returns_full_roster_regardless_of_funds()
+    public async Task AffordableAt_filters_unlocked_slots_by_FP()
     {
-        // Building is free per the original game, so AffordableAt no longer
-        // gates on funds — it just mirrors the curated 6-unit roster.
+        // F.P. doesn't get spent on a build, but it gates which roster
+        // slots are visible — units above the player's current F.P. are
+        // hidden until they save up enough.
         var mission = await MissionLoader.LoadMission01Async();
         var engine = new GameEngine();
         var start = engine.StartGame(mission, randomSeed: 1);
-        var broke = new GameState(start.Map, start.Catalog, start.Units, start.BuildingOwners,
+
+        var cheapest = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Blue)[0];
+        var funds = cheapest.ProductionCost; // exact threshold for the cheapest slot
+        var state = new GameState(start.Map, start.Catalog, start.Units, start.BuildingOwners,
             start.NextToAct, start.TurnNumber, start.Phase,
-            new Dictionary<Side, int> { [Side.Blue] = 0, [Side.Red] = 0 },
+            new Dictionary<Side, int> { [Side.Blue] = funds, [Side.Red] = 0 },
             start.Winner, start.RandomSeed);
 
-        var producible = ProductionRules.ProducibleAt(TestCatalog.Catalog, BuildingKind.LandFactory, Side.Blue);
-        var affordable = ProductionRules.AffordableAt(broke, BuildingKind.LandFactory, Side.Blue);
+        var affordable = ProductionRules.AffordableAt(state, BuildingKind.LandFactory, Side.Blue);
 
-        Assert.Equal(producible.Count, affordable.Count);
+        Assert.NotEmpty(affordable);
+        Assert.All(affordable, d => Assert.True(d.ProductionCost <= funds));
+        Assert.Contains(affordable, d => string.Equals(d.Id, cheapest.Id, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -175,9 +180,7 @@ public class ProductionRulesTests
     [Fact]
     public async Task AffordableAt_always_includes_infantry_even_when_broke()
     {
-        // Infantry is in the roster (and so always buildable) regardless
-        // of funds. With building free this generalises to "every roster
-        // slot is always buildable".
+        // Infantry has cost 0 so it is always visible regardless of F.P.
         var mission = await MissionLoader.LoadMission01Async();
         var engine = new GameEngine();
         var start = engine.StartGame(mission, randomSeed: 1);
@@ -191,6 +194,9 @@ public class ProductionRulesTests
 
         Assert.Contains(land, d => d.Category == UnitCategory.Infantry);
         Assert.Contains(air,  d => d.Category == UnitCategory.Infantry);
+        // And only infantry — everything else is locked at 0 F.P.
+        Assert.All(land, d => Assert.True(d.Category == UnitCategory.Infantry));
+        Assert.All(air,  d => Assert.True(d.Category == UnitCategory.Infantry));
     }
 
     private static bool RelationsTableIsAir(UnitCategory c)

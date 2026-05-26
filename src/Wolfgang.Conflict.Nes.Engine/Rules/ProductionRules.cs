@@ -106,10 +106,10 @@ public static class ProductionRules
     }
 
     /// <summary>
-    /// Returns the production roster the player can build right now.
-    /// Building is free per the original game, so this is just the
-    /// curated <see cref="ProducibleAt"/> list — kept as a separate
-    /// method so UI / strategy code reads its intent clearly.
+    /// Returns the production roster slots the side currently has enough
+    /// F.P. to unlock. Building is free, but F.P. acts as an "available
+    /// catalogue" threshold — you can't see a unit you haven't earned
+    /// the wealth for yet. Infantry (cost 0) is always included.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="state"/> is null.</exception>
     public static IReadOnlyList<UnitTypeDefinition> AffordableAt(GameState state, BuildingKind building, Side side)
@@ -118,7 +118,17 @@ public static class ProductionRules
         {
             throw new ArgumentNullException(nameof(state));
         }
-        return ProducibleAt(state.Catalog, building, side);
+        var funds = state.Funds.TryGetValue(side, out var fp) ? fp : 0;
+        var all = ProducibleAt(state.Catalog, building, side);
+        var result = new List<UnitTypeDefinition>(all.Count);
+        foreach (var def in all)
+        {
+            if (def.ProductionCost <= funds)
+            {
+                result.Add(def);
+            }
+        }
+        return result;
     }
 
     /// <summary>
