@@ -323,15 +323,10 @@ h1 {
 }
 
 .production-slot.ai-preview {
-    border-color: #e02c2c;
-    background: #2a1010;
-    box-shadow: 0 0 0 3px rgba(224, 44, 44, 0.55) inset;
-    animation: ai-pulse 0.7s ease-in-out infinite alternate;
-}
-
-@keyframes ai-pulse {
-    from { box-shadow: 0 0 0 3px rgba(224, 44, 44, 0.35) inset; }
-    to   { box-shadow: 0 0 0 5px rgba(224, 44, 44, 0.75) inset; }
+    /* Superseded by the louder rule further down. Kept as a single
+       fallback color so a missing class state can't fall through to
+       the default disabled grey. */
+    border-color: #4ee04e;
 }
 
 .slot-name {
@@ -418,37 +413,15 @@ h1 {
     cursor: default;
 }
 
-/* AI-build preview banner + stronger highlight on the chosen slot ------- */
-.ai-build-banner {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.1rem;
-    letter-spacing: 0.15em;
-    color: #fff;
-    background: #c83030;
-    border: 2px solid #ff6060;
-    border-radius: 4px;
-    padding: 0.4rem 0.6rem;
-    margin: 0 0 0.6rem 0;
-    box-shadow: 0 0 18px rgba(224, 44, 44, 0.7);
-    animation: ai-banner-pulse 0.8s ease-in-out infinite alternate;
-}
-
-@keyframes ai-banner-pulse {
-    from { box-shadow: 0 0 12px rgba(224, 44, 44, 0.5); }
-    to   { box-shadow: 0 0 28px rgba(224, 44, 44, 0.95); }
-}
-
-/* Override the inner-shadow .ai-preview rule with a much louder treatment:
-   outer halo, scaled-up size, bright red border. */
+/* AI's chosen slot — bright green outline with a pulsing halo so the
+   player can see at a glance which unit the AI is buying. No banner;
+   the box itself carries the meaning. */
 .production-slot.ai-preview {
-    border: 3px solid #ff4040 !important;
-    background: #401414 !important;
-    color: #fff !important;
-    transform: scale(1.08);
+    border: 4px solid #4ee04e !important;
+    transform: scale(1.06);
     box-shadow:
-        0 0 0 4px rgba(224, 44, 44, 0.55) inset,
-        0 0 24px 6px rgba(255, 64, 64, 0.85);
+        0 0 0 2px rgba(78, 224, 78, 0.4) inset,
+        0 0 24px 6px rgba(120, 240, 120, 0.85);
     animation: ai-slot-pulse 0.7s ease-in-out infinite alternate;
     z-index: 1;
 }
@@ -456,18 +429,18 @@ h1 {
 @keyframes ai-slot-pulse {
     from {
         box-shadow:
-            0 0 0 3px rgba(224, 44, 44, 0.45) inset,
-            0 0 16px 3px rgba(255, 64, 64, 0.6);
+            0 0 0 2px rgba(78, 224, 78, 0.35) inset,
+            0 0 14px 3px rgba(120, 240, 120, 0.55);
     }
     to {
         box-shadow:
-            0 0 0 5px rgba(255, 64, 64, 0.9) inset,
-            0 0 36px 10px rgba(255, 64, 64, 1.0);
+            0 0 0 4px rgba(140, 255, 140, 0.9) inset,
+            0 0 34px 10px rgba(140, 255, 140, 1.0);
     }
 }
 
 .production-slot.ai-preview .slot-name {
-    color: #fff;
+    color: #d8ffd8;
     font-size: 1.05rem;
 }
 
