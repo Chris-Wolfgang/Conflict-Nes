@@ -41,8 +41,8 @@
       "modern"
     ],
     "globalMetadata": {
-      "_appName": "Wolfgang.Conflict.Nes",
-      "_appTitle": "Wolfgang.Conflict.Nes Documentation",
+      "_appName": "Wolfgang.Conflict.Classic",
+      "_appTitle": "Wolfgang.Conflict.Classic Documentation",
       "_appLogoPath": "logo.svg",
       "_enableSearch": true,
       "_appFooter": "Made with DocFX",
@@ -50,7 +50,7 @@
       "_disableTocFilter": false,
       "_enableDarkMode": true,
       "colorMode": "dark",
-      "_baseUrl": "https://Chris-Wolfgang.github.io/Conflict-Nes/",
+      "_baseUrl": "https://Chris-Wolfgang.github.io/Conflict.Classic/",
       "pdf": true
     }
   }

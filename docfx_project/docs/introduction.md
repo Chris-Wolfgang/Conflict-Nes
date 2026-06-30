@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to Wolfgang.Conflict.Nes!
+Welcome to Wolfgang.Conflict.Classic!
 
 ## Overview
 
@@ -18,9 +18,9 @@ A modern implementation of the classic NES conflict game
 
 ## Getting Help
 
-If you need help with Wolfgang.Conflict.Nes, please:
+If you need help with Wolfgang.Conflict.Classic, please:
 
 - Check the [Getting Started](getting-started.md) guide
 - Review the [API Reference](../api/index.md)
-- Visit the [GitHub repository](https://github.com/Chris-Wolfgang/Conflict-Nes)
-- Open an issue on [GitHub Issues](https://github.com/Chris-Wolfgang/Conflict-Nes/issues)
+- Visit the [GitHub repository](https://github.com/Chris-Wolfgang/Conflict.Classic)
+- Open an issue on [GitHub Issues](https://github.com/Chris-Wolfgang/Conflict.Classic/issues)

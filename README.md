@@ -1,17 +1,17 @@
-# Wolfgang.Conflict.Nes
+# Wolfgang.Conflict.Classic
 
 A modern implementation of the classic NES conflict game
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-Multi--Targeted-purple.svg)](https://dotnet.microsoft.com/)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/Chris-Wolfgang/Conflict-Nes)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/Chris-Wolfgang/Conflict.Classic)
 
 ---
 
 ## 📦 Installation
 
 ```bash
-dotnet add package Wolfgang.Conflict.Nes
+dotnet add package Wolfgang.Conflict.Classic
 ```
 
 **NuGet Package:** Not applicable
@@ -26,8 +26,8 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ## 📚 Documentation
 
-- **GitHub Repository:** [https://github.com/Chris-Wolfgang/Conflict-Nes](https://github.com/Chris-Wolfgang/Conflict-Nes)
-- **API Documentation:** https://Chris-Wolfgang.github.io/Conflict-Nes/
+- **GitHub Repository:** [https://github.com/Chris-Wolfgang/Conflict.Classic](https://github.com/Chris-Wolfgang/Conflict.Classic)
+- **API Documentation:** https://Chris-Wolfgang.github.io/Conflict.Classic/
 - **Formatting Guide:** [README-FORMATTING.md](README-FORMATTING.md)
 - **Contributing Guide:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
@@ -98,8 +98,8 @@ This library uses **`BannedSymbols.txt`** to prohibit synchronous APIs and enfor
 
 ```bash
 # Clone the repository
-git clone https://github.com/Chris-Wolfgang/Conflict-Nes.git
-cd Conflict-Nes
+git clone https://github.com/Chris-Wolfgang/Conflict.Classic.git
+cd Conflict.Classic
 
 # Restore dependencies
 dotnet restore

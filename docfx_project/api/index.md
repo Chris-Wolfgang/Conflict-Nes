@@ -1,6 +1,6 @@
 # API Reference
 
-Welcome to the Wolfgang.Conflict.Nes API documentation.
+Welcome to the Wolfgang.Conflict.Classic API documentation.
 
 This section contains the complete API reference, automatically generated from XML documentation comments in the source code.
 

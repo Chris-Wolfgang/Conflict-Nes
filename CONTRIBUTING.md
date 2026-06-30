@@ -1,6 +1,6 @@
-# Contributing to Wolfgang.Conflict.Nes
+# Contributing to Wolfgang.Conflict.Classic
 
-Thank you for your interest in contributing to **Wolfgang.Conflict.Nes**! We welcome contributions to help improve this project.
+Thank you for your interest in contributing to **Wolfgang.Conflict.Classic**! We welcome contributions to help improve this project.
 
 ## How Can You Contribute?
 
